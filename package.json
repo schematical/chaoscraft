@@ -1,0 +1,18 @@
+{
+  "name": "schematical-chaoscraft-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "mineflayer-voxel": "^0.1.0"
+  },
+  "dependencies": {
+    "mineflayer-navigate": "0.0.10",
+    "mineflayer-radar": "0.0.2"
+  }
+}
