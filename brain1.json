@@ -1,0 +1,49 @@
+{
+  "output1":{
+    "action":{
+      "type":"PLACE_BLOCK"
+    },
+    "dependants":[
+      {
+        "id":"middle1",
+        "weight":0.5
+      },
+      {
+        "id":"middle2",
+        "weight":0.5
+      }
+    ]
+  },
+  "middle1":{
+    "dependants":[
+      {
+        "id": "input1",
+        "weight": 0.5
+      },
+      {
+        "id": "input2",
+        "weight": 0.5
+      }
+    ]
+  },
+  "middle2":{
+    "dependants":[
+      {
+        "id": "input3",
+        "weight": 0.5
+      },
+      {
+        "id": "input4",
+        "weight": 0.5
+      }
+    ]
+  },
+  "input1":{
+    "type":"CHAT",
+    "value":"come"
+  },
+  "input1":{
+    "type":"canSeeBlock",
+    "value":"block."
+  }
+}

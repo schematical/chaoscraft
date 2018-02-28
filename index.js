@@ -4,16 +4,34 @@ const navigatePlugin = require('mineflayer-navigate')(mineflayer);
 // install the plugin
 
 var bot = mineflayer.createBot({
-    host: "52.204.181.120", // optional
-    port: 3001,       // optional
+    host: "127.0.0.1", // optional
+    //port: 3001,       // optional
 /*    username: "email@example.com", // email and password are required only for
     password: "12345678",          // online-mode=true servers*/
 });
 radarPlugin(bot, {port:3002});
 navigatePlugin(bot);
+bot.navigate.blocksToAvoid[132] = true; // avoid tripwire
+bot.navigate.blocksToAvoid[59] = false; // ok to trample crops
 bot.on('chat', function(username, message) {
+    // navigate to whoever talks
     if (username === bot.username) return;
-    bot.chat(message);
+    var target = bot.players[username].entity;
+   switch(message) {
+       case('come'):
+           bot.navigate.to(target.position);
+       break;
+       case('stop'):
+           bot.navigate.stop();
+       break;
+       case('block'):
+           var stoneBlock=new Block(1,1,0);
+           let results = bot.findBlock({
+               matching:stoneBlock,
+               maxDistance: 20
+           })
+           console.log("results", results);
+   }
 });
 bot.once('connect', () => console.log('connected'))
 bot.once('error', (err) => console.error(err.message))
@@ -24,8 +42,8 @@ console.log("Death", e);
 bot.on("spawn", (e)=>{
     console.log("spawn", e);
 })
-bot.on("health", (e)=>{
-    console.log("health", e);
+bot.on("health", (e, b)=>{
+    console.log("health", e, b);
 })
 let target = null;
 bot.on("entityUpdate", (e)=>{
@@ -45,15 +63,15 @@ bot.on("entityUpdate", (e)=>{
 })
 
 bot.navigate.on('pathFound', function (path) {
-    console.log/*bot.chat*/("found path. I can get there in " + path.length + " moves.");
+    bot.chat("found path. I can get there in " + path.length + " moves.");
 });
 bot.navigate.on('cannotFind', function (closestPath) {
-    console.log/*bot.chat*/("unable to find path. getting as close as possible");
+    bot.chat("unable to find path. getting as close as possible");
     bot.navigate.walk(closestPath);
 });
 bot.navigate.on('arrived', function () {
-    console.log/*bot.chat*/("I have arrived");
+    bot.chat("I have arrived");
 });
 bot.navigate.on('interrupted', function() {
-    console.log/*bot.chat*/("stopping");
+    bot.chat("stopping");
 });
