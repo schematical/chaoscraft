@@ -55,8 +55,10 @@
   },
   "input1":{
     "base_type":"input",
-    "type":"chat",
-    "value":"come"
+    "type":"hasInInventory",
+    "target": {
+      "value": "come"
+    }
   },
   "input2":{
     "base_type":"input",
@@ -100,12 +102,12 @@
   },
   "output3":{
     "base_type":"output",
-    "action":{
-      "type":"chat"
-    },
+
+    "type":"chat",
+
     "dependants":[
       {
-        "id":"input5",
+        "id":"input6",
         "weight":1
       }
     ]

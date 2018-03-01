@@ -5,6 +5,9 @@ class InputNodeTarget{
     protected _node:NodeBase = null;
     constructor(options){
         this.rawTargetData = options.rawTargetData;
+        if(!this.rawTargetData){
+            throw new Error("missing `rawTargetData`")
+        }
         this._node = options.node;
     }
     get node():NodeBase{

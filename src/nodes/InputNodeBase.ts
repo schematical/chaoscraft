@@ -22,6 +22,9 @@ class InputNodeBase extends NodeBase{
     evaluate():number{
         let score:number = 0;
         switch(this.type){
+            case('hasInInventory'):
+                score = this.hasInInventory();
+                break
             case('canSeeEntity'):
                 score = this.canSeeEntity();
             break;
@@ -37,7 +40,11 @@ class InputNodeBase extends NodeBase{
         return score;
     }
 
-
+    hasInInventory():number{
+        //TODO: Write this
+        //bot.inventory
+        return 0;
+    }
     /**
      * Returns a 1 or a 0 based on weither or not the player can see the position we are describing
      */

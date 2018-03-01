@@ -12,6 +12,9 @@ class OutputNodeBase extends NodeBase{
 
     activate():void{
         switch(this.type){
+            case('chat'):
+                this.chat();
+                break;
             case('walkForward'):
                 this.walkForward();
             break;
@@ -27,6 +30,9 @@ class OutputNodeBase extends NodeBase{
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
+    }
+    chat():void{
+        this.brain.bot.chat("WAZZZUP");
     }
     /*lookAt(){
         this.brain.bot.lookAt(target);

@@ -118,10 +118,11 @@ class App {
         console.log("Logged In!!")
     }
     setupEventListenter(eventType){
-        this.bot.on(eventType, (e)=>{
-            this._tickEvents.push(new TickEvent({
+        let _this = this;
+        this.bot.on(eventType, function(e){
+            _this._tickEvents.push(new TickEvent({
                 type: eventType,
-                data:arguments
+                data:Array.from(arguments)
             }))
         })
     }
