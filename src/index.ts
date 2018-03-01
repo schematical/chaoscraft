@@ -11,6 +11,7 @@ import {Brain} from './Brain'
 class App {
     protected bot:any = null;
     protected brain:Brain = null;
+    protected isSpawned:boolean = false;
     constructor () {
 
 
@@ -44,23 +45,63 @@ class App {
             /*    username: "email@example.com", // email and password are required only for
              password: "12345678",          // online-mode=true servers*/
         });
-        radarPlugin(this.bot, {port:3002});
-        navigatePlugin(this.bot);
-        bloodhoundPlugin(this.bot);
-        blockFinderPlugin(this.bot);
+        radarPlugin(mineflayer)(this.bot, {port:3002});
+        navigatePlugin(mineflayer)(this.bot);
+        bloodhoundPlugin(mineflayer)(this.bot);
+        blockFinderPlugin(mineflayer)(this.bot);
 
         this.bot.once('connect', this.onConnect)
         this.bot.once('error', this.onError)
         this.bot.once('login', this.onLogin)
         this.bot.on("death", (e)=>{
             console.log("Death", e);
+            this.isSpawned = false;
         })
         this.bot.on("spawn", (e)=>{
-            console.log("spawn", e);
+            this.isSpawned = true;
+            setInterval(()=>{
+                this.brain.processTick();
+            }, 500)
         })
         this.bot.on("health", (e, b)=>{
             console.log("health", e, b);
         })
+
+        //TODO Move this to a plugin
+
+
+        this.bot.visiblePosition =  (a, b) => {
+            let v = b.minus(a)
+            const t = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+            v = v.scaled(1 / t)
+            v = v.scaled(1 / 5)
+            const u = t * 5
+            let na
+            for (let i = 1; i < u; i++) {
+                na = a.plus(v)
+                // check that blocks don't inhabit the same position
+                if (!na.floored().equals(a.floored())) {
+                    // check block is not transparent
+
+                    const block = this.bot.blockAt(na);
+                    if (block !== null && block.boundingBox !== 'empty'){
+                        return false;
+                    }
+                }
+                a = na
+            }
+            return true
+        }
+
+        this.bot.canSeePosition = (position)=>{
+            position = position.position || position;
+            // this emits a ray from the center of the bots body to the block
+            if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
+                return true
+            }
+            return false
+        }
+
     }
     onConnect(){
         console.log("Connected");

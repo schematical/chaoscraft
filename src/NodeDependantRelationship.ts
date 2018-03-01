@@ -1,12 +1,24 @@
 import { NodeBase } from './nodes/NodeBase'
 class NodeDependantRelationship{
-    protected rawRelationshipData:any = null;
-    protected parentNode:NodeBase = null;
-    protected dependantNode:NodeBase = null;
+    rawRelationshipData:any = null;
+    _parentNode:NodeBase = null;
+    _dependantNode:NodeBase = null;
     constructor(options:any){
         this.rawRelationshipData = options.rawRelationshipData;
-        this.parentNode = options.parentNode;
-        this.dependantNode = options.dependantNode;
+        this._parentNode = options.parentNode;
+        this._dependantNode = options.dependantNode;
+    }
+    get parentNode():NodeBase{
+        return this._parentNode;
+    }
+    get dependantNode():NodeBase{
+        return this._dependantNode;
+    }
+    get weight():number{
+        return this.rawRelationshipData.weight;
+    }
+    public evaluate():number{
+        return this._dependantNode.evaluate();
     }
 
 }

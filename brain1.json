@@ -15,6 +15,18 @@
       }
     ]
   },
+  "output1":{
+    "base_type":"output",
+    "action":{
+      "type":"walkForward"
+    },
+    "dependants":[
+      {
+        "id":"input5",
+        "weight":1
+      }
+    ]
+  },
   "middle1":{
     "base_type":"middle",
     "dependants":[
@@ -49,11 +61,32 @@
   "input2":{
     "base_type":"input",
     "type":"canSeeBlock",
-    "value":"block."
+    "target":{
+      "type":"block",
+      "block":2
+    }
   },
   "input3":{
     "base_type":"input",
-    "type":"canSeeBlock",
-    "value":"block."
+    "type":"canSeeEntity",
+    "target":{
+      "type":"player"
+
+    }
+  },
+  "input4":{
+    "base_type":"input",
+    "type":"canSeeEntity",
+    "target":{
+      "type":"object",
+      "objectType":"rotten_flesh"
+
+    }
+  },
+  "input5":{
+    "base_type":"input",
+    "type":"chat",
+    "value":"come"
+
   }
 }

@@ -4,16 +4,20 @@ import { OutputNodeBase } from './nodes/OutputNodeBase'
 import { InputNodeBase } from './nodes/InputNodeBase'
 import { MiddleNodeBase } from './nodes/MiddleNodeBase'
 class Brain{
+    protected currTick:number =0;
     protected rawBrainNodes:any = null;
-    protected app:any/*App*/ = null;
+    protected _app:any/*App*/ = null;
     protected _nodes:any = {};
     constructor(options:any){
         this.rawBrainNodes = options.rawBrainNodes;
-        this.app = options.app;
+        this._app = options.app;
         this.import();
     }
     get nodes():Array<NodeBase>{
         return this._nodes;
+    }
+    get bot():any{
+        return this._app.bot;
     }
     /**
      * This starts building the node structure from the `rawBrainNodes`
@@ -74,7 +78,7 @@ class Brain{
             if(filter){
                 if(_.isString(filter)){
                     //We will assume this means the node's `base_type`
-                    if(filter != this.nodes[id]){
+                    if(filter != this.nodes[id].base_type){
                         return false;
                     }
                 }else if(_.isFunction(filter)){
@@ -87,6 +91,29 @@ class Brain{
             }
             return fun(this.nodes[id]);
         })
+    }
+
+    /**
+     * This evaluates all nodes in the Brain and decides which actions to take
+     */
+    public processTick():void{
+        this.currTick += 1;
+        let firingOutputNodes:Array<OutputNodeBase> = [];
+        this.eachNodeSync(
+            (outputNode)=>{
+                let score = outputNode.evaluate();
+                if(score >= 1){
+                    firingOutputNodes.push(outputNode);
+                }
+            },
+            'output'
+        )
+
+
+        firingOutputNodes.forEach((outputNode:OutputNodeBase)=>{
+            outputNode.activate();
+        })
+
     }
 }
 export { Brain }
