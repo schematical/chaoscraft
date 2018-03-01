@@ -12,6 +12,9 @@ class OutputNodeBase extends NodeBase{
 
     activate(options:any):void{
         switch(this.type){
+            case('navigateTo'):
+                this.navigateTo(options);
+                break;
             case('chat'):
                 this.chat();
                 break;
@@ -30,6 +33,15 @@ class OutputNodeBase extends NodeBase{
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
+    }
+
+
+    navigateTo(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        this.brain.bot.navigate.to(target.position);
     }
     chat():void{
         this.brain.bot.chat("WAZZZUP");

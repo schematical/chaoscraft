@@ -37,9 +37,9 @@ class InputNodeBase extends NodeBase{
             results.push(tickEvent);
 
         })
-        if(results.length > 0){
+       /* if(results.length > 0){
             console.log("Results:", results)
-        }
+        }*/
         return results;
     }
     evaluate():NodeEvaluateResult{

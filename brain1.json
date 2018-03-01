@@ -128,5 +128,24 @@
         "weight":1
       }
     ]
+  },
+  "input8":{
+    "base_type":"input",
+    "type":"chat",
+    "target": {
+      "value": "come"
+    }
+  },
+  "output5":{
+    "base_type":"output",
+
+    "type":"navigateTo",
+
+    "dependants":[
+      {
+        "id":"input8",
+        "weight":1
+      }
+    ]
   }
 }
