@@ -12,10 +12,11 @@
     "mineflayer-voxel": "^0.1.0"
   },
   "dependencies": {
+    "@types/node": "^7.0.5",
     "mineflayer-blockfinder": "0.0.7",
+    "mineflayer-bloodhound": "https://github.com/Nixes/mineflayer-bloodhound",
     "mineflayer-navigate": "0.0.10",
     "mineflayer-radar": "0.0.2",
-    "mineflayer-bloodhound":"https://github.com/Nixes/mineflayer-bloodhound",
-    "@types/node": "^7.0.5"
+    "underscore": "^1.8.3"
   }
 }

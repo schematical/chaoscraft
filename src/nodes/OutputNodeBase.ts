@@ -3,10 +3,14 @@
  */
 
 class OutputNodeBase extends NodeBase{
-    constructor(){
+
+    constructor (options){
+        super(options);
+
 
     }
-    import(){
+
+    exicute(){
 
     }
 }

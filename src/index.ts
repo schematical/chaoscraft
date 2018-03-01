@@ -7,9 +7,10 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
+import {Brain} from './Brain'
 class App {
-    protected bot;
-    protected inputNodes:Array<InputNodeBase> = [];
+    protected bot:any = null;
+    protected brain:Brain = null;
     constructor () {
 
 
@@ -17,26 +18,25 @@ class App {
 
     run(){
 
-        this.parseBrainJSON();
+        this.setupBrain();
         this.setupBot();
     }
 
 
-    parseBrainJSON(){
+    setupBrain(){
+
         //Load file and parse JSON
         let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
         let rawBrainNodes = JSON.parse(fileBody);
         //Iterate through and find the outputs
-        Object.keys(rawBrainNodes).forEach((key)=>{
-            let currRawNode = rawBrainNodes[key];
-            if(currRawNode.base_type == 'output'){
+        this.brain = new Brain({
+            rawBrainNodes: rawBrainNodes,
+            app: this
+        });
 
-            }
-        })
+
 
     }
-
-
 
     setupBot(){
         this.bot = mineflayer.createBot({
