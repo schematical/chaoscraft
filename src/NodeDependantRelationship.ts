@@ -1,4 +1,5 @@
 import { NodeBase } from './nodes/NodeBase'
+import {NodeEvaluateResult} from "./NodeEvaluateResult";
 class NodeDependantRelationship{
     rawRelationshipData:any = null;
     _parentNode:NodeBase = null;
@@ -17,7 +18,7 @@ class NodeDependantRelationship{
     get weight():number{
         return this.rawRelationshipData.weight;
     }
-    public evaluate():number{
+    public evaluate():NodeEvaluateResult{
         return this._dependantNode.evaluate();
     }
 

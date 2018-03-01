@@ -3,6 +3,7 @@ import { NodeBase } from './nodes/NodeBase'
 import { OutputNodeBase } from './nodes/OutputNodeBase'
 import { InputNodeBase } from './nodes/InputNodeBase'
 import { MiddleNodeBase } from './nodes/MiddleNodeBase'
+import {NodeEvaluateResult} from "./NodeEvaluateResult";
 class Brain{
     protected currTick:number =0;
     protected rawBrainNodes:any = null;
@@ -101,20 +102,22 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
-        let firingOutputNodes:Array<OutputNodeBase> = [];
+        let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
             (outputNode)=>{
-                let score = outputNode.evaluate();
-                if(score >= 1){
-                    firingOutputNodes.push(outputNode);
+                let evaluateResult:NodeEvaluateResult = outputNode.evaluate();
+                if(evaluateResult.score >= 1){
+                    firingOutputNodes.push(evaluateResult);
                 }
             },
             'output'
         )
 
 
-        firingOutputNodes.forEach((outputNode:OutputNodeBase)=>{
-            outputNode.activate();
+        firingOutputNodes.forEach((evaluateResult:NodeEvaluateResult)=>{
+            evaluateResult.node.activate({
+                results:evaluateResult.results
+            });
         })
 
     }

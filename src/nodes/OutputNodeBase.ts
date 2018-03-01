@@ -10,7 +10,7 @@ class OutputNodeBase extends NodeBase{
 
     }
 
-    activate():void{
+    activate(options:any):void{
         switch(this.type){
             case('chat'):
                 this.chat();
@@ -24,9 +24,9 @@ class OutputNodeBase extends NodeBase{
             case('stopWalking'):
                 this.stopWalking();
             break;
-           /* case('lookAt'):
-                this.lookAt();
-            break;*/
+            case('lookAt'):
+                this.lookAt(options);
+            break;
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
@@ -34,9 +34,13 @@ class OutputNodeBase extends NodeBase{
     chat():void{
         this.brain.bot.chat("WAZZZUP");
     }
-    /*lookAt(){
-        this.brain.bot.lookAt(target);
-    }*/
+    lookAt(options:any){
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        this.brain.bot.lookAt(target.position);
+    }
     walkForward(){
         this.brain.bot.setControlState('forward', true);
         this.brain.bot.setControlState('back', false);

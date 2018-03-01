@@ -109,5 +109,24 @@
         "weight":1
       }
     ]
+  },
+  "input7":{
+    "base_type":"input",
+    "type":"chat",
+    "target": {
+      "value": "look"
+    }
+  },
+  "output4":{
+    "base_type":"output",
+
+    "type":"lookAt",
+
+    "dependants":[
+      {
+        "id":"input7",
+        "weight":1
+      }
+    ]
   }
 }

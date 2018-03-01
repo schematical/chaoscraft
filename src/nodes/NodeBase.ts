@@ -1,5 +1,6 @@
 import {Brain} from '../Brain'
 import { NodeDependantRelationship } from '../NodeDependantRelationship'
+import {NodeEvaluateResult} from "../NodeEvaluateResult";
 
 class NodeBase{
     protected _brain:Brain = null;
@@ -58,14 +59,28 @@ class NodeBase{
     /**
      * This method goes through all dependants and sees what they evaluate to
      */
-    public evaluate():number{
+    public evaluate():NodeEvaluateResult{
         let score = 0;
+        let highestScore = 0;
+        let highestResult = null;
         this.eachDependantNodeSync((dependantRelationship:NodeDependantRelationship)=>{
-            score += dependantRelationship.evaluate() * dependantRelationship.weight;
+            let evaluateResult:NodeEvaluateResult = dependantRelationship.evaluate();
+            let weightedScore = evaluateResult.score * dependantRelationship.weight;
+            score += weightedScore;
+            if(weightedScore > highestScore){
+                highestResult = evaluateResult.results
+                highestScore = evaluateResult.score;
+            }
         })
-        return score;
+        return new NodeEvaluateResult({
+            score: score,
+            results: highestResult,
+            node: this
+        });
     }
-
+    activate(options){
+        throw new Error("No `activate` method on InputBase")
+    }
     /**
      * Iterates through each dependantNode in a Synchronous way
      * @param fun

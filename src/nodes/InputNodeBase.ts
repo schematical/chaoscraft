@@ -5,6 +5,7 @@ import * as _ from 'underscore'
 import { NodeBase } from './NodeBase'
 import { InputNodeTarget } from '../InputNodeTarget'
 import { TickEvent } from "../TickEvent";
+import { NodeEvaluateResult } from "../NodeEvaluateResult"
 class InputNodeBase extends NodeBase{
     protected _target:InputNodeTarget = null;
     constructor (options){
@@ -19,50 +20,6 @@ class InputNodeBase extends NodeBase{
 
     }
 
-    evaluate():number{
-        let score:number = 0;
-        switch(this.type){
-            case('hasInInventory'):
-                score = this.hasInInventory();
-                break
-            case('canSeeEntity'):
-                score = this.canSeeEntity();
-            break;
-            case('canSeeBlock'):
-                score = this.canSeeBlock();
-            break;
-            case('chat'):
-                score = this.chat();
-            break;
-            default:
-                throw new Error("Invalid `InputNodeBase.type`: " + this.type)
-        }
-        return score;
-    }
-
-    hasInInventory():number{
-        //TODO: Write this
-        //bot.inventory
-        return 0;
-    }
-    /**
-     * Returns a 1 or a 0 based on weither or not the player can see the position we are describing
-     */
-    canSeeEntity():number{
-        let targetResults = this._target.findEntity();
-
-        if(targetResults.length == 0){
-            return 0;
-        }
-
-    }
-
-    canSeeBlock():number{
-        let targetResults:Array<any> = this._target.findBlock();
-        if(targetResults.length == 0){
-            return 0;
-        }
-    }
     searchTickEvents(filter:any):Array<TickEvent>{
         let results = [];
         this.brain.app.tickEvents.forEach((tickEvent:TickEvent)=>{
@@ -85,18 +42,84 @@ class InputNodeBase extends NodeBase{
         }
         return results;
     }
-    chat():number{
+    evaluate():NodeEvaluateResult{
+        let results:NodeEvaluateResult = null;
+        switch(this.type){
+            case('hasInInventory'):
+                results = this.hasInInventory();
+                break
+            case('canSeeEntity'):
+                results = this.canSeeEntity();
+            break;
+            case('canSeeBlock'):
+                results = this.canSeeBlock();
+            break;
+            case('chat'):
+                results = this.chat();
+            break;
+            default:
+                throw new Error("Invalid `InputNodeBase.type`: " + this.type)
+        }
+        return results;
+    }
+
+    hasInInventory():NodeEvaluateResult{
+        //TODO: Write this
+        //bot.inventory
+        return new NodeEvaluateResult({
+            score :0,
+            targets: null
+        });;
+    }
+    /**
+     * Returns a 1 or a 0 based on weither or not the player can see the position we are describing
+     */
+    canSeeEntity():NodeEvaluateResult{
+        let targetResults = this._target.findEntity();
+
+        if(targetResults.length == 0){
+            return new NodeEvaluateResult({
+                score: 0
+            });
+        }
+        return new NodeEvaluateResult({
+            score :1,
+            targets: targetResults
+        });
+
+    }
+
+    canSeeBlock():NodeEvaluateResult{
+        let targetResults:Array<any> = this._target.findBlock();
+        if(targetResults.length == 0){
+            return new NodeEvaluateResult({
+                score :0
+            });
+        }
+        return new NodeEvaluateResult({
+            score :1,
+            targets: targetResults
+        });
+    }
+
+    chat():NodeEvaluateResult{
         let results:Array<TickEvent> = this.searchTickEvents('chat');
         let score = 0;
+        let targets = [];
         results.forEach((result)=> {
             let username = result.data[0];
             let message = result.data[1];
             //TODO: make this a regex thing
             if(this._target.match({ value: message })){
                 score += 1;
+                targets.push(this.brain.bot.players[username].entity);
             }
         })
-        return score;
+        return new NodeEvaluateResult({
+           score: score,
+           results: targets,
+           node: this
+        });
     }
 }
 export { InputNodeBase }
