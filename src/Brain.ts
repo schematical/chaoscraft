@@ -1,21 +1,27 @@
 import * as _ from 'underscore'
+import { NodeBase } from './nodes/NodeBase'
+import { OutputNodeBase } from './nodes/OutputNodeBase'
+import { InputNodeBase } from './nodes/InputNodeBase'
+import { MiddleNodeBase } from './nodes/MiddleNodeBase'
 class Brain{
     protected rawBrainNodes:any = null;
     protected app:any/*App*/ = null;
-    protected inputNodes:Array<InputNodeBase> = [];
-    protected nodes:any = {};
+    protected _nodes:any = {};
     constructor(options:any){
         this.rawBrainNodes = options.rawBrainNodes;
         this.app = options.app;
         this.import();
     }
-
+    get nodes():Array<NodeBase>{
+        return this._nodes;
+    }
     /**
-     *
+     * This starts building the node structure from the `rawBrainNodes`
      */
     protected import(){
         Object.keys(this.rawBrainNodes).forEach((key)=>{
             let currRawNode = this.rawBrainNodes[key];
+            currRawNode.id = key;
             let currNode = null;
             switch(currRawNode.base_type) {
                 case('output'):
@@ -40,13 +46,22 @@ class Brain{
                 default:
                     throw new Error("Invalid `Node.base_type`:" + currRawNode.base_type)
             }
-            this.nodes[currNode.id] = currNode;
+            this._nodes[currNode.id] = currNode;
 
 
         })
         this.eachNodeSync((node:NodeBase)=>{
             node.attachDependants();
         })
+    }
+
+    /**
+     * Finds a Node by its `id`
+     * @param id
+     * @returns {NodeBase|null}
+     */
+    findNodeById(id):NodeBase{
+        return this.nodes[id] || null;
     }
 
     /**

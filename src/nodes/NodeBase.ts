@@ -1,4 +1,5 @@
 import {Brain} from '../Brain'
+import { NodeDependantRelationship } from '../NodeDependantRelationship'
 
 class NodeBase{
     protected brain:Brain = null;
@@ -13,6 +14,10 @@ class NodeBase{
             throw new Error("Missing `rawNode` data");
         }
         this.rawNode = options.rawNode;
+        if(!this.rawNode.id){
+            console.error(this.rawNode);
+            throw new Error("Missing `this.rawNode.id`");
+        }
     }
     get id():string{
         return this.rawNode.id;
@@ -38,3 +43,4 @@ class NodeBase{
 
     }
 }
+export { NodeBase }

@@ -16,6 +16,7 @@
     ]
   },
   "middle1":{
+    "base_type":"middle",
     "dependants":[
       {
         "id": "input1",
@@ -28,6 +29,7 @@
     ]
   },
   "middle2":{
+    "base_type":"middle",
     "dependants":[
       {
         "id": "input3",
@@ -40,14 +42,17 @@
     ]
   },
   "input1":{
+    "base_type":"input",
     "type":"chat",
     "value":"come"
   },
   "input2":{
+    "base_type":"input",
     "type":"canSeeBlock",
     "value":"block."
   },
   "input3":{
+    "base_type":"input",
     "type":"canSeeBlock",
     "value":"block."
   }

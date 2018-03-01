@@ -33,8 +33,7 @@ class App {
             rawBrainNodes: rawBrainNodes,
             app: this
         });
-
-
+        console.log("Brain alive with " + Object.keys(this.brain.nodes).length + " nodes");
 
     }
 

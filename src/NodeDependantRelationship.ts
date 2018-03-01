@@ -1,3 +1,4 @@
+import { NodeBase } from './nodes/NodeBase'
 class NodeDependantRelationship{
     protected rawRelationshipData:any = null;
     protected parentNode:NodeBase = null;
@@ -9,3 +10,4 @@ class NodeDependantRelationship{
     }
 
 }
+export { NodeDependantRelationship }
