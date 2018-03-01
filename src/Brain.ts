@@ -19,6 +19,9 @@ class Brain{
     get bot():any{
         return this._app.bot;
     }
+    get app():any{
+        return this._app;
+    }
     /**
      * This starts building the node structure from the `rawBrainNodes`
      */

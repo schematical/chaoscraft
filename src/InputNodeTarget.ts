@@ -10,6 +10,21 @@ class InputNodeTarget{
     get node():NodeBase{
         return this._node;
     }
+    match(options:any){
+        switch(this.node.type){
+            case('chat'):
+                return this.matchChat(options);
+            //break;
+            default:
+                throw new Error("Invalid  `InputNodeTarget.type`: " + this.rawTargetData.type)
+        }
+    }
+    matchChat(options:any):boolean{
+        if(options.value && options.value !== this.rawTargetData.value){
+            return false;
+        }
+        return true;
+    }
     /**
      * should return any targets that are near
      */

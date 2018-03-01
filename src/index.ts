@@ -7,16 +7,20 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
-import {Brain} from './Brain'
+import { Brain } from './Brain'
+import { TickEvent } from './TickEvent'
 class App {
     protected bot:any = null;
     protected brain:Brain = null;
     protected isSpawned:boolean = false;
+    protected _tickEvents:Array<TickEvent> = [];
     constructor () {
 
 
     }
-
+    get tickEvents():Array<TickEvent>{
+        return this._tickEvents;
+    }
     run(){
 
         this.setupBrain();
@@ -61,11 +65,12 @@ class App {
             this.isSpawned = true;
             setInterval(()=>{
                 this.brain.processTick();
+                this._tickEvents = [];
             }, 500)
         })
-        this.bot.on("health", (e, b)=>{
-            console.log("health", e, b);
-        })
+        this.setupEventListenter('health');
+        this.setupEventListenter('chat');
+        this.setupEventListenter('entityUpdate');
 
         //TODO Move this to a plugin
 
@@ -111,6 +116,14 @@ class App {
     }
     onLogin(){
         console.log("Logged In!!")
+    }
+    setupEventListenter(eventType){
+        this.bot.on(eventType, (e)=>{
+            this._tickEvents.push(new TickEvent({
+                type: eventType,
+                data:arguments
+            }))
+        })
     }
 
 

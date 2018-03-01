@@ -15,7 +15,7 @@
       }
     ]
   },
-  "output1":{
+  "output2":{
     "base_type":"output",
     "action":{
       "type":"walkForward"
@@ -86,7 +86,28 @@
   "input5":{
     "base_type":"input",
     "type":"chat",
-    "value":"come"
+    "target": {
+      "value": "walk"
+    }
 
+  },
+  "input6":{
+    "base_type":"input",
+    "type":"chat",
+    "target": {
+      "value": "talk"
+    }
+  },
+  "output3":{
+    "base_type":"output",
+    "action":{
+      "type":"chat"
+    },
+    "dependants":[
+      {
+        "id":"input5",
+        "weight":1
+      }
+    ]
   }
 }
