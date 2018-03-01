@@ -1,23 +1,44 @@
 
-/*const radarPlugin = require('mineflayer-radar')(mineflayer);
-const navigatePlugin = require('mineflayer-navigate')(mineflayer);
-const blockFinderPlugin = require('mineflayer-blockfinder')(mineflayer);
-const bloodhoundPlugin = require('mineflayer-bloodhound')(mineflayer);*/
 // install the plugin
+import * as fs from 'fs';
+import * as path from 'path';
 import * as mineflayer from 'mineflayer'
 import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
-import * as OutputNodeBase from './nodes/NodeBase'
 class App {
     protected bot;
+    protected inputNodes:Array<InputNodeBase> = [];
     constructor () {
 
 
     }
 
     run(){
+
+        this.parseBrainJSON();
+        this.setupBot();
+    }
+
+
+    parseBrainJSON(){
+        //Load file and parse JSON
+        let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
+        let rawBrainNodes = JSON.parse(fileBody);
+        //Iterate through and find the outputs
+        Object.keys(rawBrainNodes).forEach((key)=>{
+            let currRawNode = rawBrainNodes[key];
+            if(currRawNode.base_type == 'output'){
+
+            }
+        })
+
+    }
+
+
+
+    setupBot(){
         this.bot = mineflayer.createBot({
             host: "127.0.0.1", // optional
             //port: 3001,       // optional
@@ -52,12 +73,7 @@ class App {
         console.log("Logged In!!")
     }
 
-    parseBrainJSON(){
-        //Load file and parse JSON
 
-        //Iterate through and find the outputs
-
-    }
 
 
 }

@@ -1,5 +1,6 @@
 {
   "output1":{
+    "base_type":"output",
     "action":{
       "type":"PLACE_BLOCK"
     },
