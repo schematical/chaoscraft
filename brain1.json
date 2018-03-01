@@ -39,10 +39,14 @@
     ]
   },
   "input1":{
-    "type":"CHAT",
+    "type":"chat",
     "value":"come"
   },
-  "input1":{
+  "input2":{
+    "type":"canSeeBlock",
+    "value":"block."
+  },
+  "input3":{
     "type":"canSeeBlock",
     "value":"block."
   }
