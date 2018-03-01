@@ -1,9 +1,7 @@
 {
   "output1":{
     "base_type":"output",
-    "action":{
-      "type":"PLACE_BLOCK"
-    },
+    "type":"dig",
     "dependants":[
       {
         "id":"middle1",
@@ -17,9 +15,9 @@
   },
   "output2":{
     "base_type":"output",
-    "action":{
-      "type":"walkForward"
-    },
+
+    "type":"walkForward",
+
     "dependants":[
       {
         "id":"input5",

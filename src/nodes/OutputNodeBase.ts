@@ -18,8 +18,8 @@ class OutputNodeBase extends NodeBase{
             case('walkForward'):
                 this.walkForward();
             break;
-            case('walkBackwards'):
-                this.walkBackwards();
+            case('walkBack'):
+                this.walkBack();
             break;
             case('stopWalking'):
                 this.stopWalking();
@@ -39,16 +39,16 @@ class OutputNodeBase extends NodeBase{
     }*/
     walkForward(){
         this.brain.bot.setControlState('forward', true);
-        this.brain.bot.setControlState('backward', false);
+        this.brain.bot.setControlState('back', false);
     }
-    walkBackwards(){
+    walkBack(){
         this.brain.bot.setControlState('forward', false);
-        this.brain.bot.setControlState('backward', true);
+        this.brain.bot.setControlState('back', true);
     }
     stopWalking(){
         //TODO: Iterate through all directions
         this.brain.bot.setControlState('forward', false);
-        this.brain.bot.setControlState('backward', false);
+        this.brain.bot.setControlState('back', false);
     }
 }
 
