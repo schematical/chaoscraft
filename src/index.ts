@@ -48,6 +48,9 @@ class App {
             //port: 3001,       // optional
             /*    username: "email@example.com", // email and password are required only for
              password: "12345678",          // online-mode=true servers*/
+            verbose: true,
+            //version: "1.12.2",
+            checkTimeoutInterval: 30*1000
         });
         radarPlugin(mineflayer)(this.bot, {port:3002});
         navigatePlugin(mineflayer)(this.bot);
@@ -105,6 +108,22 @@ class App {
                 return true
             }
             return false
+        }
+        this.bot.on('diggingCompleted', ()=>{
+            this.bot._currentlyDigging = null;
+        })
+        this.bot.on('diggingAborted', ()=>{
+            this.bot._currentlyDigging = null;
+        })
+        this.bot.smartDig = (block, cb) => {
+            if(this.bot._currentlyDigging){
+               //TODO: Cross Check
+                return;
+            }
+            this.bot._currentlyDigging = block;
+            this.bot.chat("I am digging");
+            this.bot.dig(this.bot._currentlyDigging, cb);
+
         }
 
     }

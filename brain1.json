@@ -147,5 +147,26 @@
         "weight":1
       }
     ]
+  },
+  "input9":{
+    "base_type":"input",
+    "type":"canDigBlock",
+    "target":{
+      "type":"block",
+      "block":2
+    }
+  },
+  "output6":{
+    "base_type":"output",
+
+    "type":"dig",
+
+    "dependants":[
+      {
+        "id":"input9",
+        "weight":1
+      }
+    ]
   }
+
 }

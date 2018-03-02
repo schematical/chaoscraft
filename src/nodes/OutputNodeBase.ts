@@ -16,7 +16,7 @@ class OutputNodeBase extends NodeBase{
                 this.navigateTo(options);
                 break;
             case('chat'):
-                this.chat();
+                this.chat(options);
                 break;
             case('walkForward'):
                 this.walkForward();
@@ -30,11 +30,27 @@ class OutputNodeBase extends NodeBase{
             case('lookAt'):
                 this.lookAt(options);
             break;
+            case('dig'):
+                this.dig(options);
+            break;
+            case('navigateTo'):
+                this.navigateTo(options);
+                break;
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
     }
-
+    dig(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        //TODO: Add currentlyDigging
+        //TODO: Add some logic to find block at location if need be
+        this.brain.bot.smartDig(target, (err, results)=>{
+            console.log("Digging Done: ", err, results);
+        });
+    }
 
     navigateTo(options:any):void{
         if(options.results.length == 0){
@@ -43,8 +59,12 @@ class OutputNodeBase extends NodeBase{
         let target = options.results[0];
         this.brain.bot.navigate.to(target.position);
     }
-    chat():void{
-        this.brain.bot.chat("WAZZZUP");
+    chat(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        this.brain.bot.chat("WAZZZUP: " + target.username);
     }
     lookAt(options:any){
         if(options.results.length == 0){

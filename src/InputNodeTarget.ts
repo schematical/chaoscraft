@@ -110,12 +110,13 @@ class InputNodeTarget{
      * Finds a block that is similar to the
      * @returns {any}
      */
-    findBlock():Array<any>{
+    findBlock(options?:any):Array<any>{
+        options = options || {};
         return this.node.brain.bot.findBlockSync({
             point: this.node.brain.bot.entity.position,
             matching: this.rawTargetData.block,
             maxDistance: this.rawTargetData.maxDistance || 20,
-            count: this.rawTargetData.count || 1,
+            count: options.count || this.rawTargetData.count || 1,
         })
     }
 }

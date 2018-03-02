@@ -45,6 +45,9 @@ class InputNodeBase extends NodeBase{
     evaluate():NodeEvaluateResult{
         let results:NodeEvaluateResult = null;
         switch(this.type){
+            case('canDigBlock'):
+                results = this.canDigBlock();
+            break
             case('hasInInventory'):
                 results = this.hasInInventory();
                 break
@@ -62,14 +65,34 @@ class InputNodeBase extends NodeBase{
         }
         return results;
     }
+    canDigBlock():NodeEvaluateResult{
+        let startDate = new Date().getTime();
+        let blocks = this._target.findBlock({
+            count: 10
+        })
+        let results = [];
 
+        blocks.forEach((block)=>{
+            if(!this.brain.bot.canDigBlock(block)){
+                return false;
+            }
+            results.push(block);
+        })
+        //console.log("TIME:", (new Date().getTime() - startDate)/1000);
+        return new NodeEvaluateResult({
+            score: results.length > 0 ? 1 : 0,
+            results: results,
+            node:this
+        });
+    }
     hasInInventory():NodeEvaluateResult{
         //TODO: Write this
         //bot.inventory
         return new NodeEvaluateResult({
             score :0,
-            targets: null
-        });;
+            results: null,
+            node:this
+        });
     }
     /**
      * Returns a 1 or a 0 based on weither or not the player can see the position we are describing
@@ -79,12 +102,14 @@ class InputNodeBase extends NodeBase{
 
         if(targetResults.length == 0){
             return new NodeEvaluateResult({
-                score: 0
+                score: 0,
+                node:this
             });
         }
         return new NodeEvaluateResult({
             score :1,
-            targets: targetResults
+            results: targetResults,
+            node:this
         });
 
     }
@@ -98,7 +123,8 @@ class InputNodeBase extends NodeBase{
         }
         return new NodeEvaluateResult({
             score :1,
-            targets: targetResults
+            results: targetResults,
+            node:this
         });
     }
 

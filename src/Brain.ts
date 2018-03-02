@@ -102,22 +102,30 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
+        console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
             (outputNode)=>{
+                let startDate = new Date().getTime();
                 let evaluateResult:NodeEvaluateResult = outputNode.evaluate();
                 if(evaluateResult.score >= 1){
                     firingOutputNodes.push(evaluateResult);
                 }
+                let duration = (new Date().getTime() - startDate)/1000;
+                console.log("EVAL:", outputNode.id, ' - ', duration);
             },
             'output'
         )
 
 
         firingOutputNodes.forEach((evaluateResult:NodeEvaluateResult)=>{
+            let startDate = new Date().getTime();
             evaluateResult.node.activate({
                 results:evaluateResult.results
             });
+
+            let duration = (new Date().getTime() - startDate)/1000;
+            console.log("ACTIVATE:", evaluateResult.node.id, ' - ', duration);
         })
 
     }
