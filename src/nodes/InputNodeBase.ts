@@ -63,6 +63,9 @@ class InputNodeBase extends NodeBase{
             case('chat'):
                 results = this.chat();
             break;
+            case('onCorrelateAttack'):
+                results = this.onCorrelateAttack();
+            break;
             default:
                 throw new Error("Invalid `InputNodeBase.type`: " + this.type)
         }
@@ -85,6 +88,26 @@ class InputNodeBase extends NodeBase{
         return new NodeEvaluateResult({
             score: results.length > 0 ? 1 : 0,
             results: results,
+            node:this
+        });
+    }
+    onCorrelateAttack():NodeEvaluateResult{
+
+        let results:Array<TickEvent> = this.searchTickEvents('onCorrelateAttack');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let attacker = result.data[0];
+            let victim = result.data[1];
+            let weapon = result.data[2];
+            //TODO: Filter against victim and weapon?
+            score += 1;
+            targets.push(attacker);
+
+        })
+        return new NodeEvaluateResult({
+            score :results.length > 0 ? 1  : 0,
+            results: targets,
             node:this
         });
     }

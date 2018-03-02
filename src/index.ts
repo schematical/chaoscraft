@@ -74,7 +74,7 @@ class App {
         this.setupEventListenter('health');
         this.setupEventListenter('chat');
         this.setupEventListenter('entityUpdate');
-
+        this.setupEventListenter('onCorrelateAttack');
         //TODO Move this to a plugin
 
 

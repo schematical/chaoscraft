@@ -102,7 +102,7 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
-        console.log("ProcessTick:", this.currTick);
+        //console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
             (outputNode)=>{
@@ -112,7 +112,7 @@ class Brain{
                     firingOutputNodes.push(evaluateResult);
                 }
                 let duration = (new Date().getTime() - startDate)/1000;
-                console.log("EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
+                //console.log("EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
             },
             'output'
         )
@@ -125,7 +125,7 @@ class Brain{
             });
 
             let duration = (new Date().getTime() - startDate)/1000;
-            console.log("ACTIVATE:", evaluateResult.node.id, ' - ', duration);
+            //console.log("ACTIVATE:", evaluateResult.node.id, ' - ', duration);
         })
 
     }

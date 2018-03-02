@@ -73,6 +73,7 @@ class NodeBase{
                 highestScore = evaluateResult.score;
             }
         })
+        //TODO: Combine Results by Score into a single array - Prob add type to results
         return new NodeEvaluateResult({
             score: score,
             results: highestResult,

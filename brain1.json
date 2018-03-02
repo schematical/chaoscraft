@@ -186,6 +186,29 @@
         "id":"input10"
       }
     ]
+  },
+
+
+
+
+
+  "input12":{
+    "base_type":"input",
+    "type":"onCorrelateAttack",
+    "target":{
+      "type":"block",
+      "block":17
+    }
+  },
+  "output8":{
+    "base_type":"output",
+
+    "type":"attack",
+    "dependants":[
+      {
+        "id":"input12"
+      }
+    ]
   }
 
 }

@@ -39,12 +39,30 @@ class OutputNodeBase extends NodeBase{
             case('equip'):
                 this.equip(options);
             break;
+            case('attack'):
+                this.attack(options);
+            break;
             case('navigateTo'):
                 this.navigateTo(options);
+                break;
+            case('activateItem'):
+                this.activateItem(options);
                 break;
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
+    }
+    activateItem(options:any):void{
+        this.brain.bot.chat("I am activating stuff");
+        this.brain.bot.activateItem();
+    }
+    attack(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        this.brain.bot.chat("I am attacking " + target.username + "!");
+        this.brain.bot.attack(target);
     }
     equip(options:any):void{
         if(options.results.length == 0){
