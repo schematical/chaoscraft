@@ -93,7 +93,7 @@ class InputNodeBase extends NodeBase{
         let results = this._target.findInventory();
         return new NodeEvaluateResult({
             score :results.length > 0 ? 1 : 0,
-            results: null,
+            results: results,
             node:this
         });
     }

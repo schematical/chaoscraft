@@ -162,7 +162,7 @@
     "type":"canSeeBlock",
     "target":{
       "type":"block",
-      "block":59
+      "block":56
     }
   },
   "input11":{
@@ -180,10 +180,10 @@
     "destination":"hand",
     "dependants":[
       {
-        "id":"input10"
+        "id":"input11"
       },
       {
-        "id":"input11"
+        "id":"input10"
       }
     ]
   }

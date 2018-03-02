@@ -63,6 +63,7 @@ class NodeBase{
         let score = 0;
         let highestScore = 0;
         let highestResult = null;
+
         this.eachDependantNodeSync((dependantRelationship:NodeDependantRelationship)=>{
             let evaluateResult:NodeEvaluateResult = dependantRelationship.evaluate();
             let weightedScore = evaluateResult.score * dependantRelationship.weight;
