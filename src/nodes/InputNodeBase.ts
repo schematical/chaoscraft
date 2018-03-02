@@ -57,6 +57,9 @@ class InputNodeBase extends NodeBase{
             case('canSeeBlock'):
                 results = this.canSeeBlock();
             break;
+            case('hasInInventory'):
+                results = this.hasInInventory();
+            break;
             case('chat'):
                 results = this.chat();
             break;
@@ -86,10 +89,10 @@ class InputNodeBase extends NodeBase{
         });
     }
     hasInInventory():NodeEvaluateResult{
-        //TODO: Write this
-        //bot.inventory
+
+        let results = this._target.findInventory();
         return new NodeEvaluateResult({
-            score :0,
+            score :results.length > 0 ? 1 : 0,
             results: null,
             node:this
         });
@@ -116,13 +119,9 @@ class InputNodeBase extends NodeBase{
 
     canSeeBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock();
-        if(targetResults.length == 0){
-            return new NodeEvaluateResult({
-                score :0
-            });
-        }
+
         return new NodeEvaluateResult({
-            score :1,
+            score :targetResults.length > 0 ? 1 : 0,
             results: targetResults,
             node:this
         });

@@ -119,5 +119,28 @@ class InputNodeTarget{
             count: options.count || this.rawTargetData.count || 1,
         })
     }
+    findInventory(options?:any):Array<any>{
+        let results = [];
+        this.node.brain.bot.inventory.slots.forEach((inventorySlot)=>{
+            if(!inventorySlot){
+                return false;
+            }
+
+            let type = 'block';
+            switch(this.rawTargetData.type){
+                case('block'):
+                    type = this.rawTargetData.block;
+                break;
+                default:
+                    type = this.rawTargetData.type
+            }
+            if(inventorySlot.type != type){
+                return false;
+            }
+            results.push(inventorySlot);
+
+        })
+        return results;
+    }
 }
 export { InputNodeTarget }

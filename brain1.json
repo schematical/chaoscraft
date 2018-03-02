@@ -55,7 +55,9 @@
     "base_type":"input",
     "type":"hasInInventory",
     "target": {
-      "value": "come"
+      "type":"block",
+      "block":26
+
     }
   },
   "input2":{
@@ -148,23 +150,40 @@
       }
     ]
   },
-  "input9":{
+
+
+
+
+
+
+
+  "input10":{
     "base_type":"input",
-    "type":"canDigBlock",
+    "type":"canSeeBlock",
+    "target":{
+      "type":"block",
+      "block":59
+    }
+  },
+  "input11":{
+    "base_type":"input",
+    "type":"hasInInventory",
     "target":{
       "type":"block",
       "block":17
     }
   },
-  "output6":{
+  "output7":{
     "base_type":"output",
 
-    "type":"dig",
-
+    "type":"equip",
+    "destination":"hand",
     "dependants":[
       {
-        "id":"input9",
-        "weight":1
+        "id":"input10"
+      },
+      {
+        "id":"input11"
       }
     ]
   }

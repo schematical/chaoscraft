@@ -33,12 +33,35 @@ class OutputNodeBase extends NodeBase{
             case('dig'):
                 this.dig(options);
             break;
+            case('placeBlock'):
+                this.placeBlock(options);
+            break;
+            case('equip'):
+                this.equip(options);
+            break;
             case('navigateTo'):
                 this.navigateTo(options);
                 break;
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
+    }
+    equip(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+
+        this.brain.bot.equip(target, this.rawNode.destination);
+    }
+    placeBlock(options:any):void{
+        if(options.results.length == 0){
+            throw new Error("No results found to look at");
+        }
+        let target = options.results[0];
+        //TODO: Add currentlyDigging
+        //TODO: Add some logic to find block at location if need be
+        this.brain.bot.smartDig(target);
     }
     dig(options:any):void{
         if(options.results.length == 0){
