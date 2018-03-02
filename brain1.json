@@ -153,7 +153,7 @@
     "type":"canDigBlock",
     "target":{
       "type":"block",
-      "block":2
+      "block":17
     }
   },
   "output6":{

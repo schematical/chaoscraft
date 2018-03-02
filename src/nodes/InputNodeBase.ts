@@ -68,7 +68,7 @@ class InputNodeBase extends NodeBase{
     canDigBlock():NodeEvaluateResult{
         let startDate = new Date().getTime();
         let blocks = this._target.findBlock({
-            count: 10
+            count: 20
         })
         let results = [];
 
