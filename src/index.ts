@@ -7,9 +7,11 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
+import * as io from 'socket.io-client'
 import { Brain } from './Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected socket:SocketIOClient.Socket = null;
     protected bot:any = null;
     protected brain:Brain = null;
     protected isSpawned:boolean = false;
@@ -25,6 +27,15 @@ class App {
 
         this.setupBrain();
         this.setupBot();
+        this.setupSocket();
+    }
+    setupSocket(){
+        this.socket = io('http://localhost:3000');
+        console.log("Setting Up Socket");
+        this.socket.on('client_hello_response', (message) => {
+           console.log("client_hello_response", message);
+        });
+        this.socket.emit('client_hello', {});
     }
 
 
@@ -52,7 +63,7 @@ class App {
             //version: "1.12.2",
             checkTimeoutInterval: 30*1000
         });
-        radarPlugin(mineflayer)(this.bot, {port:3002});
+        //radarPlugin(mineflayer)(this.bot, {port:3002});
         navigatePlugin(mineflayer)(this.bot);
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
