@@ -2,6 +2,7 @@
 // install the plugin
 import * as fs from 'fs';
 import * as path from 'path';
+import * as request from 'request';
 import * as mineflayer from 'mineflayer'
 import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
@@ -15,6 +16,7 @@ class App {
     protected bot:any = null;
     protected brain:Brain = null;
     protected isSpawned:boolean = false;
+    protected identity:any = null;
     protected _tickEvents:Array<TickEvent> = [];
     constructor () {
 
@@ -25,31 +27,42 @@ class App {
     }
     run(){
 
-        this.setupBrain();
-        this.setupBot();
         this.setupSocket();
+
     }
     setupSocket(){
         this.socket = io('http://localhost:3000');
         console.log("Setting Up Socket");
-        this.socket.on('client_hello_response', (message) => {
-           console.log("client_hello_response", message);
+        this.socket.on('client_hello_response', (identity) => {
+           this.identity = identity;
+            this.setupBrain()
         });
         this.socket.emit('client_hello', {});
     }
 
 
     setupBrain(){
-
-        //Load file and parse JSON
-        let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
-        let rawBrainNodes = JSON.parse(fileBody);
-        //Iterate through and find the outputs
-        this.brain = new Brain({
-            rawBrainNodes: rawBrainNodes,
-            app: this
-        });
-        console.log("Brain alive with " + Object.keys(this.brain.nodes).length + " nodes");
+        request(
+            {
+                url:'http://localhost:3000/brains/' + this.identity._id,
+                json: true
+            },
+            (err, response, brain)=>{
+                if(err){
+                    throw err;
+                }
+                //Load file and parse JSON
+                //let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
+                let rawBrainNodes = JSON.parse(brain.brain);
+                //Iterate through and find the outputs
+                this.brain = new Brain({
+                    rawBrainNodes: rawBrainNodes,
+                    app: this
+                });
+                console.log("Brain alive with " + Object.keys(this.brain.nodes).length + " nodes");
+                this.setupBot();
+            }
+        )
 
     }
 

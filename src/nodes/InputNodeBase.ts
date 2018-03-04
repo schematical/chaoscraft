@@ -1,6 +1,7 @@
 /**
  * Created by user1a on 2/28/18.
  */
+import * as shared from 'chaoscraft-shared'
 import * as _ from 'underscore'
 import { NodeBase } from './NodeBase'
 import { InputNodeTarget } from '../InputNodeTarget'
@@ -45,25 +46,25 @@ class InputNodeBase extends NodeBase{
     evaluate():NodeEvaluateResult{
         let results:NodeEvaluateResult = null;
         switch(this.type){
-            case('canDigBlock'):
+            case(shared.Enum.InputTypes.canDigBlock):
                 results = this.canDigBlock();
             break
-            case('hasInInventory'):
+            case(shared.Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
                 break
-            case('canSeeEntity'):
+            case(shared.Enum.InputTypes.canSeeEntity):
                 results = this.canSeeEntity();
             break;
-            case('canSeeBlock'):
+            case(shared.Enum.InputTypes.canSeeBlock):
                 results = this.canSeeBlock();
             break;
-            case('hasInInventory'):
+            case(shared.Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
             break;
-            case('chat'):
+            case(shared.Enum.InputTypes.chat):
                 results = this.chat();
             break;
-            case('onCorrelateAttack'):
+            case(shared.Enum.InputTypes.onCorrelateAttack):
                 results = this.onCorrelateAttack();
             break;
             default:

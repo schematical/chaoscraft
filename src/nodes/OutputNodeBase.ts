@@ -2,6 +2,8 @@
  * Created by user1a on 2/28/18.
  */
 import { NodeBase } from './NodeBase'
+import * as shared from 'chaoscraft-shared'
+
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
     constructor (options:any){
@@ -12,40 +14,38 @@ class OutputNodeBase extends NodeBase{
 
     activate(options:any):void{
         switch(this.type){
-            case('navigateTo'):
+            case(shared.Enum.OutputTypes.navigateTo):
                 this.navigateTo(options);
                 break;
-            case('chat'):
+            case(shared.Enum.OutputTypes.chat):
                 this.chat(options);
                 break;
-            case('walkForward'):
+            case(shared.Enum.OutputTypes.walkForward):
                 this.walkForward();
             break;
-            case('walkBack'):
+            case(shared.Enum.OutputTypes.walkBack):
                 this.walkBack();
             break;
-            case('stopWalking'):
+            case(shared.Enum.OutputTypes.stopWalking):
                 this.stopWalking();
             break;
-            case('lookAt'):
+            case(shared.Enum.OutputTypes.lookAt):
                 this.lookAt(options);
             break;
-            case('dig'):
+            case(shared.Enum.OutputTypes.dig):
                 this.dig(options);
             break;
-            case('placeBlock'):
+            case(shared.Enum.OutputTypes.placeBlock):
                 this.placeBlock(options);
             break;
-            case('equip'):
+            case(shared.Enum.OutputTypes.equip):
                 this.equip(options);
             break;
-            case('attack'):
+            case(shared.Enum.OutputTypes.attack):
                 this.attack(options);
             break;
-            case('navigateTo'):
-                this.navigateTo(options);
-                break;
-            case('activateItem'):
+
+            case(shared.Enum.OutputTypes.activateItem):
                 this.activateItem(options);
                 break;
             default:

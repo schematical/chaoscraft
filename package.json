@@ -16,6 +16,7 @@
     "@types/socket.io-client": "^1.4.32",
     "mineflayer-blockfinder": "0.0.7",
     "mineflayer-bloodhound": "https://github.com/Nixes/mineflayer-bloodhound",
+    "chaoscraft-shared": "https://github.com/schematical/chaoscraft-shared",
     "mineflayer-navigate": "0.0.10",
     "mineflayer-radar": "0.0.2",
     "socket.io-client": "^2.0.4",
