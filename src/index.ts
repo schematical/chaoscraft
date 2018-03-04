@@ -70,13 +70,14 @@ class App {
         this.bot = mineflayer.createBot({
             host: "127.0.0.1", // optional
             //port: 3001,       // optional
+            username: this.identity.name + Math.floor(Math.random() * 10),
             /*    username: "email@example.com", // email and password are required only for
              password: "12345678",          // online-mode=true servers*/
             verbose: true,
             //version: "1.12.2",
             checkTimeoutInterval: 30*1000
         });
-        //radarPlugin(mineflayer)(this.bot, {port:3002});
+        radarPlugin(mineflayer)(this.bot, {port:3002});
         navigatePlugin(mineflayer)(this.bot);
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
@@ -163,6 +164,9 @@ class App {
     setupEventListenter(eventType){
         let _this = this;
         this.bot.on(eventType, function(e){
+            if(eventType == 'chat'){
+                console.log("Chattin");
+            }
             _this._tickEvents.push(new TickEvent({
                 type: eventType,
                 data:Array.from(arguments)
