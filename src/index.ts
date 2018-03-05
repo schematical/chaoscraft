@@ -9,7 +9,7 @@ import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
 import * as io from 'socket.io-client'
-import { Brain } from './Brain'
+import { Brain } from 'chaoscraft-shared'
 import { TickEvent } from './TickEvent'
 class App {
     protected socket:SocketIOClient.Socket = null;
