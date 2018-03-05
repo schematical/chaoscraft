@@ -8,11 +8,13 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
-import * as io from 'socket.io-client'
-import { Brain } from 'chaoscraft-shared'
+
+import { SocketManager } from './SocketManager'
+
+import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
-    protected socket:SocketIOClient.Socket = null;
+    protected _socket:SocketManager = null;
     protected bot:any = null;
     protected brain:Brain = null;
     protected isSpawned:boolean = false;
@@ -25,26 +27,25 @@ class App {
     get tickEvents():Array<TickEvent>{
         return this._tickEvents;
     }
+    get socket():SocketManager{
+        return this._socket;
+    }
     run(){
 
         this.setupSocket();
 
     }
     setupSocket(){
-        this.socket = io('http://localhost:3000');
-        console.log("Setting Up Socket");
-        this.socket.on('client_hello_response', (identity) => {
-           this.identity = identity;
-            this.setupBrain()
-        });
-        this.socket.emit('client_hello', {});
+        this._socket = new SocketManager({
+            app:this
+        })
     }
 
 
     setupBrain(){
-        request(
+        return request(
             {
-                url:'http://localhost:3000/brains/' + 'test'/*this.identity._id*/,
+                url:'http://localhost:3000/bots/' + this.identity.username + '/brain',
                 json: true
             },
             (err, response, brain)=>{
@@ -70,7 +71,7 @@ class App {
         this.bot = mineflayer.createBot({
             host: "127.0.0.1", // optional
             //port: 3001,       // optional
-            username: this.identity.name + Math.floor(Math.random() * 10),
+            username: this.identity.name,
             /*    username: "email@example.com", // email and password are required only for
              password: "12345678",          // online-mode=true servers*/
             verbose: true,
