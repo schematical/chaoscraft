@@ -44,7 +44,7 @@ class App {
     setupBrain(){
         request(
             {
-                url:'http://localhost:3000/brains/' + this.identity._id,
+                url:'http://localhost:3000/brains/' + 'test'/*this.identity._id*/,
                 json: true
             },
             (err, response, brain)=>{
@@ -53,7 +53,7 @@ class App {
                 }
                 //Load file and parse JSON
                 //let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
-                let rawBrainNodes = JSON.parse(brain.brain);
+                let rawBrainNodes = brain;//JSON.parse(brain.brain);
                 //Iterate through and find the outputs
                 this.brain = new Brain({
                     rawBrainNodes: rawBrainNodes,
