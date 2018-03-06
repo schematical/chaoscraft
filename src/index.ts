@@ -78,7 +78,7 @@ class App {
             //version: "1.12.2",
             checkTimeoutInterval: 30*1000
         });
-        radarPlugin(mineflayer)(this.bot, {port:3002});
+        //radarPlugin(mineflayer)(this.bot, {port:3002});
         navigatePlugin(mineflayer)(this.bot);
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
@@ -86,6 +86,12 @@ class App {
         this.bot.once('connect', this.onConnect)
         this.bot.once('error', this.onError)
         this.bot.once('login', this.onLogin)
+        this.bot.on('disconnect', (e)=>{
+            console.log("DISCONNECTED FROM MINECRAFT");
+        })
+        this.bot.on('kick_disconnect', (e)=>{
+            console.log("KICK DISCONNECTED FROM MINECRAFT");
+        })
         this.bot.on("death", (e)=>{
             console.log("Death", e);
             this.isSpawned = false;
@@ -157,7 +163,7 @@ class App {
         console.log("Connected");
     }
     onError(err){
-       console.error(err.message)
+       console.error('ERROR: ', err.message)
     }
     onLogin(){
         console.log("Logged In!!")

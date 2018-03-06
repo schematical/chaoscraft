@@ -78,7 +78,14 @@ class OutputNodeBase extends NodeBase{
         let target = options.results[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
-        this.brain.bot.smartDig(target);
+        try {
+            if(!target.digTime){
+                return console.error("Cannot Dig Type: " + target.type)
+            }
+            this.brain.bot.placeBlock(target);
+        }catch(e){
+            console.error(e.message);
+        }
     }
     dig(options:any):void{
         if(options.results.length == 0){
@@ -87,6 +94,10 @@ class OutputNodeBase extends NodeBase{
         let target = options.results[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
+
+        if(!target.digTime){
+            return console.error("Cannot Dig Type: " + target.type)
+        }
         this.brain.bot.smartDig(target, (err, results)=>{
             console.log("Digging Done: ", err, results);
         });

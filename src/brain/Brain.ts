@@ -13,6 +13,23 @@ class Brain{
         this.rawBrainNodes = options.rawBrainNodes;
         this._app = options.app;
         this.import();
+
+        setInterval(()=>{
+            //TEST
+            let outputNode = null;
+            this.eachNodeSync(
+                (_outputNode)=>{
+                    outputNode = _outputNode;
+                },
+                'output'
+            )
+
+            this.app.socket.sendFireOutputNode({
+                node: outputNode.id,
+                results: null,
+                duration: 100
+            })
+        }, 5000)
     }
     get nodes():Array<NodeBase>{
         return this._nodes;
@@ -132,6 +149,9 @@ class Brain{
             })
             //console.log("ACTIVATE:", evaluateResult.node.type, "RESULTS:", evaluateResult.results, ' - ', duration);
         })
+
+
+
 
     }
 }
