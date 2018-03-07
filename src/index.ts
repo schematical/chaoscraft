@@ -1,4 +1,4 @@
-console.log("HELLO");
+
 // install the plugin
 import * as fs from 'fs';
 import * as path from 'path';
@@ -89,7 +89,7 @@ class App {
         blockFinderPlugin(mineflayer)(this.bot);
 
         this.bot.once('connect', this.onConnect)
-        this.bot.once('error', this.onError)
+        this.bot.once('error', (err)=>{ this.onError(err) });
         this.bot.once('login', this.onLogin)
         this.bot.on('disconnect', (e)=>{
             console.log("DISCONNECTED FROM MINECRAFT");
