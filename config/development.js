@@ -1,9 +1,9 @@
 const path = require('path');
 module.exports = {
-    socket:{
+    /*socket:{
         host:'http://localhost:3000'
-    },
-    server:{
+    },*/
+    /*server:{
         host:'http://localhost:3000'
-    }
+    }*/
 };

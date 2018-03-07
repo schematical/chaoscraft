@@ -93,9 +93,12 @@ class App {
         this.bot.once('login', this.onLogin)
         this.bot.on('disconnect', (e)=>{
             console.log("DISCONNECTED FROM MINECRAFT");
+            this. setupBot();
         })
         this.bot.on('kick_disconnect', (e)=>{
+
             console.log("KICK DISCONNECTED FROM MINECRAFT");
+            this. setupBot();
         })
         this.bot.on("death", (e)=>{
             console.log("Death", e);
@@ -172,7 +175,7 @@ class App {
             if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
                 return true
             }
-            return false
+            return false;
         }
         this.bot.on('diggingCompleted', ()=>{
             this.bot._currentlyDigging = null;
@@ -197,6 +200,8 @@ class App {
     }
     onError(err){
        console.error('ERROR: ', err.message)
+        this.bot.quit();
+        this.setupBot();
     }
     onLogin(){
         console.log("Logged In!!")

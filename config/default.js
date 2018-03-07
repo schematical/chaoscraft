@@ -1,6 +1,6 @@
 module.exports = {
     socket:{
-        host:'http://localhost:3000'
+        host:'https://chaoscraft-api.schematical.com'
     },
     minecraft:{
         host:process.env.MINECRAFT_HOST || '52.90.79.127'
