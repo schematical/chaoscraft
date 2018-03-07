@@ -204,7 +204,7 @@ class App {
         this.setupBot();
     }
     onLogin(){
-        console.log(this.identity.username +  " - Logged In!!")
+        console.log(this.identity.username +  " - Logged In at ", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z)
     }
     setupEventListenter(eventType){
         let _this = this;
