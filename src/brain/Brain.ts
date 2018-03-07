@@ -128,12 +128,16 @@ class Brain{
         this.eachNodeSync(
             (outputNode)=>{
                 let startDate = new Date().getTime();
-                let evaluateResult:NodeEvaluateResult = outputNode.evaluate();
-                if(evaluateResult.score >= 1){
-                    firingOutputNodes.push(evaluateResult);
+                try {
+                    let evaluateResult = outputNode.evaluate();
+                    if (evaluateResult.score >= 1) {
+                        firingOutputNodes.push(evaluateResult);
+                    }
+                    let duration = (new Date().getTime() - startDate) / 1000;
+                    //console.log("EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
+                }catch(err){
+                    console.error(this.app.identity.username + ' - ERROR - Firing OutputNode: ' + outputNode.id , err.message, err.stack);
                 }
-                let duration = (new Date().getTime() - startDate)/1000;
-                //console.log("EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
             },
             'output'
         )
