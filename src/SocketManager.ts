@@ -28,6 +28,9 @@ class SocketManager{
             this.isObserved = false;
         })
     }
+    emit(eventType, payload){
+        this.socket.emit(eventType, payload);
+    }
     sendFireOutputNode(payload){
         this.socket.emit('client_fire_outputnode', payload);
     }

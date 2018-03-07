@@ -5,6 +5,7 @@ import { InputNodeBase } from './nodes/InputNodeBase'
 import { MiddleNodeBase } from './nodes/MiddleNodeBase'
 import {NodeEvaluateResult} from "./NodeEvaluateResult";
 class Brain{
+    protected _firedOutpuCount:number = 0;
     protected currTick:number =0;
     protected rawBrainNodes:any = null;
     protected _app:any/*App*/ = null;
@@ -14,7 +15,7 @@ class Brain{
         this._app = options.app;
         this.import();
 
-        setInterval(()=>{
+        /*setInterval(()=>{
             //TEST
             let outputNode = null;
             this.eachNodeSync(
@@ -29,7 +30,10 @@ class Brain{
                 results: null,
                 duration: 100
             })
-        }, 5000)
+        }, 5000)*/
+    }
+    get firedOutpuCount():number{
+        return this._firedOutpuCount;
     }
     get nodes():Array<NodeBase>{
         return this._nodes;
@@ -140,7 +144,7 @@ class Brain{
             evaluateResult.node.activate({
                 results:evaluateResult.results
             });
-
+            this._firedOutpuCount += 1;
             let duration = (new Date().getTime() - startDate)/1000;
             this.app.socket.sendFireOutputNode({
                 node: evaluateResult.node.id,

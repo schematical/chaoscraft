@@ -1,4 +1,4 @@
-
+console.log("HELLO");
 // install the plugin
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,12 +8,17 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
+import * as config from 'config';
 
 import { SocketManager } from './SocketManager'
 
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected processTickInterval:any = null;
+    protected daysAlive:number = 0;
+    protected bornDate:Date = null;
+    protected startPosition:any = null;
     protected _socket:SocketManager = null;
     protected bot:any = null;
     protected brain:Brain = null;
@@ -21,7 +26,7 @@ class App {
     protected identity:any = null;
     protected _tickEvents:Array<TickEvent> = [];
     constructor () {
-
+        console.log("Starting");
 
     }
     get tickEvents():Array<TickEvent>{
@@ -45,7 +50,7 @@ class App {
     setupBrain(){
         return request(
             {
-                url:'http://localhost:3000/bots/' + this.identity.username + '/brain',
+                url: config.get('server.host') + '/bots/' + this.identity.username + '/brain',
                 json: true
             },
             (err, response, brain)=>{
@@ -60,6 +65,7 @@ class App {
                     rawBrainNodes: rawBrainNodes,
                     app: this
                 });
+
                 console.log("Brain alive with " + Object.keys(this.brain.nodes).length + " nodes");
                 this.setupBot();
             }
@@ -69,11 +75,10 @@ class App {
 
     setupBot(){
         this.bot = mineflayer.createBot({
-            host: "127.0.0.1", // optional
+            host: config.get('minecraft.host'),//"127.0.0.1", // optional
             //port: 3001,       // optional
-            username: this.identity.name,
-            /*    username: "email@example.com", // email and password are required only for
-             password: "12345678",          // online-mode=true servers*/
+            username: this.identity.username,
+            //password: "12345678",          // online-mode=true servers*/
             verbose: true,
             //version: "1.12.2",
             checkTimeoutInterval: 30*1000
@@ -95,12 +100,40 @@ class App {
         this.bot.on("death", (e)=>{
             console.log("Death", e);
             this.isSpawned = false;
+            return this.socket.emit('client_death', {
+                username: this.identity.username,
+                event:e
+            });
         })
         this.bot.on("spawn", (e)=>{
             this.isSpawned = true;
-            setInterval(()=>{
+            this.bornDate = new Date();
+            this.daysAlive = 0;
+            this.startPosition = this.bot.entity.position;
+            this.processTickInterval = setInterval(()=>{
                 this.brain.processTick();
                 this._tickEvents = [];
+                let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
+                if(duration > 60){
+                    if(this.brain.firedOutpuCount == 0){
+                        this.bot.chat("I have failed to do anything in 30 seconds, jumping  to my doom");
+                        this.bot.quit();
+                        clearTimeout(this.processTickInterval);
+                        return this.socket.emit('client_not_firing', this.identity)
+                    }
+                }
+                let nextDayTime = this.daysAlive * (60 * 20);
+                if(duration > nextDayTime){
+                    this.daysAlive += 1;
+                    //It has been one day
+                    let distance = this.startPosition.distanceTo(this.bot.entity.position);
+                    return this.socket.emit('client_day_passed', {
+                        username: this.identity.username,
+                        daysAlive: this.daysAlive,
+                        distanceTraveled: distance,
+
+                    });
+                }
             }, 500)
         })
         this.setupEventListenter('health');
@@ -171,9 +204,9 @@ class App {
     setupEventListenter(eventType){
         let _this = this;
         this.bot.on(eventType, function(e){
-            if(eventType == 'chat'){
+            /*if(eventType == 'chat'){
                 console.log("Chattin");
-            }
+            }*/
             _this._tickEvents.push(new TickEvent({
                 type: eventType,
                 data:Array.from(arguments)
