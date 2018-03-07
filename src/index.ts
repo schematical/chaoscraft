@@ -66,7 +66,7 @@ class App {
                     app: this
                 });
 
-                console.log("Brain alive with " + Object.keys(this.brain.nodes).length + " nodes");
+                console.log(this.identity.username + " alive with " + Object.keys(this.brain.nodes).length + " nodes");
                 this.setupBot();
             }
         )
@@ -88,16 +88,16 @@ class App {
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
 
-        this.bot.once('connect', this.onConnect)
-        this.bot.once('error', (err)=>{ this.onError(err) });
-        this.bot.once('login', this.onLogin)
+        this.bot.once('connect', ()=>{ this.onConnect(); });
+        this.bot.once('error', (err)=>{ this.onError(err); });
+        this.bot.once('login', ()=>{ this.onLogin(); });
         this.bot.on('disconnect', (e)=>{
-            console.log("DISCONNECTED FROM MINECRAFT");
+            console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
             this. setupBot();
         })
         this.bot.on('kick_disconnect', (e)=>{
 
-            console.log("KICK DISCONNECTED FROM MINECRAFT");
+            console.log(this.identity.username + " KICK DISCONNECTED FROM MINECRAFT");
             this. setupBot();
         })
         this.bot.on("death", (e)=>{
@@ -196,15 +196,15 @@ class App {
 
     }
     onConnect(){
-        console.log("Connected");
+        console.log(this.identity.username +  " - Connected");
     }
     onError(err){
-       console.error('ERROR: ', err.message)
+       console.error(this.identity.username + ' - ERROR: ', err.message)
         this.bot.quit();
         this.setupBot();
     }
     onLogin(){
-        console.log("Logged In!!")
+        console.log(this.identity.username +  " - Logged In!!")
     }
     setupEventListenter(eventType){
         let _this = this;
