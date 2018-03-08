@@ -264,7 +264,7 @@ class OutputNodeBase extends NodeBase{
         //TODO: Add some logic to find block at location if need be
         try {
             if(!target.digTime){
-                return cthis.brain.debug(this.brain.app.identity.username + " - Cannot `activateBlock` : " + target.type)
+                return this.brain.debug(this.brain.app.identity.username + " - Cannot `activateBlock` : " + target.type)
             }
             this.brain.bot.activateBlock(target);
         }catch(err){
@@ -379,7 +379,7 @@ class OutputNodeBase extends NodeBase{
     }
     clearControlStates(options?:any){
         this.brain.bot.setControlState('jump', true);
-        this.brain.bot.setControlState('sneak', true);
+        //this.brain.bot.setControlState('sneak', true);
         this.brain.bot.setControlState('sprint', true);
         this.brain.bot.setControlState('forward', false);
         this.brain.bot.setControlState('back', false);

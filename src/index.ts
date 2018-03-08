@@ -104,7 +104,7 @@ class App {
         this.bot.on('error', (err)=>{
             this.isSpawned = false;
             console.error(this.identity.username + ' - ERROR: ', err.message)
-            this.bot && this.bot.quit();
+            this.end();
             this.setupBot();
         });
         this.bot.on('login', ()=>{
@@ -112,21 +112,20 @@ class App {
 
         });
         this.bot.on('end', (status)=>{
-            this.isSpawned = false;
             console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT");
-            this.bot.quit();
+            this.end();
+
             this.setupBot();
         })
         this.bot.on('kicked', (reason)=>{
             this.isSpawned = false;
             console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
-            this.bot.quit();
-            this.setupBot();
+            this.end();
         })
         this.bot.on('disconnect', (e)=>{
             this.isSpawned = false;
             console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
-            this.bot.quit();
+            this.end();
             //this. setupBot();
         })
         this.bot.on('kick_disconnect', (e)=>{
@@ -160,11 +159,13 @@ class App {
                 this._tickEvents = [];
                 let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
                 if(duration > 60){
-                    if(this.brain.firedOutpuCount == 0){
+                    let distance = this.startPosition.distanceTo(this.bot.entity.position);
+                    //if(this.brain.firedOutpuCount == 0){
+                    if(distance == 0){
                         console.error(this.identity.username + ' - I have failed to do anything in 30 seconds, jumping  to my doom');
                         this.bot.chat("I have failed to do anything in 30 seconds, jumping  to my doom");
-                        this.bot.quit();
-                        clearTimeout(this.processTickInterval);
+                        this.end();
+
                         return this.socket.emit('client_not_firing', this.identity);
 
                     }
@@ -257,7 +258,13 @@ class App {
         }
 
     }
+    end(){
+        this.bot && this.bot.quit && this.bot.quit();
+        this.bot = null;
+        this.isSpawned = false;
+        clearTimeout(this.processTickInterval);
 
+    }
 
 
     setupEventListenter(eventType){
