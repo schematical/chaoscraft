@@ -73,6 +73,52 @@ class InputNodeBase extends NodeBase{
             case(Enum.InputTypes.onCorrelateAttack):
                 results = this.onCorrelateAttack();
             break;
+            case(Enum.InputTypes.rain):
+                results = this.rain();
+                break;
+            case(Enum.InputTypes.entityMoved):
+                results = this.entityMoved();
+                break;
+            case(Enum.InputTypes.entitySwingArm):
+                results = this.entitySwingArm();
+                break;
+            case(Enum.InputTypes.entityHurt):
+                results = this.entityHurt();
+                break;
+            case(Enum.InputTypes.entitySpawn):
+                results = this.entitySpawn();
+                break;
+            case(Enum.InputTypes.playerCollect):
+                results = this.playerCollect();
+                break;
+            case(Enum.InputTypes.blockUpdate):
+                results = this.blockUpdate();
+                break;
+            case(Enum.InputTypes.entityUpdate):
+                results = this.entityUpdate();
+                break;
+            case(Enum.InputTypes.diggingCompleted):
+                results = this.diggingCompleted();
+                break;
+            case(Enum.InputTypes.diggingAborted):
+                results = this.diggingAborted();
+                break;
+            case(Enum.InputTypes.move):
+                results = this.move();
+                break;
+            case(Enum.InputTypes.forcedMove):
+                results = this.forcedMove();
+                break;
+            case(Enum.InputTypes.chestLidMove):
+                results = this.chestLidMove();
+                break;
+            case(Enum.InputTypes.blockBreakProgressObserved):
+                results = this.blockBreakProgressObserved();
+                break;
+            case(Enum.InputTypes.blockBreakProgressEnd):
+                results = this.blockBreakProgressEnd();
+                break;
+
             default:
                 throw new Error("Invalid `InputNodeBase.type`: " + this.type)
         }
@@ -147,6 +193,7 @@ class InputNodeBase extends NodeBase{
 
     }
 
+
     canSeeBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock();
 
@@ -157,6 +204,274 @@ class InputNodeBase extends NodeBase{
         });
     }
 
+    playerCollect():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('playerCollect');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    entityMoved():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('entityMoved');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    entityUpdate():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('entityUpdate');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    entityHurt():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('entityHurt');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    entitySpawn():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('entitySpawn');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+
+
+    entitySwingArm():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('entitySwingArm');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let entity = result.data[0];
+
+            if(this._target.match(entity)){
+                score += 1;
+                targets.push(entity);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    diggingAborted():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('diggingAborted');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    diggingCompleted():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('diggingCompleted');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    blockUpdate():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('blockUpdate');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    blockBreakProgressObserved():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('blockBreakProgressObserved');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+
+
+    blockBreakProgressEnd():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('blockBreakProgressEnd');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+
+    chestLidMove():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('chestLidMove');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            let block = result.data[0];
+
+            if(this._target.match(block)){
+                score += 1;
+                targets.push(block);
+            }
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+
+    move():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('move');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            score += 1;
+            let position = _.clone(this.brain.app.bot.entity.position);
+            position.y -= 1;
+            targets.push(this.brain.app.bot.blockAt(position));
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    forcedMove():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('forcedMove');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            score += 1;
+            let position = _.clone(this.brain.app.bot.entity.position);
+            position.y -= 1;
+            targets.push(this.brain.app.bot.blockAt(position));
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    rain():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('rain');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            score += 1;
+            targets.push(result);
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
     chat():NodeEvaluateResult{
         let results:Array<iTickEvent> = this.searchTickEvents('chat');
         let score = 0;

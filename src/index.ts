@@ -88,17 +88,51 @@ class App {
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
 
-        this.bot.once('connect', ()=>{ this.onConnect(); });
-        this.bot.once('error', (err)=>{ this.onError(err); });
-        this.bot.once('login', ()=>{ this.onLogin(); });
+        this.bot.on('connect', ()=>{
+            this.isSpawned = false;
+            setTimeout(()=>{
+                if(this.isSpawned){
+                    return;
+                }
+                console.log(this.identity.username +  " - Failed to Login After Connect, trying again");
+                this.bot && this.bot.quit();
+                this.setupBot();
+
+            }, 10000)
+            console.log(this.identity.username +  " - Connected!");
+        });
+        this.bot.on('error', (err)=>{
+            this.isSpawned = false;
+            console.error(this.identity.username + ' - ERROR: ', err.message)
+            this.bot && this.bot.quit();
+            this.setupBot();
+        });
+        this.bot.on('login', ()=>{
+            console.log(this.identity.username +  " - Logged In at ", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z)
+        });
+        this.bot.on('end', (status)=>{
+            this.isSpawned = false;
+            console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT");
+            this.bot.quit();
+            this.setupBot();
+        })
+        this.bot.on('kicked', (reason)=>{
+            this.isSpawned = false;
+            console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
+            this.bot.quit();
+            this.setupBot();
+        })
         this.bot.on('disconnect', (e)=>{
+            this.isSpawned = false;
             console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
-            this. setupBot();
+            this.bot.quit();
+            //this. setupBot();
         })
         this.bot.on('kick_disconnect', (e)=>{
-
+            this.isSpawned = false;
             console.log(this.identity.username + " KICK DISCONNECTED FROM MINECRAFT");
-            this. setupBot();
+            this.bot.quit();
+            //this. setupBot();
         })
         this.bot.on("death", (e)=>{
             console.log("Death", e);
@@ -119,10 +153,12 @@ class App {
                 let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
                 if(duration > 60){
                     if(this.brain.firedOutpuCount == 0){
+                        console.error(this.identity.username + ' - I have failed to do anything in 30 seconds, jumping  to my doom');
                         this.bot.chat("I have failed to do anything in 30 seconds, jumping  to my doom");
                         this.bot.quit();
                         clearTimeout(this.processTickInterval);
-                        return this.socket.emit('client_not_firing', this.identity)
+                        return this.socket.emit('client_not_firing', this.identity);
+
                     }
                 }
                 let nextDayTime = this.daysAlive * (60 * 20);
@@ -130,6 +166,8 @@ class App {
                     this.daysAlive += 1;
                     //It has been one day
                     let distance = this.startPosition.distanceTo(this.bot.entity.position);
+
+                    //TODO: Save to memory update brain stats
                     return this.socket.emit('client_day_passed', {
                         username: this.identity.username,
                         daysAlive: this.daysAlive,
@@ -141,8 +179,24 @@ class App {
         })
         this.setupEventListenter('health');
         this.setupEventListenter('chat');
-        this.setupEventListenter('entityUpdate');
         this.setupEventListenter('onCorrelateAttack');
+        this.setupEventListenter('rain');
+        this.setupEventListenter('entityMoved');
+        this.setupEventListenter('entitySwingArm');
+        this.setupEventListenter('entityHurt');
+        this.setupEventListenter('entitySpawn');
+        this.setupEventListenter('entityUpdate');
+        this.setupEventListenter('playerCollect');
+
+        this.setupEventListenter('blockUpdate');
+        this.setupEventListenter('diggingCompleted');
+        this.setupEventListenter('diggingAborted');
+        this.setupEventListenter('blockBreakProgressEnd');
+        this.setupEventListenter('blockBreakProgressObserved');
+        this.setupEventListenter('chestLidMove');
+
+        this.setupEventListenter('move');
+        this.setupEventListenter('forcedMoves');
         //TODO Move this to a plugin
 
 
@@ -195,17 +249,9 @@ class App {
         }
 
     }
-    onConnect(){
-        console.log(this.identity.username +  " - Connected");
-    }
-    onError(err){
-       console.error(this.identity.username + ' - ERROR: ', err.message)
-        this.bot.quit();
-        this.setupBot();
-    }
-    onLogin(){
-        console.log(this.identity.username +  " - Logged In at ", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z)
-    }
+
+
+
     setupEventListenter(eventType){
         let _this = this;
         this.bot.on(eventType, function(e){

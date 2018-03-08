@@ -4,13 +4,16 @@ import { OutputNodeBase } from './nodes/OutputNodeBase'
 import { InputNodeBase } from './nodes/InputNodeBase'
 import { MiddleNodeBase } from './nodes/MiddleNodeBase'
 import {NodeEvaluateResult} from "./NodeEvaluateResult";
+import * as debug from 'debug'
 class Brain{
+    protected _debug:any = null;
     protected _firedOutpuCount:number = 0;
     protected currTick:number =0;
     protected rawBrainNodes:any = null;
     protected _app:any/*App*/ = null;
     protected _nodes:any = {};
     constructor(options:any){
+        this._debug = debug('chaoscraft.brain');
         this.rawBrainNodes = options.rawBrainNodes;
         this._app = options.app;
         this.import();
@@ -31,6 +34,9 @@ class Brain{
                 duration: 100
             })
         }, 5000)*/
+    }
+    get debug():any{
+        return this.debug;
     }
     get firedOutpuCount():number{
         return this._firedOutpuCount;
