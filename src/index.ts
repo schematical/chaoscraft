@@ -118,9 +118,8 @@ class App {
             this.setupBot();
         })
         this.bot.on('kicked', (reason)=>{
-            this.isSpawned = false;
             console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
-            this.end();
+            //this.end();
         })
         this.bot.on('disconnect', (e)=>{
             this.isSpawned = false;
@@ -146,14 +145,18 @@ class App {
             console.log(this.identity.username + " Spawned");
             setTimeout(()=>{
                 if(!this.bot.entity || !this.bot.entity.position){
-                    return console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ")
+                   console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ");
+                   return this.end();
                 }
+
+                this.startPosition = this.bot.entity.position;
+
                 console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
             },3000)
             this.isSpawned = true;
             this.bornDate = new Date();
             this.daysAlive = 0;
-            this.startPosition = this.bot.entity.position;
+
             this.processTickInterval = setInterval(()=>{
                 this.brain.processTick();
                 this._tickEvents = [];
@@ -167,10 +170,9 @@ class App {
                         this.end();
 
                         return this.socket.emit('client_not_firing', this.identity);
-
                     }
                 }
-                let nextDayTime = this.daysAlive * (60 * 20);
+                let nextDayTime = (this.daysAlive + 1) * (60 * 20);
                 if(duration > nextDayTime){
                     this.daysAlive += 1;
                     //It has been one day
