@@ -76,6 +76,9 @@ class InputNodeBase extends NodeBase{
             case(Enum.InputTypes.rain):
                 results = this.rain();
                 break;
+            case(Enum.InputTypes.health):
+                results = this.health();
+                break;
             case(Enum.InputTypes.entityMoved):
                 results = this.entityMoved();
                 break;
@@ -472,6 +475,20 @@ class InputNodeBase extends NodeBase{
             node: this
         });
     }
+    health():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('health');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            score += 1;
+            targets.push(result);
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
     chat():NodeEvaluateResult{
         let results:Array<iTickEvent> = this.searchTickEvents('chat');
         let score = 0;
@@ -480,7 +497,7 @@ class InputNodeBase extends NodeBase{
             let username = result.data[0];
             let message = result.data[1];
             //TODO: make this a regex thing
-            if(this._target.match({ value: message })){
+            if(this._target.matchChat({ value: message })){
                 score += 1;
                 targets.push(this.brain.bot.players[username].entity);
             }

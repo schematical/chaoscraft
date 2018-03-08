@@ -36,7 +36,7 @@ class Brain{
         }, 5000)*/
     }
     get debug():any{
-        return this.debug;
+        return this._debug;
     }
     get firedOutpuCount():number{
         return this._firedOutpuCount;

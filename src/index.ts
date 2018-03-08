@@ -95,7 +95,7 @@ class App {
                     return;
                 }
                 console.log(this.identity.username +  " - Failed to Login After Connect, trying again");
-                this.bot && this.bot.quit();
+                this.bot && this.bot.quit && this.bot.quit();
                 this.setupBot();
 
             }, 10000)
@@ -108,7 +108,8 @@ class App {
             this.setupBot();
         });
         this.bot.on('login', ()=>{
-            console.log(this.identity.username +  " - Logged In at ", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z)
+            console.log(this.identity.username +  " - Logged In ");
+
         });
         this.bot.on('end', (status)=>{
             this.isSpawned = false;
@@ -143,6 +144,13 @@ class App {
             });
         })
         this.bot.on("spawn", (e)=>{
+            console.log(this.identity.username + " Spawned");
+            setTimeout(()=>{
+                if(!this.bot.entity || !this.bot.entity.position){
+                    return console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ")
+                }
+                console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
+            },3000)
             this.isSpawned = true;
             this.bornDate = new Date();
             this.daysAlive = 0;
