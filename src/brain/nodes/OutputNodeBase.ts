@@ -264,7 +264,7 @@ class OutputNodeBase extends NodeBase{
         //TODO: Add some logic to find block at location if need be
         try {
             if(!target.digTime){
-                return console.error("Cannot Dig Type: " + target.type)
+                return cthis.brain.debug(this.brain.app.identity.username + " - Cannot `activateBlock` : " + target.type)
             }
             this.brain.bot.activateBlock(target);
         }catch(err){
@@ -372,7 +372,7 @@ class OutputNodeBase extends NodeBase{
         this.brain.bot.setControlState('jump', true);
     }
     sneak(options?:any){
-        this.brain.bot.setControlState('sneak', true);
+        //this.brain.bot.setControlState('sneak', true);
     }
     sprint(options?:any){
         this.brain.bot.setControlState('sprint', true);
