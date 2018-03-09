@@ -125,6 +125,7 @@ class InputNodeTarget{
         })
         //Figure out which one is closest
         results = _.sortBy(results, (entity)=>{
+
             let delta = this.node.brain.bot.position.distanceTo(entity.position);
             return 0 - delta;
         })

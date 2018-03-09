@@ -4,141 +4,122 @@
 import { NodeBase } from './NodeBase'
 import { Enum } from 'chaoscraft-shared'
 
+import * as config from 'config';
+
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
-    protected debug:any = null;
+
+    protected _activationErrorCount:number = 0;
     constructor (options:any){
         super(options);
 
-
-
     }
 
-    activate(options:any):void{
+
+    logActivationError(data:any, data2?:any){
+        this._activationErrorCount += 1;
+        this.brain.debug.apply(this.brain.debug, arguments);
+    }
+
+    get errorThresholdHit(){
+        return this._activationErrorCount > config.get('brain.outputNodeErrorThreshold');
+    }
+    activate(options:any):boolean{
         switch(this.type){
             case(Enum.OutputTypes.navigateTo):
-                this.navigateTo(options);
-                break;
+                return this.navigateTo(options);
             case(Enum.OutputTypes.chat):
-                this.chat(options);
-                break;
+                return this.chat(options);
             case(Enum.OutputTypes.walkForward):
-                this.walkForward();
-            break;
+                return this.walkForward();
             case(Enum.OutputTypes.walkBack):
-                this.walkBack();
-            break;
+                return this.walkBack();
             case(Enum.OutputTypes.stopWalking):
-                this.stopWalking();
-            break;
+                return this.stopWalking();
             case(Enum.OutputTypes.lookAt):
-                this.lookAt(options);
-            break;
+                return this.lookAt(options);
+       
             case(Enum.OutputTypes.dig):
-                this.dig(options);
-            break;
+                return this.dig(options);
+       
             case(Enum.OutputTypes.placeBlock):
-                this.placeBlock(options);
-            break;
+                return this.placeBlock(options);
+       
             case(Enum.OutputTypes.equip):
-                this.equip(options);
-            break;
+                return this.equip(options);
+       
             case(Enum.OutputTypes.unequip):
-                this.unequip(options);
-            break;
+                return this.unequip(options);
+       
 
             case(Enum.OutputTypes.attack):
-                this.attack(options);
-            break;
+                return this.attack(options);
+       
 
             case(Enum.OutputTypes.activateItem):
-                this.activateItem(options);
-                break;
+                return this.activateItem(options);
 
             case(Enum.OutputTypes.deactivateItem):
-                this.deactivateItem(options);
-                break;
+                return this.deactivateItem(options);
 
             case(Enum.OutputTypes.walkLeft):
-                this.walkLeft(options);
-                break;
+                return this.walkLeft(options);
 
             case(Enum.OutputTypes.walkRight):
-                this.walkRight(options);
-                break;
+                return this.walkRight(options);
 
             case(Enum.OutputTypes.clearControlStates):
-                this.clearControlStates(options);
-                break;
+                return this.clearControlStates(options);
 
             case(Enum.OutputTypes.jump):
-                this.jump(options);
-                break;
+                return this.jump(options);
 
             case(Enum.OutputTypes.sprint):
-                this.sprint(options);
-                break;
+                return this.sprint(options);
             case(Enum.OutputTypes.sneak):
-                this.sneak(options);
-                break;
+                return this.sneak(options);
 
             case(Enum.OutputTypes.lookRight):
-                this.lookRight(options);
-                break;
+                return this.lookRight(options);
 
             case(Enum.OutputTypes.lookLeft):
-                this.lookLeft(options);
-                break;
+                return this.lookLeft(options);
 
             case(Enum.OutputTypes.lookUp):
-                this.lookUp(options);
-                break;
+                return this.lookUp(options);
             case(Enum.OutputTypes.lookDown):
-                this.lookDown(options);
-                break;
+                return this.lookDown(options);
             case(Enum.OutputTypes.toss):
-                this.toss(options);
-                break;
+                return this.toss(options);
             case(Enum.OutputTypes.activateBlock):
-                this.activateBlock(options);
-                break;
+                return this.activateBlock(options);
             case(Enum.OutputTypes.activateEntity):
-                this.activateEntity(options);
-                break;
+                return this.activateEntity(options);
             case(Enum.OutputTypes.useOn):
-                this.useOn(options);
-                break;
+                return this.useOn(options);
             case(Enum.OutputTypes.craft):
-                this.craft(options);
-                break;
+                return this.craft(options);
             case(Enum.OutputTypes.openChest):
-                this.openChest(options);
-                break;
+                return this.openChest(options);
             case(Enum.OutputTypes.openFurnace):
-                this.openFurnace(options);
-                break;
+                return this.openFurnace(options);
             case(Enum.OutputTypes.openDispenser):
-                this.openDispenser(options);
-                break;
+                return this.openDispenser(options);
             case(Enum.OutputTypes.openEnchantmentTable):
-                this.openEnchantmentTable(options);
-                break;
+                return this.openEnchantmentTable(options);
             case(Enum.OutputTypes.openVillager):
-                this.openVillager(options);
-                break;
+                return this.openVillager(options);
             case(Enum.OutputTypes.trade):
-                this.trade(options);
-                break;
+                return this.trade(options);
             case(Enum.OutputTypes.openEntity):
-                this.openEntity(options);
-                break;
-
+                return this.openEntity(options);
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
     }
     craft(options:any){
-        return this.brain.debug("TODO:Write this - craft");
+        this.logActivationError("TODO:Write this - craft");
+        return true;
         //this.brain.bot.craft(/*recipe, count, craftingTable, [callback]*/);
         /*
             recipe - A Recipe instance. See bot.recipesFor.
@@ -147,208 +128,263 @@ class OutputNodeBase extends NodeBase{
             callback - (optional) Called when the crafting is complete and your inventory is updated.
         */
     }
-    activateItem(options?:any):void{
+    activateItem(options?:any):boolean{
         this.brain.bot.chat("I am activating stuff");
         try{
             this.brain.bot.activateItem();
+
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - activateItem - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - activateItem - Error', err.message);
+            return false;
         }
+        return true;
     }
-    deactivateItem(options?:any):void{
+    deactivateItem(options?:any):boolean{
         this.brain.bot.chat("I am deactivateItem");
         try{
             this.brain.bot.deactivateItem();
+
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - deactivateItem - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - deactivateItem - Error', err.message);
+            return false;
         }
+        return true;
     }
 
     openEntity(options?:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to openEntity");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openEntity - Error', "No results found to openEntity");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.openEntity(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openEntity - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openEntity - Error', err.message);
+            return false;
         }
+        return true;
     }
     activateEntity(options?:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to activateEntity");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - activateEntity - Error', "No results found to activateEntity");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.activateEntity(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - activateEntity - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - activateEntity - Error', err.message);
+            return false;
         }
+        return true;
     }
-    openVillager(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to openVillager");
+    openVillager(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openVillager - Error', "No results found to openVillager");
+            return false;
         }
         let target = options.results[0];
         this.brain.bot.chat("I am openVillager " + target.name + "!");
         try{
             this.brain.bot.openVillager(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openVillager - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openVillager - Error', err.message);
+            return false;
         }
+        return true;
     }
-    trade(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to trade");
+    trade(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - trade - Error', "No results found to trade");
+            return false;
         }
         let target = options.results[0];
         this.brain.bot.chat("I am trade " + target.name + "!");
         try{
             this.brain.bot.trade(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - trade - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - trade - Error', err.message);
+            return false;
         }
+        return true;
     }
-    attack(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to attack");
+    attack(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - attack - Error',"No results found to attack");
+            return false;
         }
         let target = options.results[0];
         this.brain.bot.chat("I am attacking " + target.username + "!");
         try{
             this.brain.bot.attack(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - attack - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
+            return false;
         }
+        return true;
     }
-    useOn(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to useOn");
+    useOn(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - useOn - Error',"No results found to useOn");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.useOn(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - useOn - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - useOn - Error', err.message);
+            return false;
         }
+        return true;
     }
-    equip(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    equip(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to look at");
+            return false;
         }
         let target = options.results[0];
         try {
             this.brain.bot.equip(target, this.rawNode.destination);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - equip - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - equip - Error', err.message);
+            return false;
         }
+        return true;
     }
-    unequip(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    unequip(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - unequip - Error',"No results found to look at");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.unequip(target, this.rawNode.destination);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - unequip - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - unequip - Error', err.message);
+            return false;
         }
+        return true;
     }
-    activateBlock(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to activateBlock");
+    activateBlock(options:any):boolean{
+        if(options.results.length == 0 || !options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - activateBlock - Error', "No results found to activateBlock");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
             if(!target.digTime){
-                return this.brain.debug(this.brain.app.identity.username + " - Cannot `activateBlock` : " + target.type)
+                this.logActivationError(this.brain.app.identity.username + " - Cannot `activateBlock` : " + target.type);
+                return false;
             }
             this.brain.bot.activateBlock(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - activateBlock - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - activateBlock - Error', err.message);
+            return false;
         }
+        return true;
     }
 
-    placeBlock(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    placeBlock(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No results found to look at");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
             if(!target.digTime){
-                return console.error("Cannot Dig Type: " + target.type)
+                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Cannot Dig Type: " + target.type);
+                return false;
             }
             this.brain.bot.placeBlock(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - placeBlock - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error', err.message);
+            return false;
         }
+        return true;
     }
-    dig(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    dig(options:any):boolean{
+        if(options.results.length == 0 || !options.results[0]){
+            throw new Error("No results found to dig");
         }
         let target = options.results[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
 
         if(!target.digTime){
-            return this.brain.debug( this.brain.app.identity.username + " - Cannot Dig Type: " + target.type)
+            this.logActivationError( this.brain.app.identity.username + " - Cannot Dig Type: " + target.type);
+            return false;
         }
         try{
             this.brain.bot.smartDig(target, (err, results)=>{
-                console.log("Digging Done: ", err, results);
+                if(err){
+                    this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
+                }
             });
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - dig - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
+            return false;
         }
+        return true;
     }
 
-    navigateTo(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    navigateTo(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - navigateTo - Error', "No results found to look at");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.navigate.to(target.position);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - navigateTo - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - navigateTo - Error', err.message);
+            return false;
         }
+        return true;
     }
-    chat(options:any):void{
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+    chat(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - chat - Error', "No results found to look at");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.chat("WAZZZUP: " + target.username);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - chat - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - chat - Error', err.message);
+            return false;
         }
+        return true;
     }
     lookAt(options:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to look at");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', "No results found to look at");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.lookAt(target.position);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - lookAt - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', err.message);
+            return false;
         }
+
+        return true;
     }
 
     walkForward(){
         this.brain.bot.setControlState('forward', true);
         this.brain.bot.setControlState('back', false);
+        return true;
     }
     walkBack(){
         this.brain.bot.setControlState('forward', false);
         this.brain.bot.setControlState('back', true);
+        return true;
     }
 
     stopWalking(){
@@ -357,25 +393,31 @@ class OutputNodeBase extends NodeBase{
         this.brain.bot.setControlState('back', false);
         this.brain.bot.setControlState('left', false);
         this.brain.bot.setControlState('right', false);
+        return true;
     }
 
     walkLeft(options?:any){
         this.brain.bot.setControlState('left', true);
         this.brain.bot.setControlState('right', false);
+        return true;
     }
     walkRight(options?:any){
         this.brain.bot.setControlState('left', false);
         this.brain.bot.setControlState('right', true);
+        return true;
     }
 
     jump(options?:any){
         this.brain.bot.setControlState('jump', true);
+        return true;
     }
     sneak(options?:any){
         //this.brain.bot.setControlState('sneak', true);
+        return true;
     }
     sprint(options?:any){
         this.brain.bot.setControlState('sprint', true);
+        return true;
     }
     clearControlStates(options?:any){
         this.brain.bot.setControlState('jump', true);
@@ -385,6 +427,7 @@ class OutputNodeBase extends NodeBase{
         this.brain.bot.setControlState('back', false);
         this.brain.bot.setControlState('left', false);
         this.brain.bot.setControlState('right', false);
+        return true;
     }
 
     /**
@@ -393,6 +436,7 @@ class OutputNodeBase extends NodeBase{
     lookLeft(options?:any){
         let currYaw = this.brain.app.bot.entity.yaw ;
         this.brain.app.bot.look(currYaw + Math.PI / 8, this.brain.app.bot.entity.pitch/*, [force], [callback]*/);
+        return true;
     }
     /**
      * Looks right by 45 degrees
@@ -400,74 +444,92 @@ class OutputNodeBase extends NodeBase{
     lookRight(options?:any){
         let currYaw = this.brain.app.bot.entity.yaw ;
         this.brain.app.bot.look(currYaw - Math.PI / 4, this.brain.app.bot.entity.pitch/*, [force], [callback]*/);
+        return true;
     }
     lookUp(options?:any){
 
         this.brain.app.bot.look(this.brain.app.bot.entity.yaw, this.brain.app.bot.entity.pitch  + Math.PI / 4/*, [force], [callback]*/);
+        return true;
     }
     lookDown(options?:any){
 
         this.brain.app.bot.look(this.brain.app.bot.entity.yaw, this.brain.app.bot.entity.pitch  - Math.PI / 4/*, [force], [callback]*/);
+        return true;
     }
-    toss(options:any):void{
-            if(options.results.length == 0){
-            throw new Error("No results found to toss");
+    toss(options:any):boolean{
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
+            return false;
         }
         let target = options.results[0];
         try{
             this.brain.bot.toss(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - toss - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
+            return false;
         }
+        return true;
     }
     openChest(options:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to openChest");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
+            return false
         }
         let target = options.results[0];
         //TODO: Add some logic to find block at location if need be
         try{
             this.brain.bot.openChest(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openChest - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openChest - Error', err.message);
+            return false;
         }
+        return true;
 
     }
     openFurnace(options:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to openChest");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add some logic to find block at location if need be
         try{
             this.brain.bot.openChest(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openFurnace - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', err.message);
+            return false;
         }
+        return true;
     }
     openDispenser(options:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to openDispenser");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openDispenser - Error',"No results found to openDispenser");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add some logic to find block at location if need be
         try{
             this.brain.bot.openDispenser(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openDispenser - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openDispenser - Error', err.message);
+            return false;
         }
+        return true;
     }
     openEnchantmentTable(options:any){
-        if(options.results.length == 0){
-            throw new Error("No results found to openEnchantmentTable");
+        if(options.results.length == 0 || options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openEnchantmentTable - Error',"No results found to openEnchantmentTable");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add some logic to find block at location if need be
         try{
             this.brain.bot.openEnchantmentTable(target);
         }catch(err){
-            this.brain.debug(this.brain.app.identity.username + ' - openEnchantmentTable - Error', err.message);
+            this.logActivationError(this.brain.app.identity.username + ' - openEnchantmentTable - Error', err.message);
+            return false;
         }
+        return true;
 
     }
 

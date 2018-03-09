@@ -1,4 +1,4 @@
-
+console.log("AAAIIXXX");
 // install the plugin
 import * as fs from 'fs';
 import * as path from 'path';
@@ -8,6 +8,7 @@ import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
+import * as Vec3 from 'vec3'
 import * as config from 'config';
 
 import { SocketManager } from './SocketManager'
@@ -15,6 +16,7 @@ import { SocketManager } from './SocketManager'
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected settingUp:boolean = false;
     protected processTickInterval:any = null;
     protected daysAlive:number = 0;
     protected bornDate:Date = null;
@@ -74,6 +76,7 @@ class App {
     }
 
     setupBot(){
+        this.settingUp = true;
         this.bot = mineflayer.createBot({
             host: config.get('minecraft.host'),//"127.0.0.1", // optional
             //port: 3001,       // optional
@@ -90,52 +93,49 @@ class App {
 
         this.bot.on('connect', ()=>{
             this.isSpawned = false;
-            setTimeout(()=>{
+            /*setTimeout(()=>{
                 if(this.isSpawned){
                     return;
                 }
                 console.log(this.identity.username +  " - Failed to Login After Connect, trying again");
-                this.bot && this.bot.quit && this.bot.quit();
-                this.setupBot();
+                this.end();
 
-            }, 10000)
+
+            }, 10000)*/
             console.log(this.identity.username +  " - Connected!");
         });
         this.bot.on('error', (err)=>{
-            this.isSpawned = false;
             console.error(this.identity.username + ' - ERROR: ', err.message)
             this.end();
-            this.setupBot();
         });
         this.bot.on('login', ()=>{
             console.log(this.identity.username +  " - Logged In ");
 
         });
         this.bot.on('end', (status)=>{
+            this.isSpawned = false;
             console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT");
             this.end();
-
-            this.setupBot();
+            if(this.settingUp){
+                //We are already setting up, just chill
+                return false;
+            }
+            setTimeout(()=>{
+                this.setupBot();
+            }, 5000)
         })
         this.bot.on('kicked', (reason)=>{
             console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
             //this.end();
         })
         this.bot.on('disconnect', (e)=>{
-            this.isSpawned = false;
+
             console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
             this.end();
-            //this. setupBot();
         })
-        this.bot.on('kick_disconnect', (e)=>{
-            this.isSpawned = false;
-            console.log(this.identity.username + " KICK DISCONNECTED FROM MINECRAFT");
-            this.bot.quit();
-            //this. setupBot();
-        })
+
         this.bot.on("death", (e)=>{
             console.log("Death", e);
-            this.isSpawned = false;
             return this.socket.emit('client_death', {
                 username: this.identity.username,
                 event:e
@@ -143,29 +143,37 @@ class App {
         })
         this.bot.on("spawn", (e)=>{
             console.log(this.identity.username + " Spawned");
+            this.settingUp = false;
             setTimeout(()=>{
-                if(!this.bot.entity || !this.bot.entity.position){
+                if(!this.bot || !this.bot.entity || !this.bot.entity.position){
                    console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ");
                    return this.end();
                 }
 
-                this.startPosition = this.bot.entity.position;
+                this.startPosition = new Vec3({
+                    x:this.bot.entity.position.x,
+                    y:this.bot.entity.position.y,
+                    z:this.bot.entity.position.z
+                });
 
                 console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
-            },3000)
+            },10000)
             this.isSpawned = true;
             this.bornDate = new Date();
             this.daysAlive = 0;
 
             this.processTickInterval = setInterval(()=>{
+                if(!this.brain.app.bot ||!this.brain.app.bot.entity){
+                    return console.error("No `this.brain.app.bot.entity`, skipping `processTick`");
+                }
                 this.brain.processTick();
                 this._tickEvents = [];
                 let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-                if(duration > 60){
+                if(duration == 60){
                     let distance = this.startPosition.distanceTo(this.bot.entity.position);
                     //if(this.brain.firedOutpuCount == 0){
                     if(distance == 0){
-                        console.error(this.identity.username + ' - I have failed to do anything in 30 seconds, jumping  to my doom');
+                        console.error(this.identity.username + ' - I have failed to do anything in 30 seconds, jumping  to my doom - Distance: ', distance);
                         this.bot.chat("I have failed to do anything in 30 seconds, jumping  to my doom");
                         this.end();
 
@@ -262,7 +270,8 @@ class App {
     }
     end(){
         this.bot && this.bot.quit && this.bot.quit();
-        this.bot = null;
+        //this.bot = null;
+        this.settingUp = false;
         this.isSpawned = false;
         clearTimeout(this.processTickInterval);
 

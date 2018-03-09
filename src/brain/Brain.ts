@@ -5,6 +5,7 @@ import { InputNodeBase } from './nodes/InputNodeBase'
 import { MiddleNodeBase } from './nodes/MiddleNodeBase'
 import {NodeEvaluateResult} from "./NodeEvaluateResult";
 import * as debug from 'debug'
+import * as config from 'config'
 class Brain{
     protected _debug:any = null;
     protected _firedOutpuCount:number = 0;
@@ -133,6 +134,9 @@ class Brain{
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
             (outputNode)=>{
+                if(outputNode.errorThresholdHit){
+                    return;
+                }
                 let startDate = new Date().getTime();
                 try {
                     let evaluateResult = outputNode.evaluate();
@@ -148,14 +152,32 @@ class Brain{
             'output'
         )
 
-
+        let successfulFiredCount = 0;
         firingOutputNodes.forEach((evaluateResult:NodeEvaluateResult)=>{
+            if(successfulFiredCount > config.get('brain.maxOutputsFiredPerTick')){
+                return;
+            }
             let startDate = new Date().getTime();
-            evaluateResult.node.activate({
+            let node = <OutputNodeBase>evaluateResult.node;
+            let activateResult = node.activate({
                 results:evaluateResult.results
             });
-            this._firedOutpuCount += 1;
             let duration = (new Date().getTime() - startDate)/1000;
+            if(!activateResult){
+                if(node.errorThresholdHit){
+
+                    return this.app.socket.emit(
+                        'client_node_error_threshold_hit',
+                        {
+                            node: evaluateResult.node.id,
+                            duration: duration
+                        }
+                    );
+                }
+            }
+            successfulFiredCount += 1;//This is temporary for this tick
+            this._firedOutpuCount += 1;//This is longer term
+
             this.app.socket.sendFireOutputNode({
                 node: evaluateResult.node.id,
                 results: evaluateResult.results,
