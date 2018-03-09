@@ -309,7 +309,8 @@ class OutputNodeBase extends NodeBase{
     }
     dig(options:any):boolean{
         if(options.results.length == 0 || !options.results[0]){
-            throw new Error("No results found to dig");
+            this.logActivationError(this.brain.app.identity.username + ' - dig - Error',"No results found to `dig`");
+            return false;
         }
         let target = options.results[0];
         //TODO: Add currentlyDigging
