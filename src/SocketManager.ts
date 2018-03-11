@@ -15,7 +15,9 @@ class SocketManager{
         this.socket = io(config.get('socket.host'));
         this.debug("Setting Up Socket");
         this.socket.on('client_hello_response', (identity) => {
+            console.log("client_hello_response", identity)
             this.app.identity = identity;
+            this.app.end();
             this.app.setupBrain()
         });
         this.socket.emit('client_hello', {
@@ -35,6 +37,7 @@ class SocketManager{
         this.socket.on(eventType, callback);
     }
     emit(eventType, payload){
+        console.log("EMITTING:", eventType);
         this.socket.emit(eventType, payload);
     }
     sendFireOutputNode(payload){

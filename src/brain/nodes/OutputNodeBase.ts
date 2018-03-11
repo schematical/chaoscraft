@@ -8,7 +8,7 @@ import * as config from 'config';
 
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
-
+    protected _activationCount:number = 0;
     protected _activationErrorCount:number = 0;
     constructor (options:any){
         super(options);
@@ -20,11 +20,14 @@ class OutputNodeBase extends NodeBase{
         this._activationErrorCount += 1;
         this.brain.debug.apply(this.brain.debug, arguments);
     }
-
+    get activationCount(){
+        return this._activationCount;
+    }
     get errorThresholdHit(){
         return this._activationErrorCount > config.get('brain.outputNodeErrorThreshold');
     }
     activate(options:any):boolean{
+        this._activationCount += 1;
         switch(this.type){
             case(Enum.OutputTypes.navigateTo):
                 return this.navigateTo(options);

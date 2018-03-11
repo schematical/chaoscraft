@@ -16,6 +16,7 @@ import { SocketManager } from './SocketManager'
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected tickCount:number = 0;
     protected autoReconnect:boolean = true;
     protected settingUp:boolean = false;
     protected processTickInterval:any = null;
@@ -28,8 +29,32 @@ class App {
     protected isSpawned:boolean = false;
     protected identity:any = null;
     protected _tickEvents:Array<TickEvent> = [];
+    protected connectionCheckInterval = null;
+    protected connectionAttemptStartDate = null;
     constructor () {
         console.log("Starting");
+        this.connectionCheckInterval = setInterval(this.connectionCheck.bind(this), 30 * 1000);
+
+    }
+    connectionCheck(){
+        if(!this.identity){
+            //Waiting on our socket server
+            return false;
+        }
+        if(this.isSpawned){
+            return false;
+        }
+
+        let connectionTimeInSeconds =(this.connectionAttemptStartDate.getTime() - new Date().getTime())/ 1000;
+        if(connectionTimeInSeconds < 30 * 1000){
+            return false; //It has only been less that 30 seconds
+        }
+        console.log("Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)
+        this.end();
+        setTimeout(()=>{
+            this.setupBot();
+        }, 1000)
+
 
     }
     get tickEvents():Array<TickEvent>{
@@ -39,16 +64,12 @@ class App {
         return this._socket;
     }
     run(){
-
         this.setupSocket();
-
     }
     setupSocket(){
         this._socket = new SocketManager({
             app:this
         })
-
-
     }
 
 
@@ -70,7 +91,9 @@ class App {
                     rawBrainNodes: rawBrainNodes,
                     app: this
                 });
-
+                this.bornDate = new Date();
+                this.daysAlive = 0;
+                this.tickCount = 0;
                 console.log(this.identity.username + " alive with " + Object.keys(this.brain.nodes).length + " nodes");
                 this.setupBot();
             }
@@ -79,6 +102,7 @@ class App {
     }
 
     setupBot(){
+        this.connectionAttemptStartDate = new Date();
         this.settingUp = true;
         this.bot = mineflayer.createBot({
             host: config.get('minecraft.host'),//"127.0.0.1", // optional
@@ -94,56 +118,67 @@ class App {
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
 
-        this.bot.on('connect', ()=>{
+        this.bot.once('connect', ()=>{
             this.isSpawned = false;
 
             console.log(this.identity.username +  " - Connected!");
         });
-        this.bot.on('error', (err)=>{
+        this.bot.once('error', (err)=>{
             console.error(this.identity.username + ' - ERROR: ', err.message)
             this.end();
         });
-        this.bot.on('login', ()=>{
+        this.bot.once('login', ()=>{
             console.log(this.identity.username +  " - Logged In ");
 
         });
-        this.bot.on('end', (status)=>{
+        this.bot.once('end', (status)=>{
             this.isSpawned = false;
-            console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT");
+            console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
             this.end();
-            if(this.settingUp){
+            /*if(this.settingUp){
                 //We are already setting up, just chill
                 return false;
             }
             if(!this.autoReconnect){
                 return false;
-            }
-            setTimeout(()=>{
-                if(this.isSpawned){
-                    return false;
-                }
-                this.setupBot();
-            }, 10000)
+            }*/
+
         })
-        this.bot.on('kicked', (reason)=>{
-            console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
+        this.bot.once('kicked', (reason)=>{
+            try{
+                reason = JSON.parse(reason);
+            }catch(e){
+                console.error("Error parsing KICKED message:", reason);
+            }
+            console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason.translate);
+            switch(reason.translate){
+                case('multiplayer.disconnect.duplicate_login'):
+                    //Kill this thing
+                    this.end();
+                    return this.socket.emit('client_request_new_brain', {
+                        username: this.identity.username
+                    })
+                case('disconnect.timeout'):
+                    //Do nothing
+
+            }
 
             //this.end();
         })
-        this.bot.on('disconnect', (e)=>{
+        this.bot.once('disconnect', (e)=>{
 
             console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
             this.end();
         })
 
-        this.bot.on("death", (e)=>{
+        this.bot.once("death", (e)=>{
             console.log("Death", e);
             return this.socket.emit('client_death', {
                 username: this.identity.username,
                 event:e
             });
         })
-        this.bot.on("spawn", (e)=>{
+        this.bot.once("spawn", (e)=>{
             console.log(this.identity.username + " Spawned");
             this.settingUp = false;
             setTimeout(()=>{
@@ -159,23 +194,26 @@ class App {
                 });
 
                 console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
+                this.isSpawned = true;
             },10000)
-            this.isSpawned = true;
-            this.bornDate = new Date();
-            this.daysAlive = 0;
+
+
 
             this.processTickInterval = setInterval(()=>{
+
                 if(!this.brain.app.bot ||!this.brain.app.bot.entity){
                     return console.error("No `this.brain.app.bot.entity`, skipping `processTick`");
                 }
+                this.tickCount += 1;
                 this.brain.processTick();
                 this._tickEvents = [];
-                let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-                if(duration > 0 && duration % 60 == 0){
+                //let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
+                //console.log("TICK:", this.tickCount % 60);
+                if(this.tickCount % 60 == 0){
                     this.pong();
                 }
                 let nextDayTime = (this.daysAlive + 1) * (60 * 20);
-                if(duration > nextDayTime){
+                if(this.tickCount > nextDayTime){
                     this.daysAlive += 1;
                     //It has been one day
                     let distance = this.startPosition.distanceTo(this.bot.entity.position);
@@ -185,6 +223,7 @@ class App {
                         username: this.identity.username,
                         daysAlive: this.daysAlive,
                         distanceTraveled: distance,
+                        ticks: this.tickCount
 
                     });
                 }
@@ -284,12 +323,15 @@ class App {
             }))
         })
     }
-    pong(){
+    pong(options?:any){
+        options = options || {};
         let payload:any = {
+            artificialPong: options.artificialPong || false,
             username: this.identity.username
         }
         if(this.bot && this.bot.entity){
             payload.distanceTraveled = this.startPosition.distanceTo(this.bot.entity.position);
+            payload.ticks = this.tickCount;
             payload.position = this.bot.entity.position;
             payload.health = this.bot.health;
             payload.food = this.bot.food;
@@ -301,6 +343,12 @@ class App {
                 }
                 payload.inventoryCount += 1;
             })
+            payload.nodeInfo = {};
+            this.brain.eachNodeSync((outputNode)=>{
+                payload.nodeInfo[outputNode.id] = {
+                    activationCount: outputNode.activationCount
+                }
+            }, 'output')
         }
         return this.socket.emit('client_pong', payload);
     }
