@@ -46,7 +46,7 @@ class App {
         }
 
         let connectionTimeInSeconds =(this.connectionAttemptStartDate.getTime() - new Date().getTime())/ 1000;
-        if(connectionTimeInSeconds < 30 * 1000){
+        if(connectionTimeInSeconds < 30){
             return false; //It has only been less that 30 seconds
         }
         console.log("Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)

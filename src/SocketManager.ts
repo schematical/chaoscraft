@@ -37,7 +37,6 @@ class SocketManager{
         this.socket.on(eventType, callback);
     }
     emit(eventType, payload){
-        console.log("EMITTING:", eventType);
         this.socket.emit(eventType, payload);
     }
     sendFireOutputNode(payload){
