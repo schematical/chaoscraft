@@ -129,7 +129,7 @@ class OutputNodeBase extends NodeBase{
         */
     }
     activateItem(options?:any):boolean{
-        this.brain.bot.chat("I am activating stuff");
+        //this.brain.bot.chat("I am activating stuff");
         try{
             this.brain.bot.activateItem();
 
@@ -140,7 +140,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     deactivateItem(options?:any):boolean{
-        this.brain.bot.chat("I am deactivateItem");
+        //this.brain.bot.chat("I am deactivateItem");
         try{
             this.brain.bot.deactivateItem();
 
@@ -152,7 +152,7 @@ class OutputNodeBase extends NodeBase{
     }
 
     openEntity(options?:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openEntity - Error', "No results found to openEntity");
             return false;
         }
@@ -166,7 +166,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     activateEntity(options?:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - activateEntity - Error', "No results found to activateEntity");
             return false;
         }
@@ -180,7 +180,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openVillager(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openVillager - Error', "No results found to openVillager");
             return false;
         }
@@ -195,7 +195,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     trade(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - trade - Error', "No results found to trade");
             return false;
         }
@@ -210,7 +210,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     attack(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error',"No results found to attack");
             return false;
         }
@@ -225,7 +225,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     useOn(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - useOn - Error',"No results found to useOn");
             return false;
         }
@@ -239,7 +239,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     equip(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to look at");
             return false;
         }
@@ -253,7 +253,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     unequip(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - unequip - Error',"No results found to look at");
             return false;
         }
@@ -288,7 +288,7 @@ class OutputNodeBase extends NodeBase{
     }
 
     placeBlock(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No results found to look at");
             return false;
         }
@@ -334,7 +334,7 @@ class OutputNodeBase extends NodeBase{
     }
 
     navigateTo(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - navigateTo - Error', "No results found to look at");
             return false;
         }
@@ -348,7 +348,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     chat(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - chat - Error', "No results found to look at");
             return false;
         }
@@ -362,7 +362,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     lookAt(options:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', "No results found to look at");
             return false;
         }
@@ -458,7 +458,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     toss(options:any):boolean{
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
             return false;
         }
@@ -472,7 +472,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openChest(options:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
             return false
         }
@@ -488,7 +488,7 @@ class OutputNodeBase extends NodeBase{
 
     }
     openFurnace(options:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
             return false;
         }
@@ -503,7 +503,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openDispenser(options:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openDispenser - Error',"No results found to openDispenser");
             return false;
         }
@@ -518,7 +518,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openEnchantmentTable(options:any){
-        if(options.results.length == 0 || options.results[0]){
+        if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openEnchantmentTable - Error',"No results found to openEnchantmentTable");
             return false;
         }

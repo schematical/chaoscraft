@@ -29,16 +29,44 @@ class InputNodeTarget{
     }
     matchBlock(block:any):boolean{
         if(this.rawTargetData.type){
-            if(block.type != this.rawTargetData.block){
-                return false;
+            if(_.isString(this.rawTargetData.block)){
+                if(block.type != this.rawTargetData.block){
+                    return false;
+                }
+            }else{
+                let matchesABlock = false;
+                this.rawTargetData.block.forEach((_block)=>{
+                    if(block.type == _block){
+                        matchesABlock = true;
+                        return;
+                    }
+                })
+                if(!matchesABlock){
+                    return false;
+                }
             }
+
         }
         return true;
     }
     matchItem(item:any):boolean{
         if(this.rawTargetData.type){
-            if(item.type != this.rawTargetData.item){
-                return false;
+
+            if(_.isString(this.rawTargetData.block)){
+                if(item.type != this.rawTargetData.item){
+                    return false;
+                }
+            }else{
+                let matchesABlock = false;
+                this.rawTargetData.item.forEach((_item)=>{
+                    if(item.type == _item.type){
+                        matchesABlock = true;
+                        return;
+                    }
+                })
+                if(!matchesABlock){
+                    return false;
+                }
             }
         }
         return true;
@@ -56,9 +84,25 @@ class InputNodeTarget{
             }
         }
 
+
+
         if(this.rawTargetData.entityType){
-            if(entity.entityType != this.rawTargetData.entityType){
-                return false;
+
+            if(_.isString(this.rawTargetData.block)){
+                if(entity.entityType != this.rawTargetData.entityType){
+                    return false;
+                }
+            }else{
+                let matchesABlock = false;
+                this.rawTargetData.item.forEach((_entity)=>{
+                    if(entity.entityType == _entity.entityType){
+                        matchesABlock = true;
+                        return;
+                    }
+                })
+                if(!matchesABlock){
+                    return false;
+                }
             }
         }
 

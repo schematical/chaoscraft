@@ -27,6 +27,12 @@ class SocketManager{
         this.socket.on('client_end_observe', ()=>{
             this.isObserved = false;
         })
+        this.socket.on('client_ping', ()=>{
+            this.app.pong();
+        });
+    }
+    public on(eventType, callback){
+        this.socket.on(eventType, callback);
     }
     emit(eventType, payload){
         this.socket.emit(eventType, payload);

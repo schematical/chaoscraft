@@ -16,6 +16,7 @@ import { SocketManager } from './SocketManager'
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected autoReconnect:boolean = true;
     protected settingUp:boolean = false;
     protected processTickInterval:any = null;
     protected daysAlive:number = 0;
@@ -46,6 +47,8 @@ class App {
         this._socket = new SocketManager({
             app:this
         })
+
+
     }
 
 
@@ -93,15 +96,7 @@ class App {
 
         this.bot.on('connect', ()=>{
             this.isSpawned = false;
-            /*setTimeout(()=>{
-                if(this.isSpawned){
-                    return;
-                }
-                console.log(this.identity.username +  " - Failed to Login After Connect, trying again");
-                this.end();
 
-
-            }, 10000)*/
             console.log(this.identity.username +  " - Connected!");
         });
         this.bot.on('error', (err)=>{
@@ -120,12 +115,19 @@ class App {
                 //We are already setting up, just chill
                 return false;
             }
+            if(!this.autoReconnect){
+                return false;
+            }
             setTimeout(()=>{
+                if(this.isSpawned){
+                    return false;
+                }
                 this.setupBot();
-            }, 5000)
+            }, 10000)
         })
         this.bot.on('kicked', (reason)=>{
             console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason);
+
             //this.end();
         })
         this.bot.on('disconnect', (e)=>{
@@ -169,16 +171,8 @@ class App {
                 this.brain.processTick();
                 this._tickEvents = [];
                 let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-                if(duration == 60){
-                    let distance = this.startPosition.distanceTo(this.bot.entity.position);
-                    //if(this.brain.firedOutpuCount == 0){
-                    if(distance == 0){
-                        console.error(this.identity.username + ' - I have failed to do anything in 30 seconds, jumping  to my doom - Distance: ', distance);
-                        this.bot.chat("I have failed to do anything in 30 seconds, jumping  to my doom");
-                        this.end();
-
-                        return this.socket.emit('client_not_firing', this.identity);
-                    }
+                if(duration > 0 && duration % 60 == 0){
+                    this.pong();
                 }
                 let nextDayTime = (this.daysAlive + 1) * (60 * 20);
                 if(duration > nextDayTime){
@@ -262,7 +256,7 @@ class App {
                 return;
             }
             this.bot._currentlyDigging = block;
-            this.bot.chat("I am digging");
+            //this.bot.chat("I am digging");
             this.bot.dig(this.bot._currentlyDigging, cb);
 
         }
@@ -289,6 +283,26 @@ class App {
                 data:Array.from(arguments)
             }))
         })
+    }
+    pong(){
+        let payload:any = {
+            username: this.identity.username
+        }
+        if(this.bot && this.bot.entity){
+            payload.distanceTraveled = this.startPosition.distanceTo(this.bot.entity.position);
+            payload.position = this.bot.entity.position;
+            payload.health = this.bot.health;
+            payload.food = this.bot.food;
+            payload.inventoryCount = 0;
+            payload.ageInSeconds = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
+            this.bot.inventory.slots.forEach((inventorySlot)=> {
+                if (!inventorySlot) {
+                    return false;
+                }
+                payload.inventoryCount += 1;
+            })
+        }
+        return this.socket.emit('client_pong', payload);
     }
 
 
