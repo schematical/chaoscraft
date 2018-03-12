@@ -9,7 +9,9 @@ class SocketManager{
     protected app: any = null;
     protected socket:SocketIOClient.Socket = null;
     protected isObserved:boolean = true;//TODO: Change this to false
+
     constructor(options:any){
+
         this.app = options.app;
         this.debug = debug('chaoscraft.socket');
         this.socket = io(config.get('socket.host'));
@@ -23,6 +25,14 @@ class SocketManager{
         this.socket.emit('client_hello', {
             username: process.env.BOT_USERNAME || null
         });
+        this.socket.on('request_handshake', ()=>{
+            if(!this.app.identity){
+                return;
+            }
+            this.socket.emit('client_handshake', {
+                username: this.app.identity.username
+            });
+        })
         this.socket.on('client_start_observe', ()=>{
             this.isObserved = true;
         })
@@ -31,6 +41,12 @@ class SocketManager{
         })
         this.socket.on('client_ping', ()=>{
             this.app.pong();
+        });
+        this.socket.on('disconnect', ()=>{
+            console.error("DISCONNECTED from the socket server!!!!!");
+        });
+        this.socket.on('connect', ()=>{
+            console.error("CONNECTED from the socket server!!!!!");
         });
     }
     public on(eventType, callback){

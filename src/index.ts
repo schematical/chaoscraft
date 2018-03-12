@@ -196,7 +196,7 @@ class App {
                 event:e
             });
         })
-        this.bot.once("spawn", (e)=>{
+        this.bot.on("spawn", (e)=>{
             console.log(this.identity.username + " Spawned");
             this.settingUp = false;
             setTimeout(()=>{
@@ -213,10 +213,16 @@ class App {
 
                 console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
                 this.isSpawned = true;
+                this.socket.emit('client_spawn_complete', {
+                    username: this.identity.username,
+                    startPosition: this.startPosition
+                });
             },10000)
 
 
-
+            if(this.processTickInterval){
+                    return;//We already set it dont over clock
+            }
             this.processTickInterval = setInterval(()=>{
 
                 if(!this.brain.app.bot ||!this.brain.app.bot.entity){
@@ -325,6 +331,7 @@ class App {
         this.settingUp = false;
         this.isSpawned = false;
         clearTimeout(this.processTickInterval);
+        this.processTickInterval = null;
 
     }
 
@@ -368,6 +375,7 @@ class App {
                 }
             }, 'output')
         }
+        console.log("Sending Pong: ", payload)
         return this.socket.emit('client_pong', payload);
     }
 

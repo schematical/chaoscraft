@@ -7,7 +7,7 @@ module.exports = {
         host:'https://chaoscraft-api.schematical.com'
     },
     minecraft:{
-        host:process.env.MINECRAFT_HOST || '34.226.141.72'
+        host:process.env.MINECRAFT_HOST || '54.175.23.97'
     },
     server:{
         host:'https://chaoscraft-api.schematical.com'
