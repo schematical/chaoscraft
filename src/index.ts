@@ -31,21 +31,33 @@ class App {
     protected _tickEvents:Array<TickEvent> = [];
     protected connectionCheckInterval = null;
     protected connectionAttemptStartDate = null;
+    protected lastWorldAge:number = 0;
     constructor () {
         console.log("Starting");
-        this.connectionCheckInterval = setInterval(this.connectionCheck.bind(this), 30 * 1000);
+        this.connectionCheckInterval = setInterval(this.connectionCheck.bind(this), 10 * 1000);
 
     }
     connectionCheck(){
+        console.log('connectionCheck');
         if(!this.identity){
             //Waiting on our socket server
             return false;
         }
-        if(this.isSpawned){
-            return false;
+        if(this.bot && this.bot.time && this.bot.time.age){
+            let currWorldAge = this.bot.time.age || 0;
+            console.log('currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge)
+            if(currWorldAge > this.lastWorldAge){
+                if(this.isSpawned){
+                    return false;
+                }
+            }
+            this.lastWorldAge = currWorldAge;
+        }else {
+            console.log("No defined `this.bot.time.age`");
         }
 
-        let connectionTimeInSeconds =(this.connectionAttemptStartDate.getTime() - new Date().getTime())/ 1000;
+
+        let connectionTimeInSeconds =(new Date().getTime() - this.connectionAttemptStartDate.getTime())/ 1000;
         if(connectionTimeInSeconds < 30){
             return false; //It has only been less that 30 seconds
         }
@@ -131,7 +143,7 @@ class App {
             console.log(this.identity.username +  " - Logged In ");
 
         });
-        this.bot.once('end', (status)=>{
+        this.bot.on('end', (status)=>{
             this.isSpawned = false;
             console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
             this.end();
@@ -155,11 +167,13 @@ class App {
                 case('multiplayer.disconnect.duplicate_login'):
                     //Kill this thing
                     this.end();
+                    this.identity = null;
                     return this.socket.emit('client_request_new_brain', {
-                        username: this.identity.username
+                        //username: this.identity.username
                     })
                 case('disconnect.timeout'):
-                    //Do nothing
+                   //Do nothing
+                    break;
 
             }
 
