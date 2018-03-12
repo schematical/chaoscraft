@@ -56,6 +56,7 @@ class SocketManager{
         this.socket.emit(eventType, payload);
     }
     sendFireOutputNode(payload){
+        payload.username = this.app.identity.username;
         this.socket.emit('client_fire_outputnode', payload);
     }
 }
