@@ -38,20 +38,21 @@ class App {
 
     }
     connectionCheck(){
-        console.log('connectionCheck');
+        //console.log('connectionCheck');
         if(!this.identity){
             //Waiting on our socket server
             return false;
         }
         if(this.bot && this.bot.time && this.bot.time.age){
             let currWorldAge = this.bot.time.age || 0;
-            console.log('currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge)
+            //console.log('currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge)
             if(currWorldAge > this.lastWorldAge){
+                this.lastWorldAge = currWorldAge;
                 if(this.isSpawned){
                     return false;
                 }
             }
-            this.lastWorldAge = currWorldAge;
+
         }else {
             console.log("No defined `this.bot.time.age`");
         }
@@ -145,7 +146,7 @@ class App {
         });
         this.bot.on('end', (status)=>{
             this.isSpawned = false;
-            console.log(this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
+            console.log(this.identity && this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
             this.end();
             /*if(this.settingUp){
                 //We are already setting up, just chill
@@ -171,6 +172,9 @@ class App {
                     return this.socket.emit('client_request_new_brain', {
                         //username: this.identity.username
                     })
+                case('disconnect.spam'):
+
+                    break;
                 case('disconnect.timeout'):
                    //Do nothing
                     break;
