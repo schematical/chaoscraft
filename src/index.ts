@@ -55,7 +55,7 @@ class App {
 
 
         let connectionTimeInSeconds =(new Date().getTime() - this.connectionAttemptStartDate.getTime())/ 1000;
-        if(connectionTimeInSeconds < 30){
+        if(connectionTimeInSeconds < 60){
             return false; //It has only been less that 30 seconds
         }
         console.log(this.identity.username + " - Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)
@@ -127,6 +127,9 @@ class App {
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
 
+        this.bot.on('message', (messageData)=>{
+            console.log(this.identity.username +  " - message:", messageData);
+        });
         this.bot.on('connect', ()=>{
             this.isSpawned = false;
 
