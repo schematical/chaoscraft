@@ -1,10 +1,6 @@
-console.log("AAAIIXXX");
 // install the plugin
-import * as fs from 'fs';
-import * as path from 'path';
 import * as request from 'request';
 import * as mineflayer from 'mineflayer'
-import * as radarPlugin from 'mineflayer-radar'
 import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
