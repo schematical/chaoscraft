@@ -16,7 +16,7 @@
   "dependencies": {
     "chaoscraft-shared": "https://github.com/schematical/chaoscraft-shared",
     "config": "^1.30.0",
-    "mineflyer":"2.6.1",
+    "mineflayer":"2.6.1",
     "mineflayer-blockfinder": "0.0.7",
     "mineflayer-bloodhound": "https://github.com/Nixes/mineflayer-bloodhound",
     "mineflayer-navigate": "0.0.10",
