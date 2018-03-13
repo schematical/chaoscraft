@@ -40,8 +40,11 @@ class App {
             //Waiting on our socket server
             return false;
         }
+        if(this.isSpawned){
+            return false;
+        }
         let currWorldAge = -1;
-        if(this.bot && this.bot.time && this.bot.time.age){
+        /*if(this.bot && this.bot.time && this.bot.time.age){
             currWorldAge = this.bot.time.age || 0;
             //console.log('currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge)
             if(currWorldAge > this.lastWorldAge){
@@ -53,7 +56,7 @@ class App {
 
         }else {
             console.log(this.identity.username + " - No defined `this.bot.time.age`");
-        }
+        }*/
         this.lastWorldAge = currWorldAge;
 
         let connectionTimeInSeconds =(new Date().getTime() - this.connectionAttemptStartDate.getTime())/ 1000;
