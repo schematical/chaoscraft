@@ -129,7 +129,6 @@ class App {
         blockFinderPlugin(mineflayer)(this.bot);
 
         this.bot.on('message', (messageData)=>{
-            console.log(JSON.stringify(messageData, null, 3));
             switch(messageData.json.translate){
                 case('chat.type.text'):
                     return;
