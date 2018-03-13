@@ -53,13 +53,13 @@ class App {
         }else {
             console.log(this.identity.username + " - No defined `this.bot.time.age`");
         }
-
+        this.lastWorldAge = currWorldAge;
 
         let connectionTimeInSeconds =(new Date().getTime() - this.connectionAttemptStartDate.getTime())/ 1000;
         if(connectionTimeInSeconds < 60){
             return false; //It has only been less that 30 seconds
         }
-        console.log(this.identity.username + " - Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)
+        console.log(this.identity.username + " - Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds, 'currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge, ' isSpawned:', this.isSpawned)
         this.end();
         setTimeout(()=>{
             this.setupBot();
