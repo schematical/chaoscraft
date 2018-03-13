@@ -128,7 +128,11 @@ class App {
         blockFinderPlugin(mineflayer)(this.bot);
 
         this.bot.on('message', (messageData)=>{
-            console.log(this.identity.username +  " - message:", messageData);
+            let message = messageData.json.translate + ' ';
+            messageData.json.forEach((d)=>{
+                message += d.text + ' | ';
+            })
+            console.log(this.identity.username +  " - message:" + message );
         });
         this.bot.on('connect', ()=>{
             this.isSpawned = false;
@@ -374,7 +378,7 @@ class App {
                 }
             }, 'output')
         }
-        console.log("Sending Pong: ", payload)
+        //console.log("Sending Pong: ", payload)
         return this.socket.emit('client_pong', payload);
     }
 
