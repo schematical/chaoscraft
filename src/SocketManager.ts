@@ -20,7 +20,10 @@ class SocketManager{
             console.log("client_hello_response", identity)
             this.app.identity = identity;
             this.app.end();
-            this.app.setupBrain()
+            setTimeout(()=>{
+                this.app.setupBrain();
+            }, 3000)
+
         });
         this.socket.emit('client_hello', {
             username: process.env.BOT_USERNAME || null
