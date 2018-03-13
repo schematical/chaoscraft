@@ -54,7 +54,7 @@ class App {
             }
 
         }else {
-            this.debug(this.identity.username + " - No defined `this.bot.time.age`");
+            console.log(this.identity.username + " - No defined `this.bot.time.age`");
         }
 
 
