@@ -111,6 +111,7 @@ class App {
     }
 
     setupBot(){
+        console.log(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
         this.connectionAttemptStartDate = new Date();
         this.settingUp = true;
         this.bot = mineflayer.createBot({
@@ -128,8 +129,13 @@ class App {
         blockFinderPlugin(mineflayer)(this.bot);
 
         this.bot.on('message', (messageData)=>{
+            console.log(JSON.stringify(messageData, null, 3));
+            switch(messageData.json.translate){
+                case('chat.type.text'):
+                    return;
+            }
             let message = messageData.json.translate + ' ';
-            messageData.json.forEach((d)=>{
+            messageData.json.with.forEach((d)=>{
                 message += d.text + ' | ';
             })
             console.log(this.identity.username +  " - message:" + message );
@@ -140,7 +146,7 @@ class App {
             console.log(this.identity.username +  " - Connected!");
         });
         this.bot.on('error', (err)=>{
-            console.error(this.identity.username + ' - ERROR: ', err.message)
+            console.error(this.identity && this.identity.username + ' - ERROR: ', err.message)
            //this.end();
         });
         this.bot.on('login', ()=>{
