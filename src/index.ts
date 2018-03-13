@@ -40,8 +40,9 @@ class App {
             //Waiting on our socket server
             return false;
         }
+        let currWorldAge = -1;
         if(this.bot && this.bot.time && this.bot.time.age){
-            let currWorldAge = this.bot.time.age || 0;
+            currWorldAge = this.bot.time.age || 0;
             //console.log('currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge)
             if(currWorldAge > this.lastWorldAge){
                 this.lastWorldAge = currWorldAge;
