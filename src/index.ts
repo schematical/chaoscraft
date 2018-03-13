@@ -54,7 +54,7 @@ class App {
             }
 
         }else {
-            console.log("No defined `this.bot.time.age`");
+            this.debug(this.identity.username + " - No defined `this.bot.time.age`");
         }
 
 
@@ -62,7 +62,7 @@ class App {
         if(connectionTimeInSeconds < 30){
             return false; //It has only been less that 30 seconds
         }
-        console.log("Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)
+        console.log(this.identity.username + " - Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds)
         this.end();
         setTimeout(()=>{
             this.setupBot();
@@ -131,16 +131,16 @@ class App {
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
 
-        this.bot.once('connect', ()=>{
+        this.bot.on('connect', ()=>{
             this.isSpawned = false;
 
             console.log(this.identity.username +  " - Connected!");
         });
-        this.bot.once('error', (err)=>{
+        this.bot.on('error', (err)=>{
             console.error(this.identity.username + ' - ERROR: ', err.message)
-            this.end();
+           //this.end();
         });
-        this.bot.once('login', ()=>{
+        this.bot.on('login', ()=>{
             console.log(this.identity.username +  " - Logged In ");
 
         });
@@ -157,7 +157,7 @@ class App {
             }*/
 
         })
-        this.bot.once('kicked', (reason)=>{
+        this.bot.on('kicked', (reason)=>{
             try{
                 reason = JSON.parse(reason);
             }catch(e){
@@ -167,7 +167,7 @@ class App {
             switch(reason.translate){
                 case('multiplayer.disconnect.duplicate_login'):
                     //Kill this thing
-                    this.end();
+                    //this.end();
                     this.identity = null;
                     return this.socket.emit('client_request_new_brain', {
                         //username: this.identity.username
@@ -183,13 +183,13 @@ class App {
 
             //this.end();
         })
-        this.bot.once('disconnect', (e)=>{
+        this.bot.on('disconnect', (e)=>{
 
             console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
-            this.end();
+            //this.end();
         })
 
-        this.bot.once("death", (e)=>{
+        this.bot.on("death", (e)=>{
             console.log("Death", e);
             return this.socket.emit('client_death', {
                 username: this.identity.username,
