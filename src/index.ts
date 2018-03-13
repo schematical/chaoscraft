@@ -1,4 +1,5 @@
 // install the plugin
+import * as _ from 'underscore';
 import * as request from 'request';
 import * as mineflayer from 'mineflayer'
 import * as navigatePlugin from 'mineflayer-navigate'
@@ -131,6 +132,8 @@ class App {
         this.bot.on('message', (messageData)=>{
             switch(messageData.json.translate){
                 case('chat.type.text'):
+                case('multiplayer.player.joined'):
+                case('multiplayer.player.left'):
                     return;
             }
             let message = messageData.json.translate + ' ';
@@ -383,7 +386,10 @@ class App {
                 }
             }, 'output')
         }
-        //console.log("Sending Pong: ", payload)
+
+        let logData = _.clone(payload);
+        delete(logData.nodeInfo);
+        console.log(this.identity.username + " - Sending Pong: ", JSON.stringify(logData));
         return this.socket.emit('client_pong', payload);
     }
 
