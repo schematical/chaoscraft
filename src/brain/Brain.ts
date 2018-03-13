@@ -130,6 +130,7 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
+        let tickStartDate = new Date();
         //console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
@@ -144,7 +145,7 @@ class Brain{
                         firingOutputNodes.push(evaluateResult);
                     }
                     let duration = (new Date().getTime() - startDate) / 1000;
-                    //console.log("EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
+                    console.log(this.app.identity.username + " - OUTPUTNODE EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
                 }catch(err){
                     console.error(this.app.identity.username + ' - ERROR - Firing OutputNode: ' + outputNode.id , err.message, err.stack);
                 }
@@ -183,8 +184,9 @@ class Brain{
                 results: evaluateResult.results,
                 duration: duration
             })
-            //console.log("ACTIVATE:", evaluateResult.node.type, "RESULTS:", evaluateResult.results, ' - ', duration);
+            console.log(this.app.identity.username + "ACTIVATE OUTPUT:", evaluateResult.node.type, /*"RESULTS:", evaluateResult.results,*/ ' - ', duration);
         })
+        console.log(this.app.identity.username + " Process Tick Complete: ", this.currTick, ' - Duration:' +  (new Date().getTime() / tickStartDate.getTime()) / 1000 );
 
 
 
