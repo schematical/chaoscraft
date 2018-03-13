@@ -186,7 +186,7 @@ class Brain{
             })
             //console.log(this.app.identity.username + "ACTIVATE OUTPUT:", evaluateResult.node.type, /*"RESULTS:", evaluateResult.results,*/ ' - ', duration);
         })
-        console.log(this.app.identity.username + " Process Tick Complete: ", this.currTick, ' - Duration:' +  (new Date().getTime() / tickStartDate.getTime()) / 1000 );
+        //console.log(this.app.identity.username + " Process Tick Complete: ", this.currTick, ' - Duration:' +  (new Date().getTime() / tickStartDate.getTime()) / 1000 );
 
 
 
