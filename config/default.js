@@ -1,7 +1,7 @@
 module.exports = {
     brain:{
         outputNodeErrorThreshold: 5,
-        maxOutputsFiredPerTick: 1
+        maxOutputsFiredPerTick: 3
     },
     socket:{
         host:'https://chaoscraft-api.schematical.com'

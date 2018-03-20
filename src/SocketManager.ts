@@ -9,6 +9,7 @@ class SocketManager{
     protected app: any = null;
     protected socket:SocketIOClient.Socket = null;
     protected isObserved:boolean = true;//TODO: Change this to false
+    protected lastPingTimestamp:number = null;
 
     constructor(options:any){
 
@@ -20,9 +21,9 @@ class SocketManager{
             console.log("client_hello_response", identity)
             this.app.identity = identity;
             this.app.end();
-            setTimeout(()=>{
+            //setTimeout(()=>{
                 this.app.setupBrain();
-            }, 3000)
+            //}, 3000)
 
         });
         this.socket.emit('client_hello', {
@@ -42,7 +43,12 @@ class SocketManager{
         this.socket.on('client_end_observe', ()=>{
             this.isObserved = false;
         })
-        this.socket.on('client_ping', ()=>{
+        this.socket.on('client_ping', (data)=>{
+            data.timestamp = data.timestamp || new Date().getTime();
+            if(this.lastPingTimestamp && this.lastPingTimestamp == data.timestamp){
+                return;
+            }
+            this.lastPingTimestamp = data.timestamp;
             this.app.pong();
         });
         this.socket.on('disconnect', ()=>{

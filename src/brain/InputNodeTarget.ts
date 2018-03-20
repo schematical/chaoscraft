@@ -72,30 +72,19 @@ class InputNodeTarget{
         return true;
     }
     matchEntity(entity:any):boolean{
-        if(this.rawTargetData.type){
-            if(entity.type != this.rawTargetData.type){
-                return false;
-            }
-        }
-
-        if(this.rawTargetData.mobType){
-            if(!entity.mobType || entity.mobType != this.rawTargetData.mobType){
-                return false;
-            }
-        }
 
 
 
         if(this.rawTargetData.entityType){
 
-            if(_.isString(this.rawTargetData.block)){
+            if(!_.isArray(this.rawTargetData.entityType)){
                 if(entity.entityType != this.rawTargetData.entityType){
                     return false;
                 }
             }else{
                 let matchesABlock = false;
-                this.rawTargetData.item.forEach((_entity)=>{
-                    if(entity.entityType == _entity.entityType){
+                this.rawTargetData.entityType.forEach((_entityType)=>{
+                    if(entity.entityType == _entityType){
                         matchesABlock = true;
                         return;
                     }
@@ -105,6 +94,14 @@ class InputNodeTarget{
                 }
             }
         }
+        if(this.rawTargetData.mobType){
+            if(!entity.mobType || entity.mobType != this.rawTargetData.mobType){
+                return false;
+            }
+        }
+
+
+
 
         if(this.rawTargetData.kind){
             if(entity.kind != this.rawTargetData.kind){
@@ -170,8 +167,8 @@ class InputNodeTarget{
         //Figure out which one is closest
         results = _.sortBy(results, (entity)=>{
 
-            let delta = this.node.brain.bot.position.distanceTo(entity.position);
-            return 0 - delta;
+            let delta = this.node.brain.bot.entity.position.distanceTo(entity.position);
+            return delta;
         })
         return results;
     }
@@ -196,7 +193,7 @@ class InputNodeTarget{
                 return false;
             }
 
-            let type = 'block';
+            let type:any = 'block';
             switch(this.rawTargetData.type){
                 case('block'):
                     type = this.rawTargetData.block;
@@ -204,8 +201,20 @@ class InputNodeTarget{
                 default:
                     type = this.rawTargetData.item;
             }
-            if(inventorySlot.type != type){
-                return false;
+            if(_.isArray(type)){
+                let match = false;
+                (<[any]>type).forEach((_type)=>{
+                    if (inventorySlot.type == _type) {
+                        match = true;
+                    }
+                });
+                if(!match){
+                    return false;
+                }
+            }else {
+                if (inventorySlot.type != type) {
+                    return false;
+                }
             }
             results.push(inventorySlot);
 

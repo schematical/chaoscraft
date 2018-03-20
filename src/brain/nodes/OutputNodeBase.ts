@@ -3,6 +3,7 @@
  */
 import { NodeBase } from './NodeBase'
 import { Enum } from 'chaoscraft-shared'
+import * as Vec3 from 'vec3'
 
 import * as config from 'config';
 
@@ -92,6 +93,8 @@ class OutputNodeBase extends NodeBase{
                 return this.lookUp(options);
             case(Enum.OutputTypes.lookDown):
                 return this.lookDown(options);
+            case(Enum.OutputTypes.tossStack):
+                return this.tossStack(options);
             case(Enum.OutputTypes.toss):
                 return this.toss(options);
             case(Enum.OutputTypes.activateBlock):
@@ -218,7 +221,10 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         let target = options.results[0];
-        this.brain.bot.chat("I am attacking " + target.username + "!");
+        if(this.brain.bot.entity.position.distanceTo(target.position) > 10){
+            return false;
+        }
+        this.brain.bot.chat("I am attacking " + target.type + " - " + target.displayName + " - " + target.username + "!");
         try{
             this.brain.bot.attack(target);
         }catch(err){
@@ -248,7 +254,10 @@ class OutputNodeBase extends NodeBase{
         }
         let target = options.results[0];
         try {
-            this.brain.bot.equip(target, this.rawNode.destination);
+            this.brain.bot.equip(
+                target,
+                this.rawNode.destination || 'hand'
+            );
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - equip - Error', err.message);
             return false;
@@ -303,7 +312,18 @@ class OutputNodeBase extends NodeBase{
                 this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Cannot Dig Type: " + target.type);
                 return false;
             }
-            this.brain.bot.placeBlock(target);
+            this.brain.bot.chat("I am placing block: " + target.displayName);
+            let vec = /*new Vec3(0, 1, 0);*/new Vec3(
+                Math.round(Math.random() * 2) -1,
+                Math.round(Math.random() * 2) -1,
+                Math.round(Math.random() * 2) -1
+            );
+            this.brain.bot.placeBlock(target, vec, (err, results)=>{
+                if(err){
+                    this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
+                }
+                console.log("Placing Block DOne: ", results);
+            });
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error', err.message);
             return false;
@@ -324,6 +344,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
+            this.logActivationError(this.brain.app.identity.username + "DIG STARTED!");
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
@@ -460,8 +481,25 @@ class OutputNodeBase extends NodeBase{
         this.brain.app.bot.look(this.brain.app.bot.entity.yaw, this.brain.app.bot.entity.pitch  - Math.PI / 4/*, [force], [callback]*/);
         return true;
     }
-    toss(options:any):boolean{
+    tossStack(options:any):boolean{
         if(options.results.length == 0 || !options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
+            return false;
+        }
+        let target = options.results[0];
+        try{
+            this.brain.bot.tossStack(target);
+        }catch(err){
+            this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
+            return false;
+        }
+        return true;
+    }
+    toss(options:any):boolean{
+        //TODO: Write me
+        this.logActivationError(this.brain.app.identity.username + 'TODO: Write me');
+        return false;
+        /*if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
             return false;
         }
@@ -472,7 +510,7 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
             return false;
         }
-        return true;
+        return true;*/
     }
     openChest(options:any){
         if(options.results.length == 0 || !options.results[0]){

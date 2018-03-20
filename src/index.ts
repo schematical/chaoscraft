@@ -59,8 +59,12 @@ class App {
         }
         this.lastWorldAge = currWorldAge;
 
+        if(!this.connectionAttemptStartDate){
+            this.connectionAttemptStartDate = new Date();
+            return;
+        }
         let connectionTimeInSeconds =(new Date().getTime() - this.connectionAttemptStartDate.getTime())/ 1000;
-        if(connectionTimeInSeconds < 60){
+        if(connectionTimeInSeconds < 30){
             return false; //It has only been less that 30 seconds
         }
         console.log(this.identity.username + " - Starting to reconnect - connectionTimeInSeconds:", connectionTimeInSeconds, 'currWorldAge > this.lastWorldAge', currWorldAge, ' > ', this.lastWorldAge, '==', currWorldAge > this.lastWorldAge, ' isSpawned:', this.isSpawned)
@@ -182,11 +186,14 @@ class App {
             switch(reason.translate){
                 case('multiplayer.disconnect.duplicate_login'):
                     //Kill this thing
-                    //this.end();
-                    this.identity = null;
-                    return this.socket.emit('client_request_new_brain', {
+                    this.end();
+                    this.socket.emit('client_request_new_brain', {
                         //username: this.identity.username
                     })
+                    setTimeout(()=>{
+                        //this.identity = null;
+                    }, 1000);
+                    return;
                 case('disconnect.spam'):
 
                     break;
@@ -266,7 +273,7 @@ class App {
 
                     });
                 }
-            }, 500)
+            }, 1000)
         })
         this.setupEventListenter('health');
         this.setupEventListenter('chat');
@@ -331,11 +338,19 @@ class App {
         this.bot.smartDig = (block, cb) => {
             if(this.bot._currentlyDigging){
                //TODO: Cross Check
+                console.log("Currently Digging... dropping out");
                 return;
             }
             this.bot._currentlyDigging = block;
-            //this.bot.chat("I am digging");
-            this.bot.dig(this.bot._currentlyDigging, cb);
+            this.bot.chat("I am digging " +block.displayName);
+            this.bot.dig(this.bot._currentlyDigging, (err)=>{
+                console.log("Digging Done: " + block.displayName);
+                if(err) {
+                    console.error("Digging Error:", err.message, err.stack);
+                }
+                return cb(err)
+
+            });
 
         }
 
@@ -377,9 +392,15 @@ class App {
             payload.food = this.bot.food;
             payload.inventoryCount = 0;
             payload.ageInSeconds = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-            this.bot.inventory.slots.forEach((inventorySlot)=> {
+            payload.inventory = {};
+            this.bot.inventory.slots.forEach((inventorySlot, index)=> {
                 if (!inventorySlot) {
                     return false;
+                }
+                payload.inventory[index] = {
+                    count: inventorySlot.count,
+                    displayName: inventorySlot.displayName,
+                    type: inventorySlot.type
                 }
                 payload.inventoryCount += 1;
             })

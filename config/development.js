@@ -7,6 +7,6 @@ module.exports = {
         host:'http://localhost:3000'
     },
     minecraft:{
-        host:  '34.229.236.40'
+        host:  '54.162.43.119'
     },
 };
