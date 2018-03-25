@@ -120,13 +120,17 @@ class App {
     }
 
     setupBot(){
-        console.log(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
+        console.liog(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
         this.connectionAttemptStartDate = new Date();
         this.settingUp = true;
+        let username =  this.identity.username;
+        /*switch( this.identity.username){
+            case('adam-0'):
+        }*/
         this.bot = mineflayer.createBot({
             host: config.get('minecraft.host'),//"127.0.0.1", // optional
             //port: 3001,       // optional
-            username: this.identity.username,
+            username: username,
             //password: "12345678",          // online-mode=true servers*/
             verbose: true,
             version: "1.12.2",
