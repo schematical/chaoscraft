@@ -254,6 +254,9 @@ class OutputNodeBase extends NodeBase{
         }
         let target = options.results[0];
         try {
+            if(this.brain.app.bot.heldItem && this.brain.app.bot.heldItem.type == target.type){
+                return true;
+            }
             this.brain.bot.equip(
                 target,
                 this.rawNode.destination || 'hand'
@@ -313,12 +316,18 @@ class OutputNodeBase extends NodeBase{
                 return false;
             }
             this.brain.bot.chat("I am placing block: " + target.displayName);
-            let vec = /*new Vec3(0, 1, 0);*/new Vec3(
-                Math.round(Math.random() * 2) -1,
-                Math.round(Math.random() * 2) -1,
-                Math.round(Math.random() * 2) -1
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            while(x == 0 && y ==0 && z == 0){
+                x = Math.round(Math.random() * 2) -1;
+                y = Math.round(Math.random() * 2) -1;
+                z = Math.round(Math.random() * 2) -1;
+            }
+            let vec = new Vec3(
+                x,y,z
             );
-            this.brain.bot.placeBlock(target, vec, (err, results)=>{
+            this.brain.bot.smartPlaceBlock(target, vec, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
                 }

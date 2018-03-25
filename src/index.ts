@@ -129,7 +129,7 @@ class App {
             username: this.identity.username,
             //password: "12345678",          // online-mode=true servers*/
             verbose: true,
-            //version: "1.12.2",
+            version: "1.12.2",
             checkTimeoutInterval: 30*1000
         });
         //radarPlugin(mineflayer)(this.bot, {port:3002});
@@ -352,6 +352,63 @@ class App {
 
             });
 
+        }
+        this.bot.smartPlaceBlock =   (referenceBlock, faceVector, cb) => {
+            if (!this.bot.heldItem) return cb(new Error('must be holding an item to place a block'));
+            let maxDist = 7;
+            let targetPosition = referenceBlock.position;/*this.bot.entity.position.offset(
+                Math.floor(Math.random() * maxDist * 2) - maxDist,
+                Math.floor(Math.random() * maxDist * 2) - maxDist,
+                Math.floor(Math.random() * maxDist * 2) - maxDist
+            );*/;
+            let offsetX = 0.5;//Math.random();
+            let offsetY = 0.5;//Math.random();
+            let offsetZ = 0.5;//Math.random();
+            this.bot.lookAt(targetPosition.offset(offsetX, offsetY, offsetZ), false, () => {
+                // TODO: tell the server that we are sneaking while doing this
+                //this.bot.setControlState('sneak', true);
+                this.bot._client.write('arm_animation', { hand: 1 })
+                const pos = referenceBlock.position
+
+                this.bot._client.write('block_place', {
+                    location: pos,
+                    direction: vectorToDirection(faceVector),
+                    hand: 0,//Math.round(Math.random()),
+                    cursorX: 0.5,//Math.random(),
+                    cursorY: 0.5,//Math.random(),
+                    cursorZ: 0.5//Math.random()
+                })
+
+
+                const dest = pos.plus(faceVector)
+                const eventName = `blockUpdate:${dest}`
+                let onBlockUpdate = (oldBlock, newBlock)=> {
+                    this.bot.removeListener(eventName, onBlockUpdate)
+                    if (oldBlock.type === newBlock.type) {
+                        cb(new Error(`No block has been placed : the block is still ${oldBlock.name}`))
+                    } else {
+                        cb()
+                    }
+                }
+                this.bot.on(eventName, onBlockUpdate);
+
+            })
+        }
+        function vectorToDirection (v) {
+            if (v.y < 0) {
+                return 0
+            } else if (v.y > 0) {
+                return 1
+            } else if (v.z < 0) {
+                return 2
+            } else if (v.z > 0) {
+                return 3
+            } else if (v.x < 0) {
+                return 4
+            } else if (v.x > 0) {
+                return 5
+            }
+            throw new Error("Invalid Direction: " + v)
         }
 
     }
