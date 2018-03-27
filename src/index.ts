@@ -13,6 +13,7 @@ import { SocketManager } from './SocketManager'
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
 class App {
+    protected lastTickPosition:any = null;
     protected tickCount:number = 0;
     protected autoReconnect:boolean = true;
     protected settingUp:boolean = false;
@@ -120,7 +121,7 @@ class App {
     }
 
     setupBot(){
-        console.liog(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
+        console.log(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
         this.connectionAttemptStartDate = new Date();
         this.settingUp = true;
         let username =  this.identity.username;
@@ -251,9 +252,37 @@ class App {
             }
             this.processTickInterval = setInterval(()=>{
 
-                if(!this.brain.app.bot ||!this.brain.app.bot.entity){
+                if(!this.bot ||!this.bot.entity){
                     return console.error("No `this.brain.app.bot.entity`, skipping `processTick`");
                 }
+                if(this.lastTickPosition){
+                    if(
+                        this.bot._controlStates.forward ||
+                        this.bot._controlStates.back ||
+                        this.bot._controlStates.left ||
+                        this.bot._controlStates.right
+                    ) {
+                        let distTraveledThisTick = (this.lastTickPosition.distanceTo(this.bot.entity.position));
+                        if (distTraveledThisTick > .025) {
+                            //TODO: Find out what we hit
+                            let yaw = this.bot.entity.yaw;
+                            let z = Math.sin(yaw) * 1;
+                            let x = Math.cos(yaw) * 1;
+                            let block = this.bot.blockAt(new Vec3(
+                                this.bot.entity.position.x - x,
+                                this.bot.entity.position.y,
+                                this.bot.entity.position.z - z,
+                            ))
+                            //Add event collision
+                            this._tickEvents.push(new TickEvent({
+                                type: 'collision',
+                                data: [block]
+                            }))
+                        }
+                    }
+                }
+                this.lastTickPosition = _.clone(this.bot.entity.position);
+
                 this.tickCount += 1;
                 this.brain.processTick();
                 this._tickEvents = [];
@@ -342,13 +371,13 @@ class App {
         this.bot.smartDig = (block, cb) => {
             if(this.bot._currentlyDigging){
                //TODO: Cross Check
-                console.log("Currently Digging... dropping out");
                 return;
             }
             this.bot._currentlyDigging = block;
-            this.bot.chat("I am digging " +block.displayName);
+            //this.bot.chat("I am digging " +block.displayName);
             this.bot.dig(this.bot._currentlyDigging, (err)=>{
                 console.log("Digging Done: " + block.displayName);
+                this.bot._currentlyDigging = null;
                 if(err) {
                     console.error("Digging Error:", err.message, err.stack);
                 }
@@ -356,6 +385,11 @@ class App {
 
             });
 
+        }
+        this.bot._controlStates = {};
+        this.bot.smartSetControlState = (control, state)=>{
+            this.bot._controlStates[control] = state;
+            this.bot.setControlState(control, state);
         }
         this.bot.smartPlaceBlock =   (referenceBlock, faceVector, cb) => {
             if (!this.bot.heldItem) return cb(new Error('must be holding an item to place a block'));

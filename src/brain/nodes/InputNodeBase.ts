@@ -6,7 +6,8 @@ import * as _ from 'underscore'
 import { NodeBase } from './NodeBase'
 import { InputNodeTarget } from '../InputNodeTarget'
 //import { TickEvent } from "../TickEvent";
-import { NodeEvaluateResult } from "../NodeEvaluateResult"
+import { NodeEvaluateResult } from "../NodeEvaluateResult";
+import * as Vec3 from 'vec3';
 interface iTickEvent{
     constructor(options:any);
     type:string;
@@ -64,6 +65,9 @@ class InputNodeBase extends NodeBase{
             case(Enum.InputTypes.canSeeBlock):
                 results = this.canSeeBlock();
             break;
+            case(Enum.InputTypes.canTouchBlock):
+                results = this.canTouchBlock();
+                break;
             case(Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
             break;
@@ -120,6 +124,15 @@ class InputNodeBase extends NodeBase{
                 break;
             case(Enum.InputTypes.blockBreakProgressEnd):
                 results = this.blockBreakProgressEnd();
+                break;
+            case(Enum.InputTypes.collision):
+                results = this.collision();
+                break;
+            case(Enum.InputTypes.isOn):
+                results = this.isOn();
+                break;
+            case(Enum.InputTypes.isIn):
+                results = this.isIn();
                 break;
 
             default:
@@ -199,6 +212,17 @@ class InputNodeBase extends NodeBase{
 
     canSeeBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock();
+
+        return new NodeEvaluateResult({
+            score :targetResults.length > 0 ? 1 : 0,
+            results: targetResults,
+            node:this
+        });
+    }
+    canTouchBlock():NodeEvaluateResult{
+        let targetResults:Array<any> = this._target.findBlock({
+            maxDistance: 2
+        });
 
         return new NodeEvaluateResult({
             score :targetResults.length > 0 ? 1 : 0,
@@ -469,6 +493,62 @@ class InputNodeBase extends NodeBase{
             score += 1;
             targets.push(result);
         })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    collision():NodeEvaluateResult{
+        let results:Array<iTickEvent> = this.searchTickEvents('collision');
+        let score = 0;
+        let targets = [];
+        results.forEach((result)=> {
+            score += 1;
+            targets.push(result.data[0]);
+        })
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    isOn():NodeEvaluateResult{
+        let block = this.brain.app.bot.blockAt(
+            new Vec3(
+                this.brain.app.bot.entity.position.x,
+                this.brain.app.bot.entity.position.y - 1,
+                this.brain.app.bot.entity.position.z
+            )
+        )
+        let score = 0;
+        let targets = [];
+        if(this._target.match(block)){
+            score += 1;
+            targets.push(block);
+        }
+
+        return new NodeEvaluateResult({
+            score: score,
+            results: targets,
+            node: this
+        });
+    }
+    isIn():NodeEvaluateResult{
+        let block = this.brain.app.bot.blockAt(
+            new Vec3(
+                this.brain.app.bot.entity.position.x,
+                this.brain.app.bot.entity.position.y,
+                this.brain.app.bot.entity.position.z
+            )
+        )
+        let score = 0;
+        let targets = [];
+        if(this._target.match(block)){
+            score += 1;
+            targets.push(block);
+        }
+
         return new NodeEvaluateResult({
             score: score,
             results: targets,

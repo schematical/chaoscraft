@@ -28,6 +28,9 @@ class InputNodeTarget{
         }
     }
     matchBlock(block:any):boolean{
+        if(!block){
+            return false;
+        }
         if(this.rawTargetData.type){
             if(_.isString(this.rawTargetData.block)){
                 if(block.type != this.rawTargetData.block){
@@ -78,8 +81,10 @@ class InputNodeTarget{
         if(this.rawTargetData.entityType){
 
             if(!_.isArray(this.rawTargetData.entityType)){
-                if(entity.entityType != this.rawTargetData.entityType){
-                    return false;
+                if(this.rawTargetData.entityType == '*') {
+                    if (entity.entityType != this.rawTargetData.entityType) {
+                        return false;
+                    }
                 }
             }else{
                 let matchesABlock = false;
@@ -182,7 +187,7 @@ class InputNodeTarget{
         return this.node.brain.bot.findBlockSync({
             point: this.node.brain.bot.entity.position,
             matching: this.rawTargetData.block,
-            maxDistance: this.rawTargetData.maxDistance || 20,
+            maxDistance: options.maxDistance || this.rawTargetData.maxDistance || 20,
             count: options.count || this.rawTargetData.count || 1,
         })
     }

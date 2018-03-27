@@ -119,6 +119,8 @@ class OutputNodeBase extends NodeBase{
                 return this.trade(options);
             case(Enum.OutputTypes.openEntity):
                 return this.openEntity(options);
+            case(Enum.OutputTypes.walkTo):
+                return this.walkTo(options);
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
@@ -216,11 +218,12 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     attack(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
+        if(options.results.length == 0 || !options.results[0] || !options.results[0].position){
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error',"No results found to attack");
             return false;
         }
         let target = options.results[0];
+
         if(this.brain.bot.entity.position.distanceTo(target.position) > 10){
             return false;
         }
@@ -353,7 +356,6 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
-            this.logActivationError(this.brain.app.identity.username + "DIG STARTED!");
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
@@ -410,57 +412,74 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
 
+    walkTo(options:any){
+        if(options.results.length == 0 || !options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', "No results found to look at");
+            return false;
+        }
+        let target = options.results[0];
+        try{
+            this.brain.bot.lookAt(target.position);
+            this.brain.bot.smartSetControlState('forward', true);
+            this.brain.bot.smartSetControlState('back', false);
+        }catch(err){
+            this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', err.message);
+            return false;
+        }
+        return true;
+    }
+
     walkForward(){
-        this.brain.bot.setControlState('forward', true);
-        this.brain.bot.setControlState('back', false);
+        this.brain.bot.smartSetControlState('forward', true);
+        this.brain.bot.smartSetControlState('back', false);
         return true;
     }
     walkBack(){
-        this.brain.bot.setControlState('forward', false);
-        this.brain.bot.setControlState('back', true);
+        this.brain.bot.smartSetControlState('forward', false);
+        this.brain.bot.smartSetControlState('back', true);
         return true;
     }
 
     stopWalking(){
         //TODO: Iterate through all directions
-        this.brain.bot.setControlState('forward', false);
-        this.brain.bot.setControlState('back', false);
-        this.brain.bot.setControlState('left', false);
-        this.brain.bot.setControlState('right', false);
+        this.brain.bot.smartSetControlState('forward', false);
+        this.brain.bot.smartSetControlState('back', false);
+        this.brain.bot.smartSetControlState('left', false);
+        this.brain.bot.smartSetControlState('right', false);
         return true;
     }
 
     walkLeft(options?:any){
-        this.brain.bot.setControlState('left', true);
-        this.brain.bot.setControlState('right', false);
+        this.brain.bot.smartSetControlState('left', true);
+        this.brain.bot.smartSetControlState('right', false);
         return true;
     }
     walkRight(options?:any){
-        this.brain.bot.setControlState('left', false);
-        this.brain.bot.setControlState('right', true);
+        this.brain.bot.smartSetControlState('left', false);
+        this.brain.bot.smartSetControlState('right', true);
         return true;
     }
 
     jump(options?:any){
-        this.brain.bot.setControlState('jump', true);
+        this.brain.bot.smartSetControlState('jump', true);
         return true;
     }
     sneak(options?:any){
-        //this.brain.bot.setControlState('sneak', true);
+        //this.brain.bot.smartSetControlState('sneak', true);
         return true;
     }
     sprint(options?:any){
-        this.brain.bot.setControlState('sprint', true);
+        this.brain.bot.smartSetControlState('sprint', true);
         return true;
     }
     clearControlStates(options?:any){
-        this.brain.bot.setControlState('jump', true);
-        //this.brain.bot.setControlState('sneak', true);
-        this.brain.bot.setControlState('sprint', true);
-        this.brain.bot.setControlState('forward', false);
-        this.brain.bot.setControlState('back', false);
-        this.brain.bot.setControlState('left', false);
-        this.brain.bot.setControlState('right', false);
+        this.brain.bot.smartSetControlState('jump', true);
+        //this.brain.bot.smartSetControlState('sneak', true);
+        this.brain.bot.smartSetControlState('sprint', true);
+        this.brain.bot.smartSetControlState('forward', false);
+        this.brain.bot.smartSetControlState('back', false);
+        this.brain.bot.smartSetControlState('left', false);
+        this.brain.bot.smartSetControlState('right', false);
         return true;
     }
 
