@@ -1,5 +1,7 @@
 import { NodeBase } from './nodes/NodeBase'
 import * as _ from 'underscore'
+import * as MinecraftData from 'minecraft-data';
+import * as config from 'config'
 class InputNodeTarget{
     protected rawTargetData:any = null;
     protected _node:NodeBase = null;
@@ -184,6 +186,9 @@ class InputNodeTarget{
      */
     findBlock(options?:any):Array<any>{
         options = options || {};
+        if(!this.rawTargetData.block){
+            throw new Error(this.node.id + '- not valid');
+        }
         return this.node.brain.bot.findBlockSync({
             point: this.node.brain.bot.entity.position,
             matching: this.rawTargetData.block,
@@ -192,6 +197,12 @@ class InputNodeTarget{
         })
     }
     findInventory(options?:any):Array<any>{
+        switch(this.rawTargetData.type){
+            case('recipe'):
+                return this.findRecipeInInventory(options);
+            //break;
+            default:
+        }
         let results = [];
         this.node.brain.bot.inventory.slots.forEach((inventorySlot)=>{
             if(!inventorySlot){
@@ -224,6 +235,74 @@ class InputNodeTarget{
             results.push(inventorySlot);
 
         })
+        return results;
+    }
+    findRecipeInInventory(options?:any):Array<any>{
+        switch(this.rawTargetData.type){
+            case('recipe'):
+                //We are good
+            break;
+            default:
+                throw new Error("Not a valid target type for `findRecipeInInventory`: " + this.rawTargetData.type)
+        }
+        //Get requirements
+        let minecraftData = MinecraftData(config.get('minecraft.version'));
+
+        let recipes = [];
+
+
+        if(!_.isArray(this.rawTargetData.recipe)){
+            this.rawTargetData.recipe = [this.rawTargetData.recipe];
+        }
+        (<[any]>this.rawTargetData.recipe).forEach((_recipeItem)=>{
+            minecraftData.recipe[_recipeItem].forEach((_recipePossibility)=>{
+                let requiredItemData = {};
+                _recipePossibility.inShape.forEach((row)=>{
+                    row.forEach((itemId)=> {
+                        requiredItemData[itemId] = requiredItemData[itemId] || 0;
+                        requiredItemData[itemId] += 1;
+                    });
+                })
+                recipes.push({
+                    produces:_recipeItem,
+                    requires:requiredItemData
+                });
+            })
+
+        });
+
+
+
+        let results = [];
+        recipes.forEach((recipeData)=>{
+            let satisfied = {};
+            Object.keys(recipeData.requires).forEach((itemId)=>{
+                satisfied[itemId] = false;
+            })
+            this.node.brain.bot.inventory.slots.forEach((inventorySlot)=>{
+                if(!inventorySlot){
+                    return false;
+                }
+                if(
+                    recipeData.requires[inventorySlot.type]
+                ){
+                    satisfied[inventorySlot.type] =  inventorySlot.count / recipeData.requires[inventorySlot.type];
+                }
+
+
+                results.push(inventorySlot);
+
+            })
+            let produces = null;
+            Object.keys(satisfied).forEach((itemId)=>{
+
+                if(Math.floor(satisfied[itemId]) > 0){
+                    produces = satisfied[itemId];
+                }
+            })
+
+        })
+
         return results;
     }
 }

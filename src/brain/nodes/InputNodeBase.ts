@@ -71,6 +71,9 @@ class InputNodeBase extends NodeBase{
             case(Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
             break;
+            case(Enum.InputTypes.hasRecipeInInventory):
+                results = this.hasRecipeInInventory();
+                break;
             case(Enum.InputTypes.chat):
                 results = this.chat();
             break;
@@ -177,6 +180,15 @@ class InputNodeBase extends NodeBase{
         return new NodeEvaluateResult({
             score :results.length > 0 ? 1  : 0,
             results: targets,
+            node:this
+        });
+    }
+    hasRecipeInInventory():NodeEvaluateResult{
+
+        let results = this._target.findInventory();
+        return new NodeEvaluateResult({
+            score :results.length > 0 ? 1 : 0,
+            results: results,
             node:this
         });
     }

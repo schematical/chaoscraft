@@ -218,7 +218,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     attack(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0] || !options.results[0].position){
+        if(options.results.length == 0 || !options.results[0] || !options.results[0].position || !options.results[0].entityType){
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error',"No results found to attack");
             return false;
         }

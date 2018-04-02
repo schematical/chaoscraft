@@ -12,7 +12,9 @@ import { SocketManager } from './SocketManager'
 
 import { Brain } from './brain/Brain'
 import { TickEvent } from './TickEvent'
+import { TaskExec } from './TaskExec'
 class App {
+    protected taskQueue:Array<TaskExec> = [];
     protected lastTickPosition:any = null;
     protected tickCount:number = 0;
     protected autoReconnect:boolean = true;
@@ -137,7 +139,6 @@ class App {
             version: "1.12.2",
             checkTimeoutInterval: 30*1000
         });
-        //radarPlugin(mineflayer)(this.bot, {port:3002});
         navigatePlugin(mineflayer)(this.bot);
         bloodhoundPlugin(mineflayer)(this.bot);
         blockFinderPlugin(mineflayer)(this.bot);
@@ -250,63 +251,7 @@ class App {
             if(this.processTickInterval){
                     return;//We already set it dont over clock
             }
-            this.processTickInterval = setInterval(()=>{
-
-                if(!this.bot ||!this.bot.entity){
-                    return console.error("No `this.brain.app.bot.entity`, skipping `processTick`");
-                }
-                if(this.lastTickPosition){
-                    if(
-                        this.bot._controlStates.forward ||
-                        this.bot._controlStates.back ||
-                        this.bot._controlStates.left ||
-                        this.bot._controlStates.right
-                    ) {
-                        let distTraveledThisTick = (this.lastTickPosition.distanceTo(this.bot.entity.position));
-                        if (distTraveledThisTick > .025) {
-                            //TODO: Find out what we hit
-                            let yaw = this.bot.entity.yaw;
-                            let z = Math.sin(yaw) * 1;
-                            let x = Math.cos(yaw) * 1;
-                            let block = this.bot.blockAt(new Vec3(
-                                this.bot.entity.position.x - x,
-                                this.bot.entity.position.y,
-                                this.bot.entity.position.z - z,
-                            ))
-                            //Add event collision
-                            this._tickEvents.push(new TickEvent({
-                                type: 'collision',
-                                data: [block]
-                            }))
-                        }
-                    }
-                }
-                this.lastTickPosition = _.clone(this.bot.entity.position);
-
-                this.tickCount += 1;
-                this.brain.processTick();
-                this._tickEvents = [];
-                //let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-                //console.log("TICK:", this.tickCount % 60);
-                if(this.tickCount % 60 == 0){
-                    this.pong();
-                }
-                let nextDayTime = (this.daysAlive + 1) * (60 * 20);
-                if(this.tickCount > nextDayTime){
-                    this.daysAlive += 1;
-                    //It has been one day
-                    let distance = this.startPosition.distanceTo(this.bot.entity.position);
-
-                    //TODO: Save to memory update brain stats
-                    return this.socket.emit('client_day_passed', {
-                        username: this.identity.username,
-                        daysAlive: this.daysAlive,
-                        distanceTraveled: distance,
-                        ticks: this.tickCount
-
-                    });
-                }
-            }, 1000)
+            this.processTickInterval = setInterval(this.processTick.bind(this), 1000)
         })
         this.setupEventListenter('health');
         this.setupEventListenter('chat');
@@ -449,6 +394,63 @@ class App {
             throw new Error("Invalid Direction: " + v)
         }
 
+    }
+    processTick(){
+
+        if(!this.bot ||!this.bot.entity){
+            return console.error("No `this.brain.app.bot.entity`, skipping `processTick`");
+        }
+        if(this.lastTickPosition){
+            if(
+                this.bot._controlStates.forward ||
+                this.bot._controlStates.back ||
+                this.bot._controlStates.left ||
+                this.bot._controlStates.right
+            ) {
+                let distTraveledThisTick = (this.lastTickPosition.distanceTo(this.bot.entity.position));
+                if (distTraveledThisTick > .025) {
+                    //TODO: Find out what we hit
+                    let yaw = this.bot.entity.yaw;
+                    let z = Math.sin(yaw) * 1;
+                    let x = Math.cos(yaw) * 1;
+                    let block = this.bot.blockAt(new Vec3(
+                        this.bot.entity.position.x - x,
+                        this.bot.entity.position.y,
+                        this.bot.entity.position.z - z,
+                    ))
+                    //Add event collision
+                    this._tickEvents.push(new TickEvent({
+                        type: 'collision',
+                        data: [block]
+                    }))
+                }
+            }
+        }
+        this.lastTickPosition = _.clone(this.bot.entity.position);
+
+        this.tickCount += 1;
+        this.brain.processTick();
+        this._tickEvents = [];
+        //let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
+        //console.log("TICK:", this.tickCount % 60);
+        if(this.tickCount % 60 == 0){
+            this.pong();
+        }
+        let nextDayTime = (this.daysAlive + 1) * (60 * 20);
+        if(this.tickCount > nextDayTime){
+            this.daysAlive += 1;
+            //It has been one day
+            let distance = this.startPosition.distanceTo(this.bot.entity.position);
+
+            //TODO: Save to memory update brain stats
+            return this.socket.emit('client_day_passed', {
+                username: this.identity.username,
+                daysAlive: this.daysAlive,
+                distanceTraveled: distance,
+                ticks: this.tickCount
+
+            });
+        }
     }
     end(){
         this.bot && this.bot.quit && this.bot.quit();
