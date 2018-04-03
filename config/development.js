@@ -6,7 +6,7 @@ module.exports = {
     server:{
         host:'http://localhost:3000'
     },
-    minecraft:{
-        host:  '127.0.0.1'//'35.168.12.62'
-    },
+    /*minecraft:{
+        host:  '54.89.58.51'
+    },*/
 };
