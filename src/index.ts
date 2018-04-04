@@ -121,278 +121,299 @@ class App {
         )
 
     }
-
+    getMinecraftServerIps(){
+        return new Promise((resolve, reject)=>{
+            return request(
+                {
+                    url: config.get('server.host') + '/servers',
+                    json: true
+                },
+                (err, response, data)=>{
+                    if(err) return reject(err);
+                    return resolve(data);
+                }
+            )
+        })
+    }
     setupBot(){
-        console.log(this.identity.username + " - setupBot - " + config.get('minecraft.host'));
-        this.connectionAttemptStartDate = new Date();
-        this.settingUp = true;
-        let username =  this.identity.username;
-        /*switch( this.identity.username){
-            case('adam-0'):
-        }*/
-        this.bot = mineflayer.createBot({
-            host: config.get('minecraft.host'),//"127.0.0.1", // optional
-            //port: 3001,       // optional
-            username: username,
-            //password: "12345678",          // online-mode=true servers*/
-            verbose: true,
-            version: "1.12.2",
-            checkTimeoutInterval: 30*1000
-        });
-        navigatePlugin(mineflayer)(this.bot);
-        bloodhoundPlugin(mineflayer)(this.bot);
-        blockFinderPlugin(mineflayer)(this.bot);
+        this.getMinecraftServerIps()
+            .then((ips:Array<string>)=>{
 
-        this.bot.on('message', (messageData)=>{
-            switch(messageData.json.translate){
-                case('chat.type.text'):
-                case('multiplayer.player.joined'):
-                case('multiplayer.player.left'):
-                    return;
-            }
-            let message = messageData.json.translate + ' ';
-            messageData.json.with.forEach((d)=>{
-                message += d.text + ' | ';
-            })
-            console.log(this.identity.username +  " - message:" + message );
-        });
-        this.bot.on('connect', ()=>{
-            this.isSpawned = false;
-
-            console.log(this.identity.username +  " - Connected!");
-        });
-        this.bot.on('error', (err)=>{
-            console.error(this.identity && this.identity.username + ' - ERROR: ', err.message)
-           //this.end();
-        });
-        this.bot.on('login', ()=>{
-            console.log(this.identity.username +  " - Logged In ");
-
-        });
-        this.bot.on('end', (status)=>{
-            this.isSpawned = false;
-            console.log(this.identity && this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
-            this.end();
-            /*if(this.settingUp){
-                //We are already setting up, just chill
-                return false;
-            }
-            if(!this.autoReconnect){
-                return false;
+            console.log(this.identity.username + " - setupBot - " ,ips);
+            this.connectionAttemptStartDate = new Date();
+            this.settingUp = true;
+            let username =  this.identity.username;
+            /*switch( this.identity.username){
+                case('adam-0'):
             }*/
-
-        })
-        this.bot.on('kicked', (reason)=>{
-            try{
-                reason = JSON.parse(reason);
-            }catch(e){
-                console.error("Error parsing KICKED message:", reason);
-            }
-            console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason.translate);
-            switch(reason.translate){
-                case('multiplayer.disconnect.duplicate_login'):
-                    //Kill this thing
-                    this.end();
-                    this.socket.emit('client_request_new_brain', {
-                        //username: this.identity.username
-                    })
-                    setTimeout(()=>{
-                        //this.identity = null;
-                    }, 1000);
-                    return;
-                case('disconnect.spam'):
-
-                    break;
-                case('disconnect.timeout'):
-                   //Do nothing
-                    break;
-
-            }
-
-            //this.end();
-        })
-        this.bot.on('disconnect', (e)=>{
-
-            console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
-            //this.end();
-        })
-
-        this.bot.on("death", (e)=>{
-            console.log("Death", e);
-            return this.socket.emit('client_death', {
-                username: this.identity.username,
-                event:e
+            this.bot = mineflayer.createBot({
+                host: ips[Math.floor(Math.random() * ips.length)],//config.get('minecraft.host'),//"127.0.0.1", // optional
+                //port: 3001,       // optional
+                username: username,
+                //password: "12345678",          // online-mode=true servers*/
+                verbose: true,
+                version: "1.12.2",
+                checkTimeoutInterval: 30*1000
             });
-        })
-        this.bot.on("spawn", (e)=>{
-            console.log(this.identity.username + " Spawned");
-            this.settingUp = false;
-            setTimeout(()=>{
-                if(!this.bot || !this.bot.entity || !this.bot.entity.position){
-                   console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ");
-                   return this.end();
+            navigatePlugin(mineflayer)(this.bot);
+            bloodhoundPlugin(mineflayer)(this.bot);
+            blockFinderPlugin(mineflayer)(this.bot);
+
+            this.bot.on('message', (messageData)=>{
+                switch(messageData.json.translate){
+                    case('chat.type.text'):
+                    case('multiplayer.player.joined'):
+                    case('multiplayer.player.left'):
+                        return;
+                }
+                let message = messageData.json.translate + ' ';
+                messageData.json.with.forEach((d)=>{
+                    message += d.text + ' | ';
+                })
+                console.log(this.identity.username +  " - message:" + message );
+            });
+            this.bot.on('connect', ()=>{
+                this.isSpawned = false;
+
+                console.log(this.identity.username +  " - Connected!");
+            });
+            this.bot.on('error', (err)=>{
+                console.error(this.identity && this.identity.username + ' - ERROR: ', err.message)
+               //this.end();
+            });
+            this.bot.on('login', ()=>{
+                console.log(this.identity.username +  " - Logged In ");
+
+            });
+            this.bot.on('end', (status)=>{
+                this.isSpawned = false;
+                console.log(this.identity && this.identity.username +  " END(DISCONNECTED) FROM MINECRAFT: ", status);
+                this.end();
+                /*if(this.settingUp){
+                    //We are already setting up, just chill
+                    return false;
+                }
+                if(!this.autoReconnect){
+                    return false;
+                }*/
+
+            })
+            this.bot.on('kicked', (reason)=>{
+                try{
+                    reason = JSON.parse(reason);
+                }catch(e){
+                    console.error("Error parsing KICKED message:", reason);
+                }
+                console.log(this.identity.username +  " KICKED FROM MINECRAFT: ", reason.translate);
+                switch(reason.translate){
+                    case('multiplayer.disconnect.duplicate_login'):
+                        //Kill this thing
+                        this.end();
+                        this.socket.emit('client_request_new_brain', {
+                            //username: this.identity.username
+                        })
+                        setTimeout(()=>{
+                            //this.identity = null;
+                        }, 1000);
+                        return;
+                    case('disconnect.spam'):
+
+                        break;
+                    case('disconnect.timeout'):
+                       //Do nothing
+                        break;
+
                 }
 
-                this.startPosition = new Vec3({
-                    x:this.bot.entity.position.x,
-                    y:this.bot.entity.position.y,
-                    z:this.bot.entity.position.z
-                });
+                //this.end();
+            })
+            this.bot.on('disconnect', (e)=>{
 
-                console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
-                this.isSpawned = true;
-                this.socket.emit('client_spawn_complete', {
+                console.log(this.identity.username +  " DISCONNECTED FROM MINECRAFT");
+                //this.end();
+            })
+
+            this.bot.on("death", (e)=>{
+                console.log("Death", e);
+                return this.socket.emit('client_death', {
                     username: this.identity.username,
-                    startPosition: this.startPosition
+                    event:e
                 });
-            },10000)
-
-
-            if(this.processTickInterval){
-                    return;//We already set it dont over clock
-            }
-            this.processTickInterval = setInterval(this.processTick.bind(this), 1000)
-        })
-        this.setupEventListenter('health');
-        this.setupEventListenter('chat');
-        this.setupEventListenter('onCorrelateAttack');
-        this.setupEventListenter('rain');
-        this.setupEventListenter('entityMoved');
-        this.setupEventListenter('entitySwingArm');
-        this.setupEventListenter('entityHurt');
-        this.setupEventListenter('entitySpawn');
-        this.setupEventListenter('entityUpdate');
-        this.setupEventListenter('playerCollect');
-
-        this.setupEventListenter('blockUpdate');
-        this.setupEventListenter('diggingCompleted');
-        this.setupEventListenter('diggingAborted');
-        this.setupEventListenter('blockBreakProgressEnd');
-        this.setupEventListenter('blockBreakProgressObserved');
-        this.setupEventListenter('chestLidMove');
-
-        this.setupEventListenter('move');
-        this.setupEventListenter('forcedMoves');
-        //TODO Move this to a plugin
-
-
-        this.bot.visiblePosition =  (a, b) => {
-            let v = b.minus(a)
-            const t = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
-            v = v.scaled(1 / t)
-            v = v.scaled(1 / 5)
-            const u = t * 5
-            let na
-            for (let i = 1; i < u; i++) {
-                na = a.plus(v)
-                // check that blocks don't inhabit the same position
-                if (!na.floored().equals(a.floored())) {
-                    // check block is not transparent
-
-                    const block = this.bot.blockAt(na);
-                    if (block !== null && block.boundingBox !== 'empty'){
-                        return false;
+            })
+            this.bot.on("spawn", (e)=>{
+                console.log(this.identity.username + " Spawned");
+                this.settingUp = false;
+                setTimeout(()=>{
+                    if(!this.bot || !this.bot.entity || !this.bot.entity.position){
+                       console.error(this.identity.username +  " No position/entity data after a few seconds after spawn ");
+                       return this.end();
                     }
-                }
-                a = na
-            }
-            return true
-        }
 
-        this.bot.canSeePosition = (position)=>{
-            position = position.position || position;
-            // this emits a ray from the center of the bots body to the block
-            if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
+                    this.startPosition = new Vec3({
+                        x:this.bot.entity.position.x,
+                        y:this.bot.entity.position.y,
+                        z:this.bot.entity.position.z
+                    });
+
+                    console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
+                    this.isSpawned = true;
+                    this.socket.emit('client_spawn_complete', {
+                        username: this.identity.username,
+                        startPosition: this.startPosition
+                    });
+                },10000)
+
+
+                if(this.processTickInterval){
+                        return;//We already set it dont over clock
+                }
+                this.processTickInterval = setInterval(this.processTick.bind(this), 1000)
+            })
+            this.setupEventListenter('health');
+            this.setupEventListenter('chat');
+            this.setupEventListenter('onCorrelateAttack');
+            this.setupEventListenter('rain');
+            this.setupEventListenter('entityMoved');
+            this.setupEventListenter('entitySwingArm');
+            this.setupEventListenter('entityHurt');
+            this.setupEventListenter('entitySpawn');
+            this.setupEventListenter('entityUpdate');
+            this.setupEventListenter('playerCollect');
+
+            this.setupEventListenter('blockUpdate');
+            this.setupEventListenter('diggingCompleted');
+            this.setupEventListenter('diggingAborted');
+            this.setupEventListenter('blockBreakProgressEnd');
+            this.setupEventListenter('blockBreakProgressObserved');
+            this.setupEventListenter('chestLidMove');
+
+            this.setupEventListenter('move');
+            this.setupEventListenter('forcedMoves');
+            //TODO Move this to a plugin
+
+
+            this.bot.visiblePosition =  (a, b) => {
+                let v = b.minus(a)
+                const t = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+                v = v.scaled(1 / t)
+                v = v.scaled(1 / 5)
+                const u = t * 5
+                let na
+                for (let i = 1; i < u; i++) {
+                    na = a.plus(v)
+                    // check that blocks don't inhabit the same position
+                    if (!na.floored().equals(a.floored())) {
+                        // check block is not transparent
+
+                        const block = this.bot.blockAt(na);
+                        if (block !== null && block.boundingBox !== 'empty'){
+                            return false;
+                        }
+                    }
+                    a = na
+                }
                 return true
             }
-            return false;
-        }
-        this.bot.on('diggingCompleted', ()=>{
-            this.bot._currentlyDigging = null;
-        })
-        this.bot.on('diggingAborted', ()=>{
-            this.bot._currentlyDigging = null;
-        })
-        this.bot.smartDig = (block, cb) => {
-            if(this.bot._currentlyDigging){
-               //TODO: Cross Check
-                return;
+
+            this.bot.canSeePosition = (position)=>{
+                position = position.position || position;
+                // this emits a ray from the center of the bots body to the block
+                if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
+                    return true
+                }
+                return false;
             }
-            this.bot._currentlyDigging = block;
-            //this.bot.chat("I am digging " +block.displayName);
-            this.bot.dig(this.bot._currentlyDigging, (err)=>{
-                console.log("Digging Done: " + block.displayName);
+            this.bot.on('diggingCompleted', ()=>{
                 this.bot._currentlyDigging = null;
-                if(err) {
-                    console.error("Digging Error:", err.message, err.stack);
-                }
-                return cb(err)
-
-            });
-
-        }
-        this.bot._controlStates = {};
-        this.bot.smartSetControlState = (control, state)=>{
-            this.bot._controlStates[control] = state;
-            this.bot.setControlState(control, state);
-        }
-        this.bot.smartPlaceBlock =   (referenceBlock, faceVector, cb) => {
-            if (!this.bot.heldItem) return cb(new Error('must be holding an item to place a block'));
-            let maxDist = 7;
-            let targetPosition = referenceBlock.position;/*this.bot.entity.position.offset(
-                Math.floor(Math.random() * maxDist * 2) - maxDist,
-                Math.floor(Math.random() * maxDist * 2) - maxDist,
-                Math.floor(Math.random() * maxDist * 2) - maxDist
-            );*/;
-            let offsetX = 0.5;//Math.random();
-            let offsetY = 0.5;//Math.random();
-            let offsetZ = 0.5;//Math.random();
-            this.bot.lookAt(targetPosition.offset(offsetX, offsetY, offsetZ), false, () => {
-                // TODO: tell the server that we are sneaking while doing this
-                //this.bot.setControlState('sneak', true);
-                this.bot._client.write('arm_animation', { hand: 1 })
-                const pos = referenceBlock.position
-
-                this.bot._client.write('block_place', {
-                    location: pos,
-                    direction: vectorToDirection(faceVector),
-                    hand: 0,//Math.round(Math.random()),
-                    cursorX: 0.5,//Math.random(),
-                    cursorY: 0.5,//Math.random(),
-                    cursorZ: 0.5//Math.random()
-                })
-
-
-                const dest = pos.plus(faceVector)
-                const eventName = `blockUpdate:${dest}`
-                let onBlockUpdate = (oldBlock, newBlock)=> {
-                    this.bot.removeListener(eventName, onBlockUpdate)
-                    if (oldBlock.type === newBlock.type) {
-                        cb(new Error(`No block has been placed : the block is still ${oldBlock.name}`))
-                    } else {
-                        cb()
-                    }
-                }
-                this.bot.on(eventName, onBlockUpdate);
-
             })
-        }
-        function vectorToDirection (v) {
-            if (v.y < 0) {
-                return 0
-            } else if (v.y > 0) {
-                return 1
-            } else if (v.z < 0) {
-                return 2
-            } else if (v.z > 0) {
-                return 3
-            } else if (v.x < 0) {
-                return 4
-            } else if (v.x > 0) {
-                return 5
+            this.bot.on('diggingAborted', ()=>{
+                this.bot._currentlyDigging = null;
+            })
+            this.bot.smartDig = (block, cb) => {
+                if(this.bot._currentlyDigging){
+                   //TODO: Cross Check
+                    return;
+                }
+                this.bot._currentlyDigging = block;
+                //this.bot.chat("I am digging " +block.displayName);
+                this.bot.dig(this.bot._currentlyDigging, (err)=>{
+                    console.log("Digging Done: " + block.displayName);
+                    this.bot._currentlyDigging = null;
+                    if(err) {
+                        console.error("Digging Error:", err.message, err.stack);
+                    }
+                    return cb(err)
+
+                });
+
             }
-            throw new Error("Invalid Direction: " + v)
-        }
+            this.bot._controlStates = {};
+            this.bot.smartSetControlState = (control, state)=>{
+                this.bot._controlStates[control] = state;
+                this.bot.setControlState(control, state);
+            }
+            this.bot.smartPlaceBlock =   (referenceBlock, faceVector, cb) => {
+                if (!this.bot.heldItem) return cb(new Error('must be holding an item to place a block'));
+                let maxDist = 7;
+                let targetPosition = referenceBlock.position;/*this.bot.entity.position.offset(
+                    Math.floor(Math.random() * maxDist * 2) - maxDist,
+                    Math.floor(Math.random() * maxDist * 2) - maxDist,
+                    Math.floor(Math.random() * maxDist * 2) - maxDist
+                );*/;
+                let offsetX = 0.5;//Math.random();
+                let offsetY = 0.5;//Math.random();
+                let offsetZ = 0.5;//Math.random();
+                this.bot.lookAt(targetPosition.offset(offsetX, offsetY, offsetZ), false, () => {
+                    // TODO: tell the server that we are sneaking while doing this
+                    //this.bot.setControlState('sneak', true);
+                    this.bot._client.write('arm_animation', { hand: 1 })
+                    const pos = referenceBlock.position
+
+                    this.bot._client.write('block_place', {
+                        location: pos,
+                        direction: vectorToDirection(faceVector),
+                        hand: 0,//Math.round(Math.random()),
+                        cursorX: 0.5,//Math.random(),
+                        cursorY: 0.5,//Math.random(),
+                        cursorZ: 0.5//Math.random()
+                    })
+
+
+                    const dest = pos.plus(faceVector)
+                    const eventName = `blockUpdate:${dest}`
+                    let onBlockUpdate = (oldBlock, newBlock)=> {
+                        this.bot.removeListener(eventName, onBlockUpdate)
+                        if (oldBlock.type === newBlock.type) {
+                            cb(new Error(`No block has been placed : the block is still ${oldBlock.name}`))
+                        } else {
+                            cb()
+                        }
+                    }
+                    this.bot.on(eventName, onBlockUpdate);
+
+                })
+            }
+            function vectorToDirection (v) {
+                if (v.y < 0) {
+                    return 0
+                } else if (v.y > 0) {
+                    return 1
+                } else if (v.z < 0) {
+                    return 2
+                } else if (v.z > 0) {
+                    return 3
+                } else if (v.x < 0) {
+                    return 4
+                } else if (v.x > 0) {
+                    return 5
+                }
+                throw new Error("Invalid Direction: " + v)
+            }
+
+        })
+        .catch((err)=>{
+            console.error(err.message, err.stack);
+        })
 
     }
     processTick(){
