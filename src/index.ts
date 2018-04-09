@@ -139,13 +139,17 @@ class App {
         this.getMinecraftServerIps()
             .then((ips:Array<string>)=>{
 
-            console.log(this.identity.username + " - setupBot - " ,ips);
+
             this.connectionAttemptStartDate = new Date();
             this.settingUp = true;
             let username =  this.identity.username;
             /*switch( this.identity.username){
                 case('adam-0'):
             }*/
+            if(username.length >= 14){
+                username = username.substr(3, 15);
+            }
+            console.log(username + " - setupBot - " ,ips);
             this.bot = mineflayer.createBot({
                 host: ips[Math.floor(Math.random() * ips.length)],//config.get('minecraft.host'),//"127.0.0.1", // optional
                 //port: 3001,       // optional

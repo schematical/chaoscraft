@@ -181,6 +181,7 @@ class Brain{
 
             this.app.socket.sendFireOutputNode({
                 node: evaluateResult.node.id,
+                type: evaluateResult.node.type,
                 results: evaluateResult.results,
                 duration: duration
             })

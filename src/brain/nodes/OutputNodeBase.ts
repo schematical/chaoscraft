@@ -315,10 +315,10 @@ class OutputNodeBase extends NodeBase{
         //TODO: Add some logic to find block at location if need be
         try {
             if(!target.digTime){
-                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Cannot Dig Type: " + target.type);
+                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Place Block Type:: " + target.type);
                 return false;
             }
-            this.brain.bot.chat("I am placing block: " + target.displayName);
+
             let x = 0;
             let y = 0;
             let z = 0;
@@ -333,8 +333,18 @@ class OutputNodeBase extends NodeBase{
             this.brain.bot.smartPlaceBlock(target, vec, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
+                    return false;
                 }
+                this.brain.bot.chat("I placed block: " + this.brain.app.bot.heldItem.displayName + ' next to ' + target.displayName);
                 console.log("Placing Block DOne: ", results);
+                return this.brain.app.socket.emit(
+                    'achivment',
+                    {
+                        username: this.brain.app.identity.username,
+                        type:'place_block',
+                        value:1
+                    }
+                );
             });
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error', err.message);
@@ -360,6 +370,14 @@ class OutputNodeBase extends NodeBase{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
                 }
+                return this.brain.app.socket.emit(
+                    'achivment',
+                    {
+                        username: this.brain.app.identity.username,
+                        type:'dig',
+                        value:1
+                    }
+                );
             });
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
