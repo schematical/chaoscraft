@@ -53,3 +53,68 @@ https://github.com/PrismarineJS/mineflayer/blob/master/doc/api.md#botblockatpoin
 You will need to do a little bit more logic to determine this:
 
 https://github.com/PrismarineJS/mineflayer/blob/master/doc/api.md#botrecipesforitemtype-metadata-minresultcount-craftingtable
+
+
+
+
+{
+  "domain": null,
+  "_events": {},
+  "_eventsCount": 0,
+  "id": 26842,
+  "type": "object",
+  "position": {
+    "x": 265.1096849302338,
+    "y": 64,
+    "z": 226.74282263306264
+  },
+  "velocity": {
+    "x": -0.000625,
+    "y": 0,
+    "z": 0.0003125
+  },
+  "yaw": 2.6016314162540475,
+  "pitch": 0,
+  "onGround": true,
+  "height": 0,
+  "effects": {},
+  "equipment": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "isValid": true,
+  "metadata": {
+    "0": 0,
+    "1": 300,
+    "2": "",
+    "3": false,
+    "4": false,
+    "5": false,
+    "6": {
+      "blockId": 12,
+      "itemCount": 1,
+      "itemDamage": 0
+    }
+  },
+  "objectType": "Dropped item",
+  "displayName": "Dropped item",
+  "entityType": 2,
+  "name": "item",
+  "kind": "Drops"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+Entity

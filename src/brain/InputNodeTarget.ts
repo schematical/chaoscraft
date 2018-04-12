@@ -101,6 +101,42 @@ class InputNodeTarget{
                 }
             }
         }
+
+
+        if(this.rawTargetData.meta_blockId){
+
+            let matchesABlock = false;
+            this.rawTargetData.meta_blockId.forEach((_itemId)=>{
+                if(
+                    entity.entityType == 2 && //2 is a dropped item
+                    entity.metadata[6]._itemId == _itemId
+                ){
+                    matchesABlock = true;
+                    return;
+                }
+            })
+            if(!matchesABlock){
+                return false;
+            }
+
+        }
+        if(this.rawTargetData.is_holding){
+            let matchesABlock = false;
+            this.rawTargetData.is_holding.forEach((_itemId)=>{
+                if(
+                    //2 is a dropped item
+                    entity.heldItem &&
+                    entity.heldItem.type == _itemId
+                ){
+                    matchesABlock = true;
+                    return;
+                }
+            })
+            if(!matchesABlock){
+                return false;
+            }
+        }
+
         if(this.rawTargetData.mobType){
             if(!entity.mobType || entity.mobType != this.rawTargetData.mobType){
                 return false;
@@ -255,7 +291,10 @@ class InputNodeTarget{
             this.rawTargetData.recipe = [this.rawTargetData.recipe];
         }
         (<[any]>this.rawTargetData.recipe).forEach((_recipeItem)=>{
-            minecraftData.recipe[_recipeItem].forEach((_recipePossibility)=>{
+            if(!minecraftData.recipes[_recipeItem]){
+                return console.error("Recipe Not found: ", _recipeItem);
+            }
+            minecraftData.recipes[_recipeItem].forEach((_recipePossibility)=>{
                 let requiredItemData = {};
                 _recipePossibility.inShape.forEach((row)=>{
                     row.forEach((itemId)=> {

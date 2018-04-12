@@ -130,7 +130,6 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
-        let tickStartDate = new Date();
         //console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(

@@ -333,20 +333,39 @@ class App {
             this.bot.on('diggingAborted', ()=>{
                 this.bot._currentlyDigging = null;
             })
+            this.bot.on('onCorrelateAttack',  (attacker,victim,weapon)=> {
+                if(attacker.username != this.identity.username){
+                    return;
+                }
+                return this.brain.app.socket.emit(
+                    'achivment',
+                    {
+                        username: this.identity.username,
+                        type:'attack',
+                        value:1
+                    }
+                );
+            });
             this.bot.smartDig = (block, cb) => {
                 if(this.bot._currentlyDigging){
                    //TODO: Cross Check
                     return;
                 }
+                this.bot.clearControlStates();
                 this.bot._currentlyDigging = block;
+               /* setTimeout(()=>{
+                    this.bot._currentlyDigging = null;
+                }, 10000);*/
                 //this.bot.chat("I am digging " +block.displayName);
                 this.bot.dig(this.bot._currentlyDigging, (err)=>{
-                    console.log("Digging Done: " + block.displayName);
+
                     this.bot._currentlyDigging = null;
                     if(err) {
                         console.error("Digging Error:", err.message, err.stack);
+                        return cb(err);
                     }
-                    return cb(err)
+                    console.log("Digging Done: " + block.displayName);
+                    return cb(null, block);
 
                 });
 

@@ -51,7 +51,6 @@ class InputNodeBase extends NodeBase{
     }
     evaluate():NodeEvaluateResult{
         let results:NodeEvaluateResult = null;
-
         switch(this.type){
             case(Enum.InputTypes.canDigBlock):
                 results = this.canDigBlock();
@@ -137,6 +136,12 @@ class InputNodeBase extends NodeBase{
             case(Enum.InputTypes.isIn):
                 results = this.isIn();
                 break;
+            case(Enum.InputTypes.hasEquipped):
+                results = this.hasEquipped();
+                break;
+            case(Enum.InputTypes.isHolding):
+                results = this.isHolding();
+                break;
 
             default:
                 throw new Error("Invalid `InputNodeBase.type`: " + this.type)
@@ -144,7 +149,6 @@ class InputNodeBase extends NodeBase{
         return results;
     }
     canDigBlock():NodeEvaluateResult{
-        let startDate = new Date().getTime();
         let blocks = this._target.findBlock({
             count: 20
         })
@@ -233,7 +237,7 @@ class InputNodeBase extends NodeBase{
     }
     canTouchBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock({
-            maxDistance: 2
+            maxDistance: 4
         });
 
         return new NodeEvaluateResult({
@@ -598,6 +602,33 @@ class InputNodeBase extends NodeBase{
            score: score,
            results: targets,
            node: this
+        });
+    }
+    hasEquipped():NodeEvaluateResult{
+
+        let results = [];
+console.log("TODO:Finish me");
+        this.brain.bot.entity.equipment.forEach(()=>{
+
+        });
+        return new NodeEvaluateResult({
+            score: results.length > 0 ? 1 : 0,
+            results: results,
+            node:this
+        });
+    }
+    isHolding():NodeEvaluateResult{
+        let results = [];
+
+        if(this._target.match(this.brain.bot.entity)){
+
+            results.push(this.brain.bot.entity);
+        }
+
+        return new NodeEvaluateResult({
+            score: results.length > 0 ? 1 : 0,
+            results: results,
+            node:this
         });
     }
 }
