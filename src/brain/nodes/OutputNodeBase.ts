@@ -126,9 +126,33 @@ class OutputNodeBase extends NodeBase{
         }
     }
     craft(options:any){
-        this.logActivationError("TODO:Write this - craft");
+        if(options.results.length == 0 || !options.results[0]){
+            this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to craft");
+            return false;
+        }
+        let target = options.results[0];
+        try{
+
+            let recipe = target;
+            let count = null;
+            let craftingTable = null;
+            this.brain.bot.craft(recipe, count, craftingTable, (err, results)=>{
+                if(err){
+                    this.logActivationError(this.brain.app.identity.username + ' - craft - Error 2', err.message);
+                    console.error(err.stack);
+                    return false;
+                }
+                console.log("CRAFT SUCCESS!!!!", results, recipe.produces);
+                this.brain.bot.chat("I crafted a " + recipe.produces);
+            });
+
+        }catch(err){
+            this.logActivationError(this.brain.app.identity.username + ' - craft - Error', err.message);
+            console.error(err.stack);
+            return false;
+        }
         return true;
-        //this.brain.bot.craft(/*recipe, count, craftingTable, [callback]*/);
+
         /*
             recipe - A Recipe instance. See bot.recipesFor.
             count - How many times you wish to perform the operation. If you want to craft planks into 8 sticks, you would set count to 2. null is an alias for 1.

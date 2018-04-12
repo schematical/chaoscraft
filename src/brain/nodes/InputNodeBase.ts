@@ -150,7 +150,8 @@ class InputNodeBase extends NodeBase{
     }
     canDigBlock():NodeEvaluateResult{
         let blocks = this._target.findBlock({
-            count: 20
+            count: 20,
+            maxDistance: 2
         })
         let results = [];
 
@@ -237,7 +238,7 @@ class InputNodeBase extends NodeBase{
     }
     canTouchBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock({
-            maxDistance: 4
+            maxDistance: 2
         });
 
         return new NodeEvaluateResult({

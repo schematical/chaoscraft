@@ -27,7 +27,8 @@ class SocketManager{
 
         });
         this.socket.emit('client_hello', {
-            username: process.env.BOT_USERNAME || null
+            username: process.env.BOT_USERNAME || null,
+            env: process.env.NODE_ENV
         });
         this.socket.on('request_handshake', ()=>{
             if(!this.app.identity){

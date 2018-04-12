@@ -281,8 +281,18 @@ class InputNodeTarget{
             default:
                 throw new Error("Not a valid target type for `findRecipeInInventory`: " + this.rawTargetData.type)
         }
+
+
+        return this.node.brain.app.bot.recipesFor(
+            this.rawTargetData.recipe,
+            this.rawTargetData.metadata || null,
+            this.rawTargetData.minResultCount || null,
+           /* options.craftingTable || */null//TODO: Search for touchable crafting tables
+        )
+
+
         //Get requirements
-        let minecraftData = MinecraftData(config.get('minecraft.version'));
+        /*let minecraftData = MinecraftData(config.get('minecraft.version'));
 
         let recipes = [];
 
@@ -296,6 +306,9 @@ class InputNodeTarget{
             }
             minecraftData.recipes[_recipeItem].forEach((_recipePossibility)=>{
                 let requiredItemData = {};
+                if(!_recipePossibility || !_recipePossibility.inShape){
+                    return console.error("No recipe.inShape for: ", _recipeItem, _recipePossibility);
+                }
                 _recipePossibility.inShape.forEach((row)=>{
                     row.forEach((itemId)=> {
                         requiredItemData[itemId] = requiredItemData[itemId] || 0;
@@ -304,7 +317,8 @@ class InputNodeTarget{
                 })
                 recipes.push({
                     produces:_recipeItem,
-                    requires:requiredItemData
+                    requires:requiredItemData,
+                    recipe: _recipePossibility
                 });
             })
 
@@ -329,7 +343,7 @@ class InputNodeTarget{
                 }
 
 
-                results.push(inventorySlot);
+                //results.push(inventorySlot);
 
             })
             let produces = null;
@@ -339,10 +353,13 @@ class InputNodeTarget{
                     produces = satisfied[itemId];
                 }
             })
+            if(produces){
+                results.push(recipeData.recipe);
+            }
 
         })
 
-        return results;
+        return results;*/
     }
 }
 export { InputNodeTarget }
