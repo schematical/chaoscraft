@@ -353,9 +353,9 @@ class App {
                 }
                 this.bot.clearControlStates();
                 this.bot._currentlyDigging = block;
-               /* setTimeout(()=>{
+                setTimeout(()=>{
                     this.bot._currentlyDigging = null;
-                }, 10000);*/
+                }, 4000);
                 //this.bot.chat("I am digging " +block.displayName);
                 this.bot.dig(this.bot._currentlyDigging, (err)=>{
 
@@ -475,9 +475,7 @@ class App {
         this.tickCount += 1;
         this.brain.processTick();
         this._tickEvents = [];
-        //let duration = Math.floor((new Date().getTime() - this.bornDate.getTime()) / 1000);
-        //console.log("TICK:", this.tickCount % 60);
-        if(this.tickCount % 60 == 0){
+        if(this.tickCount % 30 == 0){//15 seconds
             this.pong();
         }
         let nextDayTime = (this.daysAlive + 1) * (60 * 20);

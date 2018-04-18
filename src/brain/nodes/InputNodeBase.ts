@@ -146,6 +146,7 @@ class InputNodeBase extends NodeBase{
             default:
                 throw new Error("Invalid `InputNodeBase.type`: " + this.type)
         }
+
         return results;
     }
     canDigBlock():NodeEvaluateResult{
@@ -238,7 +239,7 @@ class InputNodeBase extends NodeBase{
     }
     canTouchBlock():NodeEvaluateResult{
         let targetResults:Array<any> = this._target.findBlock({
-            maxDistance: 2
+            maxDistance: 1
         });
 
         return new NodeEvaluateResult({

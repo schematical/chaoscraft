@@ -229,7 +229,7 @@ class InputNodeTarget{
             point: this.node.brain.bot.entity.position,
             matching: this.rawTargetData.block,
             maxDistance: options.maxDistance || this.rawTargetData.maxDistance || 20,
-            count: options.count || this.rawTargetData.count || 1,
+            count: options.count || this.rawTargetData.count || 20,
         })
     }
     findInventory(options?:any):Array<any>{

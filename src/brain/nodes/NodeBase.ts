@@ -60,6 +60,7 @@ class NodeBase{
      * This method goes through all dependants and sees what they evaluate to
      */
     public evaluate():NodeEvaluateResult{
+
         let score = 0;
         let highestScore = 0;
         let highestResult = null;

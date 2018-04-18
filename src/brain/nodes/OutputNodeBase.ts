@@ -6,16 +6,30 @@ import { Enum } from 'chaoscraft-shared'
 import * as Vec3 from 'vec3'
 
 import * as config from 'config';
-
+import {NodeEvaluateResult} from "../NodeEvaluateResult";
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
     protected _activationCount:number = 0;
     protected _activationErrorCount:number = 0;
+    protected _cooldown:number = 0;
+
     constructor (options:any){
         super(options);
 
     }
+    evaluate():NodeEvaluateResult{
 
+        if(this._cooldown > 0){
+            this._cooldown -= 1;
+            return new NodeEvaluateResult({
+                score: 0,
+                results: [],
+                node: this
+            });
+        }
+        let result:NodeEvaluateResult = super.evaluate();
+        return result;
+    }
 
     logActivationError(data:any, data2?:any){
         this._activationErrorCount += 1;
@@ -29,6 +43,7 @@ class OutputNodeBase extends NodeBase{
     }
     activate(options:any):boolean{
         this._activationCount += 1;
+        this._cooldown = this.rawNode.cooldown || 8;
         switch(this.type){
             case(Enum.OutputTypes.navigateTo):
                 return this.navigateTo(options);
@@ -142,8 +157,16 @@ class OutputNodeBase extends NodeBase{
                     console.error(err.stack);
                     return false;
                 }
-                console.log("CRAFT SUCCESS!!!!", results, recipe.produces);
-                this.brain.bot.chat("I crafted a " + recipe.produces);
+                console.log("CRAFT SUCCESS!!!!", results, recipe);
+                this.brain.bot.chat("I crafted  " + recipe.result.count + " of " + recipe.result.id);
+                return this.brain.app.socket.emit(
+                    'achivment',
+                    {
+                        username: this.brain.app.identity.username,
+                        type:'craft',
+                        value:1
+                    }
+                );
             });
 
         }catch(err){
@@ -334,7 +357,8 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No results found to look at");
             return false;
         }
-        let target = options.results[0];
+        //let target = options.results[0];
+        let target = options.results[Math.floor(Math.random() * options.results.length)]
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
@@ -381,7 +405,8 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - dig - Error',"No results found to `dig`");
             return false;
         }
-        let target = options.results[0];
+        let index = Math.floor(Math.random() * options.results.length);
+        let target = options.results[index];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
 
@@ -390,6 +415,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
+            this.brain.bot.chat("I am digging: " + target.displayName + '  ' + index + ' out of ' + options.results.length + ' possable blocks');
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
