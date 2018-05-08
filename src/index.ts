@@ -378,19 +378,30 @@ class App {
             this.bot.smartPlaceBlock =   (referenceBlock, faceVector, cb) => {
                 if (!this.bot.heldItem) return cb(new Error('must be holding an item to place a block'));
                 let maxDist = 7;
-                let targetPosition = referenceBlock.position;/*this.bot.entity.position.offset(
-                    Math.floor(Math.random() * maxDist * 2) - maxDist,
-                    Math.floor(Math.random() * maxDist * 2) - maxDist,
-                    Math.floor(Math.random() * maxDist * 2) - maxDist
-                );*/;
-                let offsetX = 0.5;//Math.random();
-                let offsetY = 0.5;//Math.random();
-                let offsetZ = 0.5;//Math.random();
+                let targetPosition = referenceBlock.position;
+                let offsetX = 0.5;
+                let offsetY = 0.5;
+                let offsetZ = 0.5;
                 this.bot.lookAt(targetPosition.offset(offsetX, offsetY, offsetZ), false, () => {
                     // TODO: tell the server that we are sneaking while doing this
                     //this.bot.setControlState('sneak', true);
                     this.bot._client.write('arm_animation', { hand: 1 })
                     const pos = referenceBlock.position
+
+
+
+
+                    const dest = pos.plus(faceVector)
+                    const eventName = `blockUpdate:${dest}`
+                    let onBlockUpdate = (oldBlock, newBlock)=> {
+                        this.bot.removeListener(eventName, onBlockUpdate)
+                        if (oldBlock.type === newBlock.type) {
+                            return cb(new Error(`No block has been placed : the block is still ${oldBlock.name}`))
+                        } else {
+                            return cb()
+                        }
+                    }
+                    this.bot.on(eventName, onBlockUpdate);
 
                     this.bot._client.write('block_place', {
                         location: pos,
@@ -400,19 +411,6 @@ class App {
                         cursorY: 0.5,//Math.random(),
                         cursorZ: 0.5//Math.random()
                     })
-
-
-                    const dest = pos.plus(faceVector)
-                    const eventName = `blockUpdate:${dest}`
-                    let onBlockUpdate = (oldBlock, newBlock)=> {
-                        this.bot.removeListener(eventName, onBlockUpdate)
-                        if (oldBlock.type === newBlock.type) {
-                            cb(new Error(`No block has been placed : the block is still ${oldBlock.name}`))
-                        } else {
-                            cb()
-                        }
-                    }
-                    this.bot.on(eventName, onBlockUpdate);
 
                 })
             }

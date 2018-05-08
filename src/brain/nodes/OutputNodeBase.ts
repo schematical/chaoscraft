@@ -378,6 +378,19 @@ class OutputNodeBase extends NodeBase{
             let vec = new Vec3(
                 x,y,z
             );
+
+
+            this.brain.app.socket.emit(
+                'achivment',
+                {
+                    username: this.brain.app.identity.username,
+                    type:'place_block_attempt',
+                    value:1
+                }
+            );
+
+
+
             this.brain.bot.smartPlaceBlock(target, vec, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
