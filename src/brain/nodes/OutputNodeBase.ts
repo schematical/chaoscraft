@@ -151,6 +151,14 @@ class OutputNodeBase extends NodeBase{
             let recipe = target;
             let count = null;
             let craftingTable = null;
+            return this.brain.app.socket.emit(
+                'achivment',
+                {
+                    username: this.brain.app.identity.username,
+                    type:'craft_attempt',
+                    value:1
+                }
+            );
             this.brain.bot.craft(recipe, count, craftingTable, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - craft - Error 2', err.message);
@@ -262,6 +270,14 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - trade - Error', err.message);
             return false;
         }
+        this.brain.app.socket.emit(
+            'achivment',
+            {
+                username: this.brain.app.identity.username,
+                type:'trade',
+                value:1
+            }
+        );
         return true;
     }
     attack(options:any):boolean{
@@ -281,6 +297,14 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
             return false;
         }
+        this.brain.app.socket.emit(
+            'achivment',
+            {
+                username: this.brain.app.identity.username,
+                type:'attack',
+                value:1
+            }
+        );
         return true;
     }
     useOn(options:any):boolean{
@@ -315,6 +339,14 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - equip - Error', err.message);
             return false;
         }
+        this.brain.app.socket.emit(
+            'achivment',
+            {
+                username: this.brain.app.identity.username,
+                type:'equip',
+                value:1
+            }
+        );
         return true;
     }
     unequip(options:any):boolean{
@@ -390,7 +422,7 @@ class OutputNodeBase extends NodeBase{
             );
 
 
-
+            this.brain.bot.chat("I am trying to place block: " + this.brain.app.bot.heldItem.displayName + ' next to ' + target.displayName);
             this.brain.bot.smartPlaceBlock(target, vec, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
