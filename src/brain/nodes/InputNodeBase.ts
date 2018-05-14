@@ -609,10 +609,18 @@ class InputNodeBase extends NodeBase{
     hasEquipped():NodeEvaluateResult{
 
         let results = [];
-console.log("TODO:Finish me");
-        this.brain.bot.entity.equipment.forEach(()=>{
 
-        });
+
+            this.brain.bot.entity.equipment.forEach((equipmentSlot)=>{
+                if(!equipmentSlot){
+                    return;
+
+                }
+
+                console.log("TODO:Finish me");
+            });
+
+
         return new NodeEvaluateResult({
             score: results.length > 0 ? 1 : 0,
             results: results,

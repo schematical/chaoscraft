@@ -151,7 +151,7 @@ class OutputNodeBase extends NodeBase{
             let recipe = target;
             let count = null;
             let craftingTable = null;
-            return this.brain.app.socket.emit(
+            this.brain.app.socket.emit(
                 'achivment',
                 {
                     username: this.brain.app.identity.username,
@@ -331,22 +331,37 @@ class OutputNodeBase extends NodeBase{
             if(this.brain.app.bot.heldItem && this.brain.app.bot.heldItem.type == target.type){
                 return true;
             }
+            this.brain.app.socket.emit(
+                'achivment',
+                {
+                    username: this.brain.app.identity.username,
+                    type:'equip_attempt',
+                    value:1
+                }
+            );
             this.brain.bot.equip(
                 target,
-                this.rawNode.destination || 'hand'
+                this.rawNode.destination || 'hand',
+                (err)=>{
+                    if(err){
+                        this.logActivationError(this.brain.app.identity.username + ' - equip - cb Error', err.message);
+                        return false;
+                    }
+                    this.brain.app.socket.emit(
+                        'achivment',
+                        {
+                            username: this.brain.app.identity.username,
+                            type:'equip',
+                            value:1
+                        }
+                    );
+                }
             );
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - equip - Error', err.message);
             return false;
         }
-        this.brain.app.socket.emit(
-            'achivment',
-            {
-                username: this.brain.app.identity.username,
-                type:'equip',
-                value:1
-            }
-        );
+
         return true;
     }
     unequip(options:any):boolean{
