@@ -352,7 +352,7 @@ class OutputNodeBase extends NodeBase{
                         this.brain.bot.chat("Equipping  " + options.results[0].displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
-                    this.brain.bot.chat("I successfully equipped  " + options.results[0].displayName + ' to my ' + destination + '!!');
+                    this.brain.bot.chat("I successfully equipped  " + options.results[0].displayName + ' to my ' + destination + '. My held item is ' + this.brain.app.bot.heldItem.displayName + '!!');
 
                     this.brain.app.socket.emit(
                         'achivment',
