@@ -326,7 +326,8 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to look at");
             return false;
         }
-        let target = options.results[0];
+        //let target = options.results[0];
+        let target = options.results[Math.floor(Math.random() * options.results.length)]
         try {
             if(this.brain.app.bot.heldItem && this.brain.app.bot.heldItem.type == target.type){
                 return true;
@@ -339,14 +340,20 @@ class OutputNodeBase extends NodeBase{
                     value:1
                 }
             );
+            let destination = this.rawNode.destination || 'hand';
+            this.brain.bot.chat("I am trying to equip: " + options.results[0].displayName + ' to my ' + destination);
+
             this.brain.bot.equip(
                 target,
-                this.rawNode.destination || 'hand',
+                destination,
                 (err)=>{
                     if(err){
                         this.logActivationError(this.brain.app.identity.username + ' - equip - cb Error', err.message);
+                        this.brain.bot.chat("Equipping  " + options.results[0].displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
+                    this.brain.bot.chat("I successfully equipped  " + options.results[0].displayName + ' to my ' + destination + '!!');
+
                     this.brain.app.socket.emit(
                         'achivment',
                         {
@@ -369,7 +376,8 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - unequip - Error',"No results found to look at");
             return false;
         }
-        let target = options.results[0];
+        //let target = options.results[0];
+        let target = options.results[Math.floor(Math.random() * options.results.length)]
         try{
             this.brain.bot.unequip(target, this.rawNode.destination);
         }catch(err){
@@ -383,7 +391,8 @@ class OutputNodeBase extends NodeBase{
             this.logActivationError(this.brain.app.identity.username + ' - activateBlock - Error', "No results found to activateBlock");
             return false;
         }
-        let target = options.results[0];
+        //let target = options.results[0];
+        let target = options.results[Math.floor(Math.random() * options.results.length)]
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
@@ -409,9 +418,13 @@ class OutputNodeBase extends NodeBase{
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
-            if(!target.digTime){
+            if(!target || !target.digTime){
                 this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Place Block Type:: " + target.type);
                 return false;
+            }
+            if(!this.brain.app.bot.heldItem){
+                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"I am not holding an item... ");
+                return true;
             }
 
             let x = 0;
