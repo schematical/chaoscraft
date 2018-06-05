@@ -52,6 +52,93 @@ class InputNodeTarget{
             }
 
         }
+
+       if(!this.matchPosition()){
+           return false;
+       }
+
+
+        return true;
+    }
+    matchPosition(){
+        if(!this.rawTargetData.position){
+            return true;
+        }
+
+        if(
+            !(
+                this.rawTargetData.position.xDelta &&
+                this.rawTargetData.position.yDelta &&
+                this.rawTargetData.position.zDelta
+            )
+        ) {
+            throw new Error("Invalid `position` data");
+        }
+        let newPosition = _.clone(this.rawTargetData.position);
+        let fortyFiveDegrees = Math.PI() / 4;
+        let facing = null;
+        let rotation = null;
+        if(this.node.brain.bot.position.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.position.yaw <=  fortyFiveDegrees){
+            //They are facing north?
+            facing = 'n';
+            rotation = 0;
+        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees  || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 3){
+            //They are facing east
+            facing = 'e';
+            rotation = fortyFiveDegrees * 2;
+        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees * 3 || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 5){
+            //They are facing south
+            facing = 's';
+            rotation = fortyFiveDegrees * 4;
+        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees * 5 || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 7){
+            //They are facing west
+            facing = 'w';
+            rotation = fortyFiveDegrees * 6;
+        }
+        //We only need to rotate x and z
+        let translatePoint = (property)=>{
+            let tanMin = newPosition.zDelta[property] / newPosition.xDelta[property];
+            let hypotinuse = Math.sqrt(Math.pow(newPosition.zDelta[property], 2) * Math.pow(newPosition.xDelta[property], 2))
+            let aTanMin = Math.atan(tanMin);
+            newPosition.zDelta[property] = Math.sin(aTanMin + rotation) * hypotinuse;
+            newPosition.xDelta[property] = Math.cos(aTanMin + rotation) * hypotinuse;
+
+        }
+        translatePoint('min');
+        translatePoint('max');
+
+        if(
+            newPosition.zDelta.min > newPosition.zDelta.max
+        ){
+            let tmpMin = newPosition.zDelta.min;
+            newPosition.zDelta.min = newPosition.zDelta.max;
+            newPosition.zDelta.max = tmpMin;
+        }
+
+        if(
+            newPosition.xDelta.min > newPosition.xDelta.max
+        ){
+            let tmpMin = newPosition.xDelta.min;
+            newPosition.xDelta.min = newPosition.xDelta.max;
+            newPosition.xDelta.max = tmpMin;
+        }
+
+
+        if(
+            !(
+                this.node.brain.bot.position.x > newPosition.xDelta.min &&
+                this.node.brain.bot.position.x < newPosition.xDelta.max &&
+
+                this.node.brain.bot.position.y > newPosition.yDelta.min &&
+                this.node.brain.bot.position.y < newPosition.yDelta.max &&
+
+                this.node.brain.bot.position.z > newPosition.zDelta.min &&
+                this.node.brain.bot.position.z < newPosition.zDelta.max
+            )
+        ){
+            return false;
+        }
+
         return true;
     }
     matchItem(item:any):boolean{
@@ -162,6 +249,9 @@ class InputNodeTarget{
             if(entity.onGround != this.rawTargetData.onGround){
                 return false;
             }
+        }
+        if(!this.matchPosition()){
+            return false;
         }
 
 

@@ -32,6 +32,7 @@ class App {
     protected connectionCheckInterval = null;
     protected connectionAttemptStartDate = null;
     protected lastWorldAge:number = 0;
+    //protected entityPositionMatrix:{};
     constructor () {
         console.log("Starting");
         this.connectionCheckInterval = setInterval(this.connectionCheck.bind(this), 10 * 1000);
@@ -294,7 +295,10 @@ class App {
             this.setupEventListenter('move');
             this.setupEventListenter('forcedMoves');
             //TODO Move this to a plugin
+            /*this.bot.on('entityMoved', (e)=>{
+                //Update entityPositionMatrix
 
+            })*/
 
             this.bot.visiblePosition =  (a, b) => {
                 let v = b.minus(a)
