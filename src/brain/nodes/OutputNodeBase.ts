@@ -7,15 +7,21 @@ import * as Vec3 from 'vec3'
 
 import * as config from 'config';
 import {NodeEvaluateResult} from "../NodeEvaluateResult";
+import { NodeTarget } from '../NodeTarget'
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
     protected _activationCount:number = 0;
     protected _activationErrorCount:number = 0;
     protected _cooldown:number = 0;
-
+    protected _target:NodeTarget = null;
     constructor (options:any){
+
         super(options);
 
+        this._target = new NodeTarget({
+            node:this,
+            rawTargetData: this.rawNode.target
+        });
     }
     evaluate():NodeEvaluateResult{
 
@@ -45,8 +51,7 @@ class OutputNodeBase extends NodeBase{
         this._activationCount += 1;
         this._cooldown = this.rawNode.cooldown || 8;
         switch(this.type){
-            case(Enum.OutputTypes.navigateTo):
-                return this.navigateTo(options);
+
             case(Enum.OutputTypes.chat):
                 return this.chat(options);
             case(Enum.OutputTypes.walkForward):
@@ -55,8 +60,8 @@ class OutputNodeBase extends NodeBase{
                 return this.walkBack();
             case(Enum.OutputTypes.stopWalking):
                 return this.stopWalking();
-            case(Enum.OutputTypes.lookAt):
-                return this.lookAt(options);
+            /*case(Enum.OutputTypes.lookAt):
+                return this.lookAt(options);*/
        
             case(Enum.OutputTypes.dig):
                 return this.dig(options);
@@ -134,23 +139,70 @@ class OutputNodeBase extends NodeBase{
                 return this.trade(options);
             case(Enum.OutputTypes.openEntity):
                 return this.openEntity(options);
-            case(Enum.OutputTypes.walkTo):
-                return this.walkTo(options);
+           /* case(Enum.OutputTypes.walkTo):
+                return this.walkTo(options);*/
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
     }
-    craft(options:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to craft");
+
+    attack(options:any):boolean{
+
+        let targets = this._target.findEntity();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
+        if(this.brain.bot.entity.position.distanceTo(target.position) > 10){
+            return false;
+        }
+        this.brain.bot.chat("I am attacking " + target.type + " - " + target.displayName + " - " + target.username + "!");
+        try{
+            this.brain.bot.attack(target);
+        }catch(err){
+            this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
+            return false;
+        }
+        this.brain.app.socket.emit(
+            'achivment',
+            {
+                username: this.brain.app.identity.username,
+                type:'attack',
+                value:1
+            }
+        );
+        return true;
+    }
+
+
+    craft(options:any){
+        let targets = this._target.findRecipeInInventory();
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to activateEntity");
+            return false;
+        }
+        let target = targets[0];
         try{
 
             let recipe = target;
             let count = null;
             let craftingTable = null;
+            for(let x = this.brain.bot.position.x - 2; x <= this.brain.bot.position.x + 2; x ++){
+                for(let y = this.brain.bot.position.y - 2; y <= this.brain.bot.position.y + 2; y ++){
+                    for(let z = this.brain.bot.position.z - 2; z <= this.brain.bot.position.z + 2; z ++){
+                        let block = this.brain.bot.blockAt(new Vec3(x,y,z));
+                        if(block.type == 58){
+                            craftingTable = block;
+                        }
+                    }
+                }
+            }
+            if(!craftingTable){
+                this.logActivationError(this.brain.app.identity.username + ' - craft - Error: No crafting table near');
+                return false;
+            }
             this.brain.app.socket.emit(
                 'achivment',
                 {
@@ -215,11 +267,12 @@ class OutputNodeBase extends NodeBase{
     }
 
     openEntity(options?:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openEntity - Error', "No results found to openEntity");
+        let targets = this._target.findEntity();
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         try{
             this.brain.bot.openEntity(target);
         }catch(err){
@@ -229,11 +282,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     activateEntity(options?:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - activateEntity - Error', "No results found to activateEntity");
+        let targets = this._target.findEntity();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         try{
             this.brain.bot.activateEntity(target);
         }catch(err){
@@ -243,11 +298,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openVillager(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openVillager - Error', "No results found to openVillager");
+        let targets = this._target.findEntity();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         this.brain.bot.chat("I am openVillager " + target.name + "!");
         try{
             this.brain.bot.openVillager(target);
@@ -258,11 +315,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     trade(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - trade - Error', "No results found to trade");
+        let targets = this._target.findEntity();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         this.brain.bot.chat("I am trade " + target.name + "!");
         try{
             this.brain.bot.trade(target);
@@ -280,39 +339,15 @@ class OutputNodeBase extends NodeBase{
         );
         return true;
     }
-    attack(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0] || !options.results[0].position || !options.results[0].entityType){
-            this.logActivationError(this.brain.app.identity.username + ' - attack - Error',"No results found to attack");
-            return false;
-        }
-        let target = options.results[0];
 
-        if(this.brain.bot.entity.position.distanceTo(target.position) > 10){
-            return false;
-        }
-        this.brain.bot.chat("I am attacking " + target.type + " - " + target.displayName + " - " + target.username + "!");
-        try{
-            this.brain.bot.attack(target);
-        }catch(err){
-            this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
-            return false;
-        }
-        this.brain.app.socket.emit(
-            'achivment',
-            {
-                username: this.brain.app.identity.username,
-                type:'attack',
-                value:1
-            }
-        );
-        return true;
-    }
     useOn(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - useOn - Error',"No results found to useOn");
+        let targets = this._target.findEntity();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         try{
             this.brain.bot.useOn(target);
         }catch(err){
@@ -322,12 +357,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     equip(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to look at");
+        let targets = this._target.findInventory();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        //let target = options.results[0];
-        let target = options.results[Math.floor(Math.random() * options.results.length)]
+        let target = targets[0];
         try {
             if(this.brain.app.bot.heldItem && this.brain.app.bot.heldItem.type == target.type){
                 return true;
@@ -376,12 +412,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     unequip(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - unequip - Error',"No results found to look at");
+        let targets = this._target.findInventory();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - unequip - Error', "No results found to unequip");
             return false;
         }
-        //let target = options.results[0];
-        let target = options.results[Math.floor(Math.random() * options.results.length)]
+        let target = targets[0];
         try{
             this.brain.bot.unequip(target, this.rawNode.destination);
         }catch(err){
@@ -391,12 +428,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     activateBlock(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - activateBlock - Error', "No results found to activateBlock");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to activateBlock");
             return false;
         }
-        //let target = options.results[0];
-        let target = options.results[Math.floor(Math.random() * options.results.length)]
+        let target = targets[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
@@ -413,12 +451,13 @@ class OutputNodeBase extends NodeBase{
     }
 
     placeBlock(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No results found to look at");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to placeBlock");
             return false;
         }
-        //let target = options.results[0];
-        let target = options.results[Math.floor(Math.random() * options.results.length)]
+        let target = targets[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
@@ -478,12 +517,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     dig(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - dig - Error',"No results found to `dig`");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let index = Math.floor(Math.random() * options.results.length);
-        let target = options.results[index];
+        let target = targets[0];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
 
@@ -492,7 +532,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
-            this.brain.bot.chat("I am digging: " + target.displayName + '  ' + index + ' out of ' + options.results.length + ' possable blocks');
+            this.brain.bot.chat("I am digging: " + target.displayName + '  ' + 0/*index*/ + ' out of ' + options.results.length + ' possable blocks');
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
@@ -513,20 +553,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
 
-    navigateTo(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - navigateTo - Error', "No results found to look at");
-            return false;
-        }
-        let target = options.results[0];
-        try{
-            this.brain.bot.navigate.to(target.position);
-        }catch(err){
-            this.logActivationError(this.brain.app.identity.username + ' - navigateTo - Error', err.message);
-            return false;
-        }
-        return true;
-    }
+
     chat(options:any):boolean{
         if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - chat - Error', "No results found to look at");
@@ -541,7 +568,7 @@ class OutputNodeBase extends NodeBase{
         }
         return true;
     }
-    lookAt(options:any){
+    /*lookAt(options:any){
         if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', "No results found to look at");
             return false;
@@ -555,9 +582,9 @@ class OutputNodeBase extends NodeBase{
         }
 
         return true;
-    }
+    }*/
 
-    walkTo(options:any){
+    /*walkTo(options:any){
         if(options.results.length == 0 || !options.results[0]){
             this.logActivationError(this.brain.app.identity.username + ' - lookAt - Error', "No results found to look at");
             return false;
@@ -572,7 +599,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         return true;
-    }
+    }*/
 
     walkForward(){
         this.brain.bot.smartSetControlState('forward', true);
@@ -655,11 +682,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     tossStack(options:any):boolean{
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
+        let targets = this._target.findInventory();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         try{
             this.brain.bot.tossStack(target);
         }catch(err){
@@ -669,28 +698,30 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     toss(options:any):boolean{
-        //TODO: Write me
-        this.logActivationError(this.brain.app.identity.username + 'TODO: Write me');
-        return false;
-        /*if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to toss");
+        let targets = this._target.findInventory();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
+
         try{
             this.brain.bot.toss(target);
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
             return false;
         }
-        return true;*/
+        return true;
     }
     openChest(options:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
-            return false
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
+            return false;
         }
-        let target = options.results[0];
+        let target = targets[0];
         //TODO: Add some logic to find block at location if need be
         try{
             this.brain.bot.openChest(target);
@@ -702,12 +733,13 @@ class OutputNodeBase extends NodeBase{
 
     }
     openFurnace(options:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openFurnace - Error', "No results found to openChest");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
-        //TODO: Add some logic to find block at location if need be
+        let target = targets[0];
         try{
             this.brain.bot.openChest(target);
         }catch(err){
@@ -717,12 +749,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openDispenser(options:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openDispenser - Error',"No results found to openDispenser");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
-        //TODO: Add some logic to find block at location if need be
+        let target = targets[0];
         try{
             this.brain.bot.openDispenser(target);
         }catch(err){
@@ -732,12 +765,13 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
     openEnchantmentTable(options:any){
-        if(options.results.length == 0 || !options.results[0]){
-            this.logActivationError(this.brain.app.identity.username + ' - openEnchantmentTable - Error',"No results found to openEnchantmentTable");
+        let targets = this._target.findBlock();
+
+        if(targets.length == 0 || !targets[0]){
+            //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = options.results[0];
-        //TODO: Add some logic to find block at location if need be
+        let target = targets[0];
         try{
             this.brain.bot.openEnchantmentTable(target);
         }catch(err){

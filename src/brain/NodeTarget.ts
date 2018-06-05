@@ -1,8 +1,9 @@
 import { NodeBase } from './nodes/NodeBase'
 import * as _ from 'underscore'
+import * as vec3 from 'vec3';
 import * as MinecraftData from 'minecraft-data';
 import * as config from 'config'
-class InputNodeTarget{
+class NodeTarget{
     protected rawTargetData:any = null;
     protected _node:NodeBase = null;
     constructor(options){
@@ -29,7 +30,7 @@ class InputNodeTarget{
                 throw new Error("Invalid  `InputNodeTarget.type`: " + this.rawTargetData.type)
         }
     }
-    matchBlock(block:any):boolean{
+    matchBlock(block:any, options?:any):boolean{
         if(!block){
             return false;
         }
@@ -53,16 +54,43 @@ class InputNodeTarget{
 
         }
 
-       if(!this.matchPosition()){
+       if(
+           !options.skipMatchPosition &&
+           !this.matchPosition(block.position)
+       ){
            return false;
        }
 
 
         return true;
     }
-    matchPosition(){
-        if(!this.rawTargetData.position){
+    matchPosition(position){
+
+       let newPosition = this.translatePositionDeltaRange()
+        if(!newPosition){
             return true;
+        }
+
+        if(
+            !(
+                this.node.brain.bot.position.x + newPosition.xDelta.min < position.x &&
+                this.node.brain.bot.position.x + newPosition.xDelta.max > position.x  &&
+
+                this.node.brain.bot.position.y + newPosition.yDelta.min < position.y &&
+                this.node.brain.bot.position.y + newPosition.yDelta.max > position.y &&
+
+                this.node.brain.bot.position.z + newPosition.zDelta.min < position.z &&
+                this.node.brain.bot.position.z + newPosition.zDelta.max > position.z
+            )
+        ){
+            return false;
+        }
+
+        return true;
+    }
+    translatePositionDeltaRange(){
+        if(!this.rawTargetData.position){
+            return null;
         }
 
         if(
@@ -75,7 +103,7 @@ class InputNodeTarget{
             throw new Error("Invalid `position` data");
         }
         let newPosition = _.clone(this.rawTargetData.position);
-        let fortyFiveDegrees = Math.PI() / 4;
+        let fortyFiveDegrees:number = Math.PI / 4;
         let facing = null;
         let rotation = null;
         if(this.node.brain.bot.position.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.position.yaw <=  fortyFiveDegrees){
@@ -122,24 +150,7 @@ class InputNodeTarget{
             newPosition.xDelta.min = newPosition.xDelta.max;
             newPosition.xDelta.max = tmpMin;
         }
-
-
-        if(
-            !(
-                this.node.brain.bot.position.x > newPosition.xDelta.min &&
-                this.node.brain.bot.position.x < newPosition.xDelta.max &&
-
-                this.node.brain.bot.position.y > newPosition.yDelta.min &&
-                this.node.brain.bot.position.y < newPosition.yDelta.max &&
-
-                this.node.brain.bot.position.z > newPosition.zDelta.min &&
-                this.node.brain.bot.position.z < newPosition.zDelta.max
-            )
-        ){
-            return false;
-        }
-
-        return true;
+        return newPosition;
     }
     matchItem(item:any):boolean{
         if(this.rawTargetData.type){
@@ -178,7 +189,7 @@ class InputNodeTarget{
             }else{
                 let matchesABlock = false;
                 this.rawTargetData.entityType.forEach((_entityType)=>{
-                    if(entity.entityType == _entityType){
+                    if(entity.type/*entityType*/ == _entityType){
                         matchesABlock = true;
                         return;
                     }
@@ -250,7 +261,7 @@ class InputNodeTarget{
                 return false;
             }
         }
-        if(!this.matchPosition()){
+        if(!this.matchPosition(entity.position)){
             return false;
         }
 
@@ -315,12 +326,37 @@ class InputNodeTarget{
         if(!this.rawTargetData.block){
             throw new Error(this.node.id + '- not valid');
         }
-        return this.node.brain.bot.findBlockSync({
+        //TODO: Rewrite
+        let newPosition = this.translatePositionDeltaRange()
+        if(!newPosition){
+            throw new Error(this.node.id + '- no valid `positionDeltaRange`');
+        }
+        let results = [];
+        for(let x = this.node.brain.bot.position.x + newPosition.xDelta.min; x <= this.node.brain.bot.position.x + newPosition.xDelta.max; x++){
+            for(let y = this.node.brain.bot.position.y + newPosition.yDelta.min; y <= this.node.brain.bot.position.y + newPosition.yDelta.max; y++){
+                for(let z = this.node.brain.bot.position.z + newPosition.zDelta.min; z <= this.node.brain.bot.position.z + newPosition.zDelta.max; z++){
+                    let block = this.node.brain.bot.blockAt(
+                        new vec3(x, y, z)
+                    );
+                    if(
+                        this.matchBlock(
+                            block, {
+                                skipMatchPosition:true
+                            }
+                        )
+                    ){
+                        results.push(block);
+                    }
+                }
+            }
+        }
+        return results;
+        /*return this.node.brain.bot.findBlockSync({
             point: this.node.brain.bot.entity.position,
             matching: this.rawTargetData.block,
             maxDistance: options.maxDistance || this.rawTargetData.maxDistance || 20,
             count: options.count || this.rawTargetData.count || 20,
-        })
+        })*/
     }
     findInventory(options?:any):Array<any>{
         switch(this.rawTargetData.type){
@@ -452,4 +488,4 @@ class InputNodeTarget{
         return results;*/
     }
 }
-export { InputNodeTarget }
+export { NodeTarget }

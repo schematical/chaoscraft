@@ -4,7 +4,7 @@
 import { Enum } from 'chaoscraft-shared'
 import * as _ from 'underscore'
 import { NodeBase } from './NodeBase'
-import { InputNodeTarget } from '../InputNodeTarget'
+import { NodeTarget } from '../NodeTarget'
 //import { TickEvent } from "../TickEvent";
 import { NodeEvaluateResult } from "../NodeEvaluateResult";
 import * as Vec3 from 'vec3';
@@ -14,13 +14,13 @@ interface iTickEvent{
     data:Array<any>;
 }
 class InputNodeBase extends NodeBase{
-    protected _target:InputNodeTarget = null;
+    protected _target:NodeTarget = null;
     constructor (options){
         super(options);
         if(!this.rawNode.target){
             //IDK...
         }
-        this._target = new InputNodeTarget({
+        this._target = new NodeTarget({
             node:this,
             rawTargetData: this.rawNode.target
         });
@@ -52,13 +52,21 @@ class InputNodeBase extends NodeBase{
     evaluate():NodeEvaluateResult{
         let results:NodeEvaluateResult = null;
         switch(this.type){
-            case(Enum.InputTypes.canDigBlock):
-                results = this.canDigBlock();
-            break
+
             case(Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
                 break
-            case(Enum.InputTypes.canSeeEntity):
+            case(Enum.InputTypes.blockAt):
+                results = this.blockAt();
+                break;
+            case(Enum.InputTypes.entityAt):
+                results = this.blockAt();
+                break;
+           /*
+            case(Enum.InputTypes.canDigBlock):
+            results = this.canDigBlock();
+            break
+           case(Enum.InputTypes.canSeeEntity):
                 results = this.canSeeEntity();
             break;
             case(Enum.InputTypes.canSeeBlock):
@@ -66,7 +74,7 @@ class InputNodeBase extends NodeBase{
             break;
             case(Enum.InputTypes.canTouchBlock):
                 results = this.canTouchBlock();
-                break;
+                break;*/
             case(Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
             break;
@@ -149,11 +157,10 @@ class InputNodeBase extends NodeBase{
 
         return results;
     }
-    canDigBlock():NodeEvaluateResult{
-        let blocks = this._target.findBlock({
-            count: 20,
-            maxDistance: 2
-        })
+
+
+    blockAt():NodeEvaluateResult{
+        let blocks = this._target.findBlock({});
         let results = [];
 
         blocks.forEach((block)=>{
@@ -169,6 +176,20 @@ class InputNodeBase extends NodeBase{
             node:this
         });
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     onCorrelateAttack():NodeEvaluateResult{
 
         let results:Array<iTickEvent> = this.searchTickEvents('onCorrelateAttack');
@@ -207,9 +228,29 @@ class InputNodeBase extends NodeBase{
             node:this
         });
     }
-    /**
+/*    canDigBlock():NodeEvaluateResult{
+        let blocks = this._target.findBlock({
+            count: 20,
+            maxDistance: 2
+        })
+        let results = [];
+
+        blocks.forEach((block)=>{
+            if(!this.brain.bot.canDigBlock(block)){
+                return false;
+            }
+            results.push(block);
+        })
+        //console.log("TIME:", (new Date().getTime() - startDate)/1000);
+        return new NodeEvaluateResult({
+            score: results.length > 0 ? 1 : 0,
+            results: results,
+            node:this
+        });
+    }
+    /!**
      * Returns a 1 or a 0 based on weither or not the player can see the position we are describing
-     */
+     *!/
     canSeeEntity():NodeEvaluateResult{
         let targetResults = this._target.findEntity();
 
@@ -247,7 +288,7 @@ class InputNodeBase extends NodeBase{
             results: targetResults,
             node:this
         });
-    }
+    }*/
 
     playerCollect():NodeEvaluateResult{
         let results:Array<iTickEvent> = this.searchTickEvents('playerCollect');
