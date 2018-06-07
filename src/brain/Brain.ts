@@ -166,7 +166,7 @@ class Brain{
             if(!activateResult){
                 if(node.errorThresholdHit){
 
-                    return this.app.socket.emit(
+                    return this.app.socket.debugEmit(
                         'client_node_error_threshold_hit',
                         {
                             node: evaluateResult.node.id,

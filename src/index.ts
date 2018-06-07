@@ -245,6 +245,15 @@ class App {
                     event:e
                 });
             })
+            this.bot.on('move', (e)=>{
+                this.socket.debugEmit('update_position', {
+                    x: this.bot.position.x,
+                    y: this.bot.position.y,
+                    z: this.bot.position.z,
+                    pitch: this.bot.pitch,
+                    yaw: this.bot.yaw
+                });
+            })
             this.bot.on("spawn", (e)=>{
                 console.log(this.identity.username + " Spawned");
                 this.settingUp = false;

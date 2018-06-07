@@ -8,7 +8,7 @@ class SocketManager{
     protected debug = null;
     protected app: any = null;
     protected socket:SocketIOClient.Socket = null;
-    protected isObserved:boolean = true;//TODO: Change this to false
+    protected isObserved:boolean = false;//TODO: Change this to false
     protected lastPingTimestamp:number = null;
 
     constructor(options:any){
@@ -26,6 +26,7 @@ class SocketManager{
             //}, 3000)
 
         });
+
         this.socket.emit('client_hello', {
             username: process.env.BOT_USERNAME || null,
             env: process.env.NODE_ENV
@@ -58,9 +59,18 @@ class SocketManager{
         this.socket.on('connect', ()=>{
             console.error("CONNECTED from the socket server!!!!!");
         });
+        this.socket.on('map_nearby_request', (payload)=>{
+            this.onMapNearbyRequest(payload);
+        })
     }
     public on(eventType, callback){
         this.socket.on(eventType, callback);
+    }
+    debugEmit(eventType, payload){
+        if(!this.isObserved){
+            return;
+        }
+        return this.emit(eventType, payload);
     }
     emit(eventType, payload){
         this.socket.emit(eventType, payload);
@@ -68,7 +78,31 @@ class SocketManager{
     sendFireOutputNode(payload){
         payload.username = this.app.identity.username;
         payload.results = [payload.results[0]]
-        this.socket.emit('client_fire_outputnode', payload);
+        this.socket.debugEmit('client_fire_outputnode', payload);
     }
+
+    onMapNearbyRequest(payload:any){
+
+        let blockData:any = {};
+        let range = 20;
+        for(let x = this.app.bot.position.x - range; x <= this.app.bot.position.x + range; x++){
+            for(let y = this.app.bot.position.y - range; y <= this.app.bot.position.y + range; y++){
+                for(let z = this.app.bot.position.z - range; z <= this.app.bot.position.z + range; z++){
+                    let block = this.app.bot.blockAt(x,y,z);
+                    blockData[x] = blockData[x] || {};
+                    blockData[x][y] =  blockData[x][y] || {};
+                    blockData[x][y][z] =  {
+                        type:block.type
+                    }
+                }
+            }
+        }
+
+        this.socket.emit('map_nearby_response', {
+            username: this.app.bot.username,
+            blockData:blockData
+        });
+    }
+
 }
 export { SocketManager }
