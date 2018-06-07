@@ -17,11 +17,12 @@ class OutputNodeBase extends NodeBase{
     constructor (options:any){
 
         super(options);
-
-        this._target = new NodeTarget({
-            node:this,
-            rawTargetData: this.rawNode.target
-        });
+        if(this.rawNode.target) {
+            this._target = new NodeTarget({
+                node: this,
+                rawTargetData: this.rawNode.target
+            });
+        }
     }
     evaluate():NodeEvaluateResult{
 
@@ -189,9 +190,9 @@ class OutputNodeBase extends NodeBase{
             let recipe = target;
             let count = null;
             let craftingTable = null;
-            for(let x = this.brain.bot.position.x - 2; x <= this.brain.bot.position.x + 2; x ++){
-                for(let y = this.brain.bot.position.y - 2; y <= this.brain.bot.position.y + 2; y ++){
-                    for(let z = this.brain.bot.position.z - 2; z <= this.brain.bot.position.z + 2; z ++){
+            for(let x = this.brain.bot.entity.position.x - 2; x <= this.brain.bot.entity.position.x + 2; x ++){
+                for(let y = this.brain.bot.entity.position.y - 2; y <= this.brain.bot.entity.position.y + 2; y ++){
+                    for(let z = this.brain.bot.entity.position.z - 2; z <= this.brain.bot.entity.position.z + 2; z ++){
                         let block = this.brain.bot.blockAt(new Vec3(x,y,z));
                         if(block.type == 58){
                             craftingTable = block;
@@ -506,7 +507,14 @@ class OutputNodeBase extends NodeBase{
                     {
                         username: this.brain.app.identity.username,
                         type:'place_block',
-                        value:1
+                        value:1,
+                        target: {
+                            position: {
+                                x: target.position.x,
+                                y: target.position.y,
+                                z: target.position.z
+                            }
+                        }
                     }
                 );
             });

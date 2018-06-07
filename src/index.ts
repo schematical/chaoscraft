@@ -246,10 +246,13 @@ class App {
                 });
             })
             this.bot.on('move', (e)=>{
+                if(!this.bot.entity.position){
+                    return;
+                }
                 this.socket.debugEmit('update_position', {
-                    x: this.bot.position.x,
-                    y: this.bot.position.y,
-                    z: this.bot.position.z,
+                    x: this.bot.entity.position.x,
+                    y: this.bot.entity.position.y,
+                    z: this.bot.entity.position.z,
                     pitch: this.bot.pitch,
                     yaw: this.bot.yaw
                 });

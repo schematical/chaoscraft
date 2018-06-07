@@ -73,14 +73,14 @@ class NodeTarget{
 
         if(
             !(
-                this.node.brain.bot.position.x + newPosition.xDelta.min < position.x &&
-                this.node.brain.bot.position.x + newPosition.xDelta.max > position.x  &&
+                this.node.brain.bot.entity.position.x + newPosition.xDelta.min < position.x &&
+                this.node.brain.bot.entity.position.x + newPosition.xDelta.max > position.x  &&
 
-                this.node.brain.bot.position.y + newPosition.yDelta.min < position.y &&
-                this.node.brain.bot.position.y + newPosition.yDelta.max > position.y &&
+                this.node.brain.bot.entity.position.y + newPosition.yDelta.min < position.y &&
+                this.node.brain.bot.entity.position.y + newPosition.yDelta.max > position.y &&
 
-                this.node.brain.bot.position.z + newPosition.zDelta.min < position.z &&
-                this.node.brain.bot.position.z + newPosition.zDelta.max > position.z
+                this.node.brain.bot.entity.position.z + newPosition.zDelta.min < position.z &&
+                this.node.brain.bot.entity.position.z + newPosition.zDelta.max > position.z
             )
         ){
             return false;
@@ -106,19 +106,19 @@ class NodeTarget{
         let fortyFiveDegrees:number = Math.PI / 4;
         let facing = null;
         let rotation = null;
-        if(this.node.brain.bot.position.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.position.yaw <=  fortyFiveDegrees){
+        if(this.node.brain.bot.entity.position.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.entity.position.yaw <=  fortyFiveDegrees){
             //They are facing north?
             facing = 'n';
             rotation = 0;
-        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees  || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 3){
+        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees  || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 3){
             //They are facing east
             facing = 'e';
             rotation = fortyFiveDegrees * 2;
-        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees * 3 || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 5){
+        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees * 3 || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 5){
             //They are facing south
             facing = 's';
             rotation = fortyFiveDegrees * 4;
-        }else if(this.node.brain.bot.position.yaw >  fortyFiveDegrees * 5 || this.node.brain.bot.position.yaw <= fortyFiveDegrees * 7){
+        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees * 5 || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 7){
             //They are facing west
             facing = 'w';
             rotation = fortyFiveDegrees * 6;
@@ -324,7 +324,7 @@ class NodeTarget{
     findBlock(options?:any):Array<any>{
         options = options || {};
         if(!this.rawTargetData.block){
-            throw new Error(this.node.id + '- not valid');
+            //throw new Error(this.node.id + '- not valid');
         }
         //TODO: Rewrite
         let newPosition = this.translatePositionDeltaRange()
@@ -332,9 +332,9 @@ class NodeTarget{
             throw new Error(this.node.id + '- no valid `positionDeltaRange`');
         }
         let results = [];
-        for(let x = this.node.brain.bot.position.x + newPosition.xDelta.min; x <= this.node.brain.bot.position.x + newPosition.xDelta.max; x++){
-            for(let y = this.node.brain.bot.position.y + newPosition.yDelta.min; y <= this.node.brain.bot.position.y + newPosition.yDelta.max; y++){
-                for(let z = this.node.brain.bot.position.z + newPosition.zDelta.min; z <= this.node.brain.bot.position.z + newPosition.zDelta.max; z++){
+        for(let x = this.node.brain.bot.entity.position.x + newPosition.xDelta.min; x <= this.node.brain.bot.entity.position.x + newPosition.xDelta.max; x++){
+            for(let y = this.node.brain.bot.entity.position.y + newPosition.yDelta.min; y <= this.node.brain.bot.entity.position.y + newPosition.yDelta.max; y++){
+                for(let z = this.node.brain.bot.entity.position.z + newPosition.zDelta.min; z <= this.node.brain.bot.entity.position.z + newPosition.zDelta.max; z++){
                     let block = this.node.brain.bot.blockAt(
                         new vec3(x, y, z)
                     );

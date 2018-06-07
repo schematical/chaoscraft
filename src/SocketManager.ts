@@ -4,6 +4,7 @@
 import * as io from 'socket.io-client'
 import * as config from 'config'
 import * as debug from 'debug'
+import * as vec3 from 'vec3'
 class SocketManager{
     protected debug = null;
     protected app: any = null;
@@ -78,17 +79,20 @@ class SocketManager{
     sendFireOutputNode(payload){
         payload.username = this.app.identity.username;
         payload.results = [payload.results[0]]
-        this.socket.debugEmit('client_fire_outputnode', payload);
+        this.debugEmit('client_fire_outputnode', payload);
     }
 
     onMapNearbyRequest(payload:any){
-
+        if(!this.app.bot.entity && !this.app.bot.entity.position){
+            return;
+        }
         let blockData:any = {};
         let range = 20;
-        for(let x = this.app.bot.position.x - range; x <= this.app.bot.position.x + range; x++){
-            for(let y = this.app.bot.position.y - range; y <= this.app.bot.position.y + range; y++){
-                for(let z = this.app.bot.position.z - range; z <= this.app.bot.position.z + range; z++){
-                    let block = this.app.bot.blockAt(x,y,z);
+
+        for(let x = Math.round(this.app.bot.entity.position.x) - range; x <=  Math.round(this.app.bot.entity.position.x) + range; x++){
+            for(let y =  Math.round(this.app.bot.entity.position.y) - range; y <=  Math.round(this.app.bot.entity.position.y) + range; y++){
+                for(let z =  Math.round(this.app.bot.entity.position.z) - range; z <=  Math.round(this.app.bot.entity.position.z) + range; z++){
+                    let block = this.app.bot.blockAt(new vec3(x,y,z));
                     blockData[x] = blockData[x] || {};
                     blockData[x][y] =  blockData[x][y] || {};
                     blockData[x][y][z] =  {

@@ -60,7 +60,7 @@ class InputNodeBase extends NodeBase{
                 results = this.blockAt();
                 break;
             case(Enum.InputTypes.entityAt):
-                results = this.blockAt();
+                results = this.entityAt();
                 break;
            /*
             case(Enum.InputTypes.canDigBlock):
@@ -161,18 +161,21 @@ class InputNodeBase extends NodeBase{
 
     blockAt():NodeEvaluateResult{
         let blocks = this._target.findBlock({});
-        let results = [];
 
-        blocks.forEach((block)=>{
-            if(!this.brain.bot.canDigBlock(block)){
-                return false;
-            }
-            results.push(block);
-        })
+        return new NodeEvaluateResult({
+            score: blocks.length > 0 ? 1 : 0,
+            results: blocks,
+            node:this
+        });
+    }
+
+    entityAt():NodeEvaluateResult{
+        let entities = this._target.findEntity();
+
         //console.log("TIME:", (new Date().getTime() - startDate)/1000);
         return new NodeEvaluateResult({
-            score: results.length > 0 ? 1 : 0,
-            results: results,
+            score: entities.length > 0 ? 1 : 0,
+            results: entities,
             node:this
         });
     }
