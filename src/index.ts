@@ -246,7 +246,7 @@ class App {
                 });
             })
             this.bot.on('move', (e)=>{
-                if(!this.bot.entity.position){
+                if(!this.bot.entity || !this.bot.entity.position){
                     return;
                 }
                 this.socket.debugEmit('update_position', {
@@ -257,6 +257,14 @@ class App {
                     yaw: this.bot.yaw
                 });
             })
+
+            this.setupDebugEventListenter('entityHurt');
+           /* this.setupDebugEventListenter('entityMoved');
+            //this.setupDebugEventListenter('entitySwingArm');
+
+            this.setupDebugEventListenter('entitySpawn');
+            this.setupDebugEventListenter('entityUpdate');*/
+
             this.bot.on("spawn", (e)=>{
                 console.log(this.identity.username + " Spawned");
                 this.settingUp = false;
@@ -529,6 +537,30 @@ class App {
                 type: eventType,
                 data:Array.from(arguments)
             }))
+        })
+    }
+    setupDebugEventListenter(eventType){
+
+        this.bot.on(eventType, (entity)=>{
+
+
+            if(!entity || !entity.position){
+                return;
+            }
+            this.socket.debugEmit('debug_update_entity', {
+                entity:{
+                    id:entity.id,
+                    name:entity.name,
+                    position: {
+                        x: entity.position.x,
+                        y: entity.position.y,
+                        z: entity.position.z,
+                    },
+                    pitch: entity.pitch,
+                    yaw: entity.yaw,
+                },
+                eventType: eventType
+            });
         })
     }
     pong(options?:any){

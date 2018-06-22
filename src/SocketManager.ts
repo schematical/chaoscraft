@@ -9,14 +9,16 @@ class SocketManager{
     protected debug = null;
     protected app: any = null;
     protected socket:SocketIOClient.Socket = null;
-    protected isObserved:boolean = false;//TODO: Change this to false
+    protected isObserved:boolean = true;//TODO: Change this to false
     protected lastPingTimestamp:number = null;
 
     constructor(options:any){
 
         this.app = options.app;
         this.debug = debug('chaoscraft.socket');
-        this.socket = io(config.get('socket.host'));
+        let host = config.get('socket.host');
+        console.log("Socket attempting to connect to: ", host);
+        this.socket = io(host);
         this.debug("Setting Up Socket");
         this.socket.on('client_hello_response', (identity) => {
             console.log("client_hello_response", identity)
@@ -83,24 +85,27 @@ class SocketManager{
     }
 
     onMapNearbyRequest(payload:any){
-        if(!this.app.bot.entity && !this.app.bot.entity.position){
+        if(!this.app.bot.entity || !this.app.bot.entity.position){
             return;
         }
         let blockData:any = {};
-        let range = 20;
-
+        let range = 10;
         for(let x = Math.round(this.app.bot.entity.position.x) - range; x <=  Math.round(this.app.bot.entity.position.x) + range; x++){
             for(let y =  Math.round(this.app.bot.entity.position.y) - range; y <=  Math.round(this.app.bot.entity.position.y) + range; y++){
                 for(let z =  Math.round(this.app.bot.entity.position.z) - range; z <=  Math.round(this.app.bot.entity.position.z) + range; z++){
                     let block = this.app.bot.blockAt(new vec3(x,y,z));
                     blockData[x] = blockData[x] || {};
-                    blockData[x][y] =  blockData[x][y] || {};
-                    blockData[x][y][z] =  {
-                        type:block.type
+                    blockData[x][y] = blockData[x][y] || {};
+
+                    blockData[x][y][z] = {
+                        type: block.type
                     }
+
                 }
             }
         }
+        let fs = require('fs');
+        fs.writeFileSync('./test-world.json', JSON.stringify(blockData));
 
         this.socket.emit('map_nearby_response', {
             username: this.app.bot.username,

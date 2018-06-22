@@ -106,27 +106,27 @@ class NodeTarget{
         let fortyFiveDegrees:number = Math.PI / 4;
         let facing = null;
         let rotation = null;
-        if(this.node.brain.bot.entity.position.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.entity.position.yaw <=  fortyFiveDegrees){
+        if(this.node.brain.bot.entity.yaw > 0 - fortyFiveDegrees && this.node.brain.bot.entity.yaw <=  fortyFiveDegrees){
             //They are facing north?
             facing = 'n';
             rotation = 0;
-        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees  || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 3){
+        }else if(this.node.brain.bot.entity.yaw >  fortyFiveDegrees  || this.node.brain.bot.entity.yaw <= fortyFiveDegrees * 3){
             //They are facing east
             facing = 'e';
             rotation = fortyFiveDegrees * 2;
-        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees * 3 || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 5){
+        }else if(this.node.brain.bot.entity.yaw >  fortyFiveDegrees * 3 || this.node.brain.bot.entity.yaw <= fortyFiveDegrees * 5){
             //They are facing south
             facing = 's';
             rotation = fortyFiveDegrees * 4;
-        }else if(this.node.brain.bot.entity.position.yaw >  fortyFiveDegrees * 5 || this.node.brain.bot.entity.position.yaw <= fortyFiveDegrees * 7){
+        }else if(this.node.brain.bot.entity.yaw >  fortyFiveDegrees * 5 || this.node.brain.bot.entity.yaw <= fortyFiveDegrees * 7){
             //They are facing west
             facing = 'w';
             rotation = fortyFiveDegrees * 6;
         }
         //We only need to rotate x and z
         let translatePoint = (property)=>{
-            let tanMin = newPosition.zDelta[property] / newPosition.xDelta[property];
-            let hypotinuse = Math.sqrt(Math.pow(newPosition.zDelta[property], 2) * Math.pow(newPosition.xDelta[property], 2))
+            let tanMin = this.rawTargetData.position.zDelta[property] / this.rawTargetData.position.xDelta[property];
+            let hypotinuse = Math.sqrt(Math.pow(this.rawTargetData.position.zDelta[property], 2) + Math.pow(this.rawTargetData.position.xDelta[property], 2))
             let aTanMin = Math.atan(tanMin);
             newPosition.zDelta[property] = Math.sin(aTanMin + rotation) * hypotinuse;
             newPosition.xDelta[property] = Math.cos(aTanMin + rotation) * hypotinuse;

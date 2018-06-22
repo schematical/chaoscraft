@@ -130,7 +130,7 @@ class Brain{
      */
     public processTick():void{
         this.currTick += 1;
-        //console.log("ProcessTick:", this.currTick);
+        console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
         this.eachNodeSync(
             (outputNode)=>{
