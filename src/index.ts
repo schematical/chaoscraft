@@ -258,12 +258,12 @@ class App {
                 });
             })
 
-            this.setupDebugEventListenter('entityHurt');
-           /* this.setupDebugEventListenter('entityMoved');
-            //this.setupDebugEventListenter('entitySwingArm');
-
             this.setupDebugEventListenter('entitySpawn');
-            this.setupDebugEventListenter('entityUpdate');*/
+            this.setupDebugEventListenter('entityHurt');
+            this.setupDebugEventListenter('entityMoved');
+            this.setupDebugEventListenter('entityUpdate');
+
+                //this.setupDebugEventListenter('entitySwingArm');
 
             this.bot.on("spawn", (e)=>{
                 console.log(this.identity.username + " Spawned");
@@ -544,13 +544,17 @@ class App {
         this.bot.on(eventType, (entity)=>{
 
 
-            if(!entity || !entity.position){
+            if(!entity || !entity.position || !this.bot.entity){
+                return;
+            }
+            if(entity.position.distanceTo(this.bot.entity.position) > 10){
                 return;
             }
             this.socket.debugEmit('debug_update_entity', {
                 entity:{
                     id:entity.id,
                     name:entity.name,
+                    type: entity.type,
                     position: {
                         x: entity.position.x,
                         y: entity.position.y,

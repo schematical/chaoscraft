@@ -9,7 +9,7 @@ class SocketManager{
     protected debug = null;
     protected app: any = null;
     protected socket:SocketIOClient.Socket = null;
-    protected isObserved:boolean = true;//TODO: Change this to false
+    protected isObserved:boolean = false;//TODO: Change this to false
     protected lastPingTimestamp:number = null;
 
     constructor(options:any){
@@ -93,20 +93,25 @@ class SocketManager{
         for(let x = Math.round(this.app.bot.entity.position.x) - range; x <=  Math.round(this.app.bot.entity.position.x) + range; x++){
             for(let y =  Math.round(this.app.bot.entity.position.y) - range; y <=  Math.round(this.app.bot.entity.position.y) + range; y++){
                 for(let z =  Math.round(this.app.bot.entity.position.z) - range; z <=  Math.round(this.app.bot.entity.position.z) + range; z++){
-                    let block = this.app.bot.blockAt(new vec3(x,y,z));
+
                     blockData[x] = blockData[x] || {};
                     blockData[x][y] = blockData[x][y] || {};
-
-                    blockData[x][y][z] = {
-                        type: block.type
+                    let block = this.app.bot.blockAt(new vec3(x,y,z));
+                    if(!block){
+                        blockData[x][y][z] = null;
+                        console.error("MIssing Block at:", x, y, z);
+                    }else {
+                        blockData[x][y][z] = {
+                            type: block.type
+                        }
                     }
 
                 }
             }
         }
-        let fs = require('fs');
+        /*let fs = require('fs');
         fs.writeFileSync('./test-world.json', JSON.stringify(blockData));
-
+*/
         this.socket.emit('map_nearby_response', {
             username: this.app.bot.username,
             blockData:blockData

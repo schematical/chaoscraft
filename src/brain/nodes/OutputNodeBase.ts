@@ -4,7 +4,7 @@
 import { NodeBase } from './NodeBase'
 import { Enum } from 'chaoscraft-shared'
 import * as Vec3 from 'vec3'
-
+import * as _ from 'underscore';
 import * as config from 'config';
 import {NodeEvaluateResult} from "../NodeEvaluateResult";
 import { NodeTarget } from '../NodeTarget'
@@ -458,20 +458,49 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to placeBlock");
             return false;
         }
-        let target = targets[0];
+
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
         try {
-            if(!target || !target.digTime){
-                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Place Block Type:: " + target.type);
-                return false;
-            }
+
             if(!this.brain.app.bot.heldItem){
                 this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"I am not holding an item... ");
-                return true;
+                return false;
+            }
+            let target = null;
+            let foundVec = null;
+            for(let i in targets){
+                target = targets[i];
+                if(!target || !target.digTime){
+                    this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Place Block Type:: " + target.type);
+                    return false;
+                }
+                for(let xx = -1; xx <= 1; xx ++){
+                    for(let yy = -1; yy <= 1; yy ++){
+                        for(let zz = -1; zz <= 1; zz ++){
+                            let block =  this.brain.bot.blockAt(
+                                target.position.offset(xx, yy, zz)
+                            );
+
+                            if(
+                                _.indexOf([0,8,9,10,11, 31, '31:1','31:2',32], block.type) !== -1
+                            ){
+                                foundVec =  new Vec3(xx, yy, zz);;
+                                break;
+                                break;
+                                break;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
 
-            let x = 0;
+            if(!foundVec){
+                this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No valid Vec found (Block was not Air, Water, Lava) ");
+                return false;
+            }
+           /* let x = 0;
             let y = 0;
             let z = 0;
             while(x == 0 && y ==0 && z == 0){
@@ -481,7 +510,7 @@ class OutputNodeBase extends NodeBase{
             }
             let vec = new Vec3(
                 x,y,z
-            );
+            );*/
 
 
             this.brain.app.socket.emit(
@@ -489,13 +518,21 @@ class OutputNodeBase extends NodeBase{
                 {
                     username: this.brain.app.identity.username,
                     type:'place_block_attempt',
-                    value:1
+                    value:1,
+                    target:{
+                        type: target.type,
+                        position:{
+                            x: target.position.x,
+                            y: target.position.y,
+                            z: target.position.z
+                        }
+                    }
                 }
             );
 
 
             this.brain.bot.chat("I am trying to place block: " + this.brain.app.bot.heldItem.displayName + ' next to ' + target.displayName);
-            this.brain.bot.smartPlaceBlock(target, vec, (err, results)=>{
+            this.brain.bot.smartPlaceBlock(target, foundVec, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - placeBlock - cb Error2', err.message);
                     return false;
@@ -509,6 +546,7 @@ class OutputNodeBase extends NodeBase{
                         type:'place_block',
                         value:1,
                         target: {
+                            type: target.type,
                             position: {
                                 x: target.position.x,
                                 y: target.position.y,
@@ -520,6 +558,7 @@ class OutputNodeBase extends NodeBase{
             });
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error', err.message);
+            console.error(err.stack)
             return false;
         }
         return true;
@@ -550,7 +589,15 @@ class OutputNodeBase extends NodeBase{
                     {
                         username: this.brain.app.identity.username,
                         type:'dig',
-                        value:1
+                        value:1,
+                        target:{
+                            type: target.type,
+                            position:{
+                                x: target.position.x,
+                                y: target.position.y,
+                                z: target.position.z
+                            }
+                        }
                     }
                 );
             });
