@@ -366,7 +366,11 @@ class OutputNodeBase extends NodeBase{
         }
         let target = targets[0];
         try {
-            if(this.brain.app.bot.heldItem && this.brain.app.bot.heldItem.type == target.type){
+            if(
+                this.brain.app.bot.heldItem &&
+                this.brain.app.bot.heldItem.type == target.type &&
+                this.brain.app.bot.heldItem.metadata == target.metadata
+            ){
                 return true;
             }
             this.brain.app.socket.emit(
@@ -378,7 +382,7 @@ class OutputNodeBase extends NodeBase{
                 }
             );
             let destination = this.rawNode.destination || 'hand';
-            this.brain.bot.chat("I am trying to equip: " + options.results[0].displayName + ' to my ' + destination);
+            this.brain.bot.chat("I am trying to equip: " + target.displayName + ' to my ' + destination);
 
             this.brain.bot.equip(
                 target,
@@ -386,14 +390,14 @@ class OutputNodeBase extends NodeBase{
                 (err)=>{
                     if(err){
                         this.logActivationError(this.brain.app.identity.username + ' - equip - cb Error', err.message);
-                        this.brain.bot.chat("Equipping  " + options.results[0].displayName + ' to my ' + destination + ' failed because ' + err.message);
+                        this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
                     if(!options.results[0].displayName == this.brain.app.bot.heldItem.displayName){
-                        this.brain.bot.chat("Equipping  " + options.results[0].displayName + ' to my ' + destination + ' failed because on check missmatch');
+                        this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
                         return false;
                     }
-                    this.brain.bot.chat("I successfully equipped  " + options.results[0].displayName + ' to my ' + destination + '. My held item is ' + this.brain.app.bot.heldItem.displayName + '!!');
+                    this.brain.bot.chat("I successfully equipped  " + target.displayName + ' to my ' + destination + '. My held item is ' + this.brain.app.bot.heldItem.displayName + '!!');
 
                     this.brain.app.socket.emit(
                         'achivment',

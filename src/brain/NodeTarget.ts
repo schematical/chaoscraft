@@ -381,9 +381,21 @@ class NodeTarget{
             }
             if(_.isArray(type)){
                 let match = false;
+
                 (<[any]>type).forEach((_type)=>{
+                    let _meta_type = null;
+                    if(_.isString(_type) && _type.indexOf(':') !== 0){
+                        let parts = _type.split(':');
+                        _type = parts[0];
+                        _meta_type = parts[1];
+                    }
                     if (inventorySlot.type == _type) {
-                        match = true;
+                        if(!_meta_type){
+                            match = true;
+                        }else if(_meta_type == inventorySlot.metadata){
+                            match = true;
+                        }
+
                     }
                 });
                 if(!match){
