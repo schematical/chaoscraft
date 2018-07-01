@@ -175,7 +175,19 @@ class App {
                 messageData.json.with.forEach((d)=>{
                     message += d.text + ' | ';
                 })
+                const DEATH_PREFIX = 'death.';
                 console.log(this.identity.username +  " - message:" + message );
+                if(message.substr(0, DEATH_PREFIX.length) == DEATH_PREFIX){
+                    let parts = message.split(' ');
+                    if(parts[1] == this.identity.username)
+                    return this.socket.emit('client_death', {
+                        username: this.identity.username,
+                        death_reason:parts[0],
+                        victim: parts[1],
+                        attacker: parts[3]
+                    });
+                }
+
             });
             this.bot.on('connect', ()=>{
                 this.isSpawned = false;
@@ -240,10 +252,11 @@ class App {
 
             this.bot.on("death", (e)=>{
                 console.log("Death", e);
-                return this.socket.emit('client_death', {
+                //Moved this to the `on('message'` section
+                /*return this.socket.emit('client_death', {
                     username: this.identity.username,
                     event:e
-                });
+                });*/
             })
             this.bot.on('move', (e)=>{
                 if(!this.bot.entity || !this.bot.entity.position){

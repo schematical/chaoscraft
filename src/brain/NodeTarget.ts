@@ -236,8 +236,20 @@ class NodeTarget{
         }
 
         if(this.rawTargetData.mobType){
-            if(!entity.mobType || entity.mobType != this.rawTargetData.mobType){
-                return false;
+            if(!_.isArray(this.rawTargetData.mobType)) {
+                if (!entity.mobType || entity.mobType != this.rawTargetData.mobType) {
+                    return false;
+                }
+            }else{
+                let matched = false;
+                this.rawTargetData.mobType.forEach((mobType)=>{
+                    if (!entity.mobType || entity.mobType != mobType) {
+                        matched = true;
+                    }
+                })
+                if(!matched){
+                    return false;
+                }
             }
         }
 
