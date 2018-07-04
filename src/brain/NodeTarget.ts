@@ -66,7 +66,7 @@ class NodeTarget{
     }
     matchPosition(position){
 
-       let newPosition = this.translatePositionDeltaRange()
+       let newPosition = this.rawTargetData.position;//this.translatePositionDeltaRange()
         if(!newPosition){
             return true;
         }

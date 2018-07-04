@@ -430,6 +430,7 @@ class App {
 
                     const dest = pos.plus(faceVector)
                     const eventName = `blockUpdate:${dest}`
+                    console.log("Setting up block Listener: " + eventName);
                     let onBlockUpdate = (oldBlock, newBlock)=> {
                         this.bot.removeListener(eventName, onBlockUpdate)
                         if (oldBlock.type === newBlock.type) {
@@ -568,6 +569,9 @@ class App {
                     id:entity.id,
                     name:entity.name,
                     type: entity.type,
+                    entityType: entity.entityType,
+                    healdItem: entity.healdItem,
+                    metadata: entity.metadata,
                     position: {
                         x: entity.position.x,
                         y: entity.position.y,

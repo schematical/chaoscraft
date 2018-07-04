@@ -52,7 +52,9 @@ class InputNodeBase extends NodeBase{
     evaluate():NodeEvaluateResult{
         let results:NodeEvaluateResult = null;
         switch(this.type){
-
+            case(Enum.InputTypes.debug):
+                results = this.debug();
+                break
             case(Enum.InputTypes.hasInInventory):
                 results = this.hasInInventory();
                 break
@@ -157,7 +159,14 @@ class InputNodeBase extends NodeBase{
 
         return results;
     }
+    debug():NodeEvaluateResult{
 
+        return new NodeEvaluateResult({
+            score: this.rawNode.score,
+            results: [],
+            node:this
+        });
+    }
 
     blockAt():NodeEvaluateResult{
         let blocks = this._target.findBlock({});

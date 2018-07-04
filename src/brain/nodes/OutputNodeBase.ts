@@ -393,7 +393,7 @@ class OutputNodeBase extends NodeBase{
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
-                    if(!options.results[0].displayName == this.brain.app.bot.heldItem.displayName){
+                    if(!target.displayName == this.brain.app.bot.heldItem.displayName){
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
                         return false;
                     }
