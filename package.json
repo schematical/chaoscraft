@@ -5,20 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build":"tsc",
+    "build": "./node_modules/typescript/bin/tsc",
     "start": "NODE_ENV=production node dist/index.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "mineflayer-voxel": "^0.1.0",
     "@types/node": "^7.0.5",
-    "@types/socket.io-client": "^1.4.32"
+    "@types/socket.io-client": "^1.4.32",
+    "mineflayer-voxel": "^0.1.0",
+    "typescript": "^2.9.2"
   },
   "dependencies": {
     "chaoscraft-shared": "https://github.com/schematical/chaoscraft-shared",
     "config": "^1.30.0",
-    "mineflayer":"2.6.1",
+    "mineflayer": "2.6.1",
     "mineflayer-blockfinder": "0.0.7",
     "mineflayer-bloodhound": "https://github.com/Nixes/mineflayer-bloodhound",
     "mineflayer-navigate": "0.0.10",

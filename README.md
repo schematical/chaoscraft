@@ -38,6 +38,17 @@ npm start
 ```
 
 
+
+## Docker Build:
+```
+docker build -t chaoscraft-bot .
+```
+
+Run it locally:
+```
+docker run -it --net=host chaoscraft-bot
+```
+
 ## Random Notes:
 
 https://github.com/PrismarineJS/mineflayer/blob/master/doc/api.md#move
