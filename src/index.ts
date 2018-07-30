@@ -2,7 +2,7 @@
 import * as _ from 'underscore';
 import * as request from 'request';
 import * as mineflayer from 'mineflayer'
-import * as navigatePlugin from 'mineflayer-navigate'
+//import * as navigatePlugin from 'mineflayer-navigate'
 import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
 import * as Vec3 from 'vec3'
@@ -160,9 +160,7 @@ class App {
                 version: "1.12.2",
                 checkTimeoutInterval: 30*1000
             });
-            navigatePlugin(mineflayer)(this.bot);
-            bloodhoundPlugin(mineflayer)(this.bot);
-            blockFinderPlugin(mineflayer)(this.bot);
+
 
             this.bot.on('message', (messageData)=>{
                 switch(messageData.json.translate){
@@ -179,13 +177,15 @@ class App {
                 console.log(this.identity.username +  " - message:" + message );
                 if(message.substr(0, DEATH_PREFIX.length) == DEATH_PREFIX){
                     let parts = message.split(' ');
-                    if(parts[1] == this.identity.username)
-                    return this.socket.emit('client_death', {
+                    if(parts[1] !== this.identity.username){
+                        return;
+                    }
+                    /*return this.socket.emit('client_death', {
                         username: this.identity.username,
                         death_reason:parts[0],
                         victim: parts[1],
                         attacker: parts[3]
-                    });
+                    });*/
                 }
 
             });
@@ -258,7 +258,7 @@ class App {
                     event:e
                 });*/
             })
-            this.bot.on('move', (e)=>{
+            /*this.bot.on('move', (e)=>{
                 if(!this.bot.entity || !this.bot.entity.position){
                     return;
                 }
@@ -269,13 +269,13 @@ class App {
                     pitch: this.bot.pitch,
                     yaw: this.bot.yaw
                 });
-            })
+            })*/
 
-            this.setupDebugEventListenter('entitySpawn');
+            /*this.setupDebugEventListenter('entitySpawn');
             this.setupDebugEventListenter('entityHurt');
             this.setupDebugEventListenter('entityMoved');
             this.setupDebugEventListenter('entityUpdate');
-
+*/
                 //this.setupDebugEventListenter('entitySwingArm');
 
             this.bot.on("spawn", (e)=>{
@@ -356,14 +356,7 @@ class App {
                 return true
             }
 
-            this.bot.canSeePosition = (position)=>{
-                position = position.position || position;
-                // this emits a ray from the center of the bots body to the block
-                if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
-                    return true
-                }
-                return false;
-            }
+
             this.bot.on('diggingCompleted', ()=>{
                 this.bot._currentlyDigging = null;
             })
@@ -543,15 +536,16 @@ class App {
 
     setupEventListenter(eventType){
         let _this = this;
-        this.bot.on(eventType, function(e){
-            /*if(eventType == 'chat'){
+        return;
+        /*this.bot.on(eventType, function(e){
+            /!*if(eventType == 'chat'){
                 console.log("Chattin");
-            }*/
+            }*!/
             _this._tickEvents.push(new TickEvent({
                 type: eventType,
                 data:Array.from(arguments)
             }))
-        })
+        })*/
     }
     setupDebugEventListenter(eventType){
 

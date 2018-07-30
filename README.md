@@ -38,6 +38,27 @@ npm start
 ```
 
 
+
+
+### Common Install Errors:
+
+
+####Windows Users:
+
+`npm start` wont work on windows at the moment.
+Instead try
+```
+ setx NODE_ENV "production"
+ node dist\index.js
+```
+
+### `npm build` errors out
+
+Try it manually by running `npm i -g typescript` then just run `tsc` at the root of the repo. That should create a `./dist` folder with a bunch of stuff in it.
+
+
+
+
 ## Random Notes:
 
 https://github.com/PrismarineJS/mineflayer/blob/master/doc/api.md#move

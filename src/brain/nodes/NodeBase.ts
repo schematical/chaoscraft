@@ -80,7 +80,7 @@ class NodeBase{
             results: highestResult,
             node: this
         });
-    }
+    };
     activate(options){
         throw new Error("No `activate` method on InputBase")
     }
