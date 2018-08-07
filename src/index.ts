@@ -169,23 +169,35 @@ class App {
                     case('multiplayer.player.left'):
                         return;
                 }
+                console.log("MESSAGE: ", messageData.json.translate)
                 let message = messageData.json.translate + ' ';
                 messageData.json.with.forEach((d)=>{
                     message += d.text + ' | ';
                 })
                 const DEATH_PREFIX = 'death.';
-                console.log(this.identity.username +  " - message:" + message );
+                const ADVANCMENT = 'chat.type.advancement.task';
+                let achievementType = messageData.json.with[1] && messageData.json.with[1].extra[0].translate || null;
+
+                let parts = message.split(' ');
+                if(parts[1] !== this.identity.username){
+                    return;
+                }
+                console.log(this.identity.username +  " - message:" + message + " - " + achievementType);
+                 if(parts[0] == ADVANCMENT){
+                    return this.socket.emit('achievement', {
+                        type:achievementType,
+                        username: this.identity.username,
+                    });
+                }
                 if(message.substr(0, DEATH_PREFIX.length) == DEATH_PREFIX){
-                    let parts = message.split(' ');
-                    if(parts[1] !== this.identity.username){
-                        return;
-                    }
-                    /*return this.socket.emit('client_death', {
+
+
+                    return this.socket.emit('client_death', {
                         username: this.identity.username,
                         death_reason:parts[0],
                         victim: parts[1],
                         attacker: parts[3]
-                    });*/
+                    });
                 }
 
             });
@@ -258,7 +270,7 @@ class App {
                     event:e
                 });*/
             })
-            /*this.bot.on('move', (e)=>{
+            this.bot.on('move', (e)=>{
                 if(!this.bot.entity || !this.bot.entity.position){
                     return;
                 }
@@ -269,13 +281,13 @@ class App {
                     pitch: this.bot.pitch,
                     yaw: this.bot.yaw
                 });
-            })*/
+            })
 
-            /*this.setupDebugEventListenter('entitySpawn');
+            this.setupDebugEventListenter('entitySpawn');
             this.setupDebugEventListenter('entityHurt');
             this.setupDebugEventListenter('entityMoved');
             this.setupDebugEventListenter('entityUpdate');
-*/
+
                 //this.setupDebugEventListenter('entitySwingArm');
 
             this.bot.on("spawn", (e)=>{
@@ -356,7 +368,14 @@ class App {
                 return true
             }
 
-
+            this.bot.canSeePosition = (position)=>{
+                position = position.position || position;
+                // this emits a ray from the center of the bots body to the block
+                if (this.bot.visiblePosition(this.bot.entity.position.offset(0, this.bot.entity.height * 0.5, 0), position)) {
+                    return true
+                }
+                return false;
+            }
             this.bot.on('diggingCompleted', ()=>{
                 this.bot._currentlyDigging = null;
             })
@@ -368,7 +387,7 @@ class App {
                     return;
                 }
                 return this.brain.app.socket.emit(
-                    'achivment',
+                    'achievement',
                     {
                         username: this.identity.username,
                         type:'attack',
@@ -536,16 +555,15 @@ class App {
 
     setupEventListenter(eventType){
         let _this = this;
-        return;
-        /*this.bot.on(eventType, function(e){
-            /!*if(eventType == 'chat'){
+        this.bot.on(eventType, function(e){
+            /*if(eventType == 'chat'){
                 console.log("Chattin");
-            }*!/
+            }*/
             _this._tickEvents.push(new TickEvent({
                 type: eventType,
                 data:Array.from(arguments)
             }))
-        })*/
+        })
     }
     setupDebugEventListenter(eventType){
 

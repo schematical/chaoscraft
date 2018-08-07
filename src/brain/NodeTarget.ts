@@ -162,10 +162,18 @@ class NodeTarget{
             }else{
                 let matchesABlock = false;
                 this.rawTargetData.item.forEach((_item)=>{
-                    if(item.type == _item.type){
-                        matchesABlock = true;
-                        return;
+                    if(_.isObject(_item)){
+                        if(item.type == _item.type){
+                            matchesABlock = true;
+                            return;
+                        }
+                    }else{
+                        if(item.type == _item){
+                            matchesABlock = true;
+                            return;
+                        }
                     }
+
                 })
                 if(!matchesABlock){
                     return false;
