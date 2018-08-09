@@ -161,7 +161,9 @@ class OutputNodeBase extends NodeBase{
         }
         this.brain.bot.chat("I am attacking " + target.type + " - " + target.displayName + " - " + target.username + "!");
         try{
-            this.brain.bot.attack(target);
+            this.brain.bot._lastAttackTime = new Date().getTime();
+            this.brain.bot._lastAttackEntity = target;
+            this.brain.bot.attack(target, true);
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
             return false;

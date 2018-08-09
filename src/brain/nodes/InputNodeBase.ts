@@ -683,7 +683,10 @@ class InputNodeBase extends NodeBase{
     isHolding():NodeEvaluateResult{
         let results = [];
 
-        if(this._target.match(this.brain.bot.entity.heldItem)){
+        if(
+            this.brain.bot.entity.heldItem &&
+            this._target.match(this.brain.bot.entity.heldItem)
+        ){
 
             results.push(this.brain.bot.entity.heldItem);
         }

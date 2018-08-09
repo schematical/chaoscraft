@@ -2,8 +2,6 @@
 import * as _ from 'underscore';
 import * as request from 'request';
 import * as mineflayer from 'mineflayer'
-//import * as navigatePlugin from 'mineflayer-navigate'
-import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
 import * as Vec3 from 'vec3'
 import * as config from 'config';
@@ -32,6 +30,7 @@ class App {
     protected connectionCheckInterval = null;
     protected connectionAttemptStartDate = null;
     protected lastWorldAge:number = 0;
+    protected _lastData:any = null;
     //protected entityPositionMatrix:{};
     constructor () {
         console.log("Starting");
@@ -160,8 +159,29 @@ class App {
                 version: "1.12.2",
                 checkTimeoutInterval: 30*1000
             });
+            bloodhoundPlugin(mineflayer)(this.bot);
 
+// turn on yaw correlation, for better distinguishing of attacks within short radius
+            //this.bot.bloodhound.yaw_correlation_enabled = true;
+            /*this.bot.on('onCorrelateAttack', function (attacker,victim,weapon) {
+                //TODO:!!!MATT!!! REMEMBER YOU INCREASED BLOODHOUND MAX_ATTACK_DELTA_TIME to 1000 from 10. Fork it an override
+                if(attacker.username == this.identity.username){
+                    return this.socket.emit('achievement', {
+                        type:'attack_success',
+                        username: this.identity.username,
+                        victim: victim.username,
+                        //weapon: weapon
+                    });
+                }else if(victim.username == this.identity.username){
+                    return this.socket.emit('achievement', {
+                        type:'attack_received',
+                        username: this.identity.username,
+                        attacker: attacker.username,
+                        //weapon: weapon
+                    });
+                }
 
+            });*/
             this.bot.on('message', (messageData)=>{
                 switch(messageData.json.translate){
                     case('chat.type.text'):
@@ -285,6 +305,7 @@ class App {
 
             this.setupDebugEventListenter('entitySpawn');
             this.setupDebugEventListenter('entityHurt');
+            this.setupDebugEventListenter('entityDead');
             this.setupDebugEventListenter('entityMoved');
             this.setupDebugEventListenter('entityUpdate');
 
@@ -304,6 +325,11 @@ class App {
                         y:this.bot.entity.position.y,
                         z:this.bot.entity.position.z
                     });
+                    this._lastData = {
+                        health: this.bot.health,
+                        food: this.bot.food,
+                        foodSaturation: this.bot.foodSaturation
+                    }
 
                     console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
                     this.isSpawned = true;
@@ -312,7 +338,11 @@ class App {
                         startPosition: this.startPosition
                     });
                 },10000)
-
+                this._lastData = {
+                    health: this.bot.health,
+                    food: this.bot.food,
+                    foodSaturation: this.bot.foodSaturation
+                }
 
                 if(this.processTickInterval){
                         return;//We already set it dont over clock
@@ -327,6 +357,8 @@ class App {
             this.setupEventListenter('entitySwingArm');
             this.setupEventListenter('entityHurt');
             this.setupEventListenter('entitySpawn');
+            this.setupEventListenter('entityDead');
+
             this.setupEventListenter('entityUpdate');
             this.setupEventListenter('playerCollect');
 
@@ -339,11 +371,7 @@ class App {
 
             this.setupEventListenter('move');
             this.setupEventListenter('forcedMoves');
-            //TODO Move this to a plugin
-            /*this.bot.on('entityMoved', (e)=>{
-                //Update entityPositionMatrix
 
-            })*/
 
             this.bot.visiblePosition =  (a, b) => {
                 let v = b.minus(a)
@@ -554,21 +582,75 @@ class App {
 
 
     setupEventListenter(eventType){
-        let _this = this;
-        this.bot.on(eventType, function(e){
+        //let _this = this;
+        this.bot.on(eventType, (e,param2)=>{
+            let argData = Array.from(arguments);
+            let time_delta = null;
+            switch(eventType){
+                case('entityHurt'):
+                    time_delta = this.bot._lastAttackTime - new Date().getTime();
+                    if(
+                        this.bot._lastAttackEntity &&
+                        this.bot._lastAttackEntity.id == e.id &&
+                        time_delta < 5000
+                    ){
+                        this.socket.emit('achievement', {
+                            type:'attack_success',
+                            username: this.identity.username,
+                            victim: e.displayName,
+                            //weapon: weapon
+                        });
+                    }
+
+                    break;
+                case('entityDead'):
+                    time_delta = this.bot._lastAttackTime - new Date().getTime();
+                    if(
+                        this.bot._lastAttackEntity &&
+                        this.bot._lastAttackEntity.id == e.id &&
+                        time_delta < 5000
+                    ){
+                        this.socket.emit('achievement', {
+                            type:'kill',
+                            username: this.identity.username,
+                            victim: e.displayName,
+                            //weapon: weapon
+                        });
+                    }
+                    break;
+                case('health'):
+                    if(this._lastData) {
+                        argData = argData || [];
+                        argData[0] = {
+                            last: this._lastData,
+                            delta: {
+                                health: this._lastData.health - this.bot.health,
+                                food: this._lastData.food - this.bot.food,
+                                foodSaturation: this._lastData.foodSaturation - this.bot.foodSaturation,
+                            }
+                        }
+                        this._lastData = {
+                            health: this.bot.health,
+                            food: this.bot.food,
+                            foodSaturation: this.bot.foodSaturation,
+                        }
+                        console.log("HEalth Change:", argData);
+                    }
+                break;
+            }
+
             /*if(eventType == 'chat'){
                 console.log("Chattin");
             }*/
-            _this._tickEvents.push(new TickEvent({
+            this._tickEvents.push(new TickEvent({
                 type: eventType,
-                data:Array.from(arguments)
+                data: argData
             }))
         })
     }
     setupDebugEventListenter(eventType){
 
-        this.bot.on(eventType, (entity)=>{
-
+            this.bot.on(eventType, (entity, param2)=>{
 
             if(!entity || !entity.position || !this.bot.entity){
                 return;

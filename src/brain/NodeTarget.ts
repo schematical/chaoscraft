@@ -197,7 +197,10 @@ class NodeTarget{
             }else{
                 let matchesABlock = false;
                 this.rawTargetData.entityType.forEach((_entityType)=>{
-                    if(entity.type/*entityType*/ == _entityType){
+                    if(
+                        entity.type/*entityType*/ == _entityType ||
+                        entity.entityType == _entityType
+                    ){
                         matchesABlock = true;
                         return;
                     }
