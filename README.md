@@ -30,6 +30,15 @@ Build the code
 ```
 npm build
 ```
+NOTE: Some NPM versions might need
+```
+npm run-script build
+```
+
+NOTE: if the build fails try
+```npm install -g tsc```
+then from the project root directory
+```tsc```
 
 ### Step 6:
 Start it
