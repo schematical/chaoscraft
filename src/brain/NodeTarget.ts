@@ -443,84 +443,28 @@ class NodeTarget{
                 throw new Error("Not a valid target type for `findRecipeInInventory`: " + this.rawTargetData.type)
         }
 
-
-        return this.node.brain.app.bot.recipesFor(
-            this.rawTargetData.recipe,
-            this.rawTargetData.metadata || null,
-            this.rawTargetData.minResultCount || null,
-           /* options.craftingTable || */null//TODO: Search for touchable crafting tables
-        )
-
-
-        //Get requirements
-        /*let minecraftData = MinecraftData(config.get('minecraft.version'));
-
-        let recipes = [];
-
-
         if(!_.isArray(this.rawTargetData.recipe)){
             this.rawTargetData.recipe = [this.rawTargetData.recipe];
         }
-        (<[any]>this.rawTargetData.recipe).forEach((_recipeItem)=>{
-            if(!minecraftData.recipes[_recipeItem]){
-                return console.error("Recipe Not found: ", _recipeItem);
-            }
-            minecraftData.recipes[_recipeItem].forEach((_recipePossibility)=>{
-                let requiredItemData = {};
-                if(!_recipePossibility || !_recipePossibility.inShape){
-                    return console.error("No recipe.inShape for: ", _recipeItem, _recipePossibility);
-                }
-                _recipePossibility.inShape.forEach((row)=>{
-                    row.forEach((itemId)=> {
-                        requiredItemData[itemId] = requiredItemData[itemId] || 0;
-                        requiredItemData[itemId] += 1;
-                    });
-                })
-                recipes.push({
-                    produces:_recipeItem,
-                    requires:requiredItemData,
-                    recipe: _recipePossibility
-                });
-            })
-
+        let recipes = [];
+        this.rawTargetData.recipe.forEach((recipe)=>{
+            let _recipes = this.node.brain.app.bot.recipesFor(
+                recipe,
+                this.rawTargetData.metadata || null,
+                this.rawTargetData.minResultCount || null,
+                /*this.rawTargetData.craftingTable || */null//TODO: Search for touchable crafting tables
+            )
+            recipes = _recipes.concat(recipes);
         });
+        return recipes;
+     /*   let results = [];
+        recipes.forEach((recipe)=>{
+this.findInventory({
 
-
-
-        let results = [];
-        recipes.forEach((recipeData)=>{
-            let satisfied = {};
-            Object.keys(recipeData.requires).forEach((itemId)=>{
-                satisfied[itemId] = false;
-            })
-            this.node.brain.bot.inventory.slots.forEach((inventorySlot)=>{
-                if(!inventorySlot){
-                    return false;
-                }
-                if(
-                    recipeData.requires[inventorySlot.type]
-                ){
-                    satisfied[inventorySlot.type] =  inventorySlot.count / recipeData.requires[inventorySlot.type];
-                }
-
-
-                //results.push(inventorySlot);
-
-            })
-            let produces = null;
-            Object.keys(satisfied).forEach((itemId)=>{
-
-                if(Math.floor(satisfied[itemId]) > 0){
-                    produces = satisfied[itemId];
-                }
-            })
-            if(produces){
-                results.push(recipeData.recipe);
-            }
-
+})
         })
+        return recipes;*/
 
-        return results;*/
     }
 }
 export { NodeTarget }

@@ -215,13 +215,16 @@ class OutputNodeBase extends NodeBase{
                 {
                     username: this.brain.app.identity.username,
                     type:'craft_attempt',
-                    value:1
+                    value:1,
+                    recipe:recipe.result.id
                 }
             );
+            //this.brain.bot.chat("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
+            //console.log("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
             this.brain.bot.craft(recipe, count, craftingTable, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - craft - Error 2', err.message);
-                    console.error(err.stack);
+                    //console.error(err.stack);
                     return false;
                 }
                 console.log("CRAFT SUCCESS!!!!", results, recipe);
@@ -231,7 +234,8 @@ class OutputNodeBase extends NodeBase{
                     {
                         username: this.brain.app.identity.username,
                         type:'craft',
-                        value:1
+                        value:1,
+                        recipe:recipe.result.id
                     }
                 );
             });
@@ -381,6 +385,7 @@ class OutputNodeBase extends NodeBase{
                 }
             );
             if(
+                this.rawNode.destination == 'hand' &&
                 this.brain.app.bot.heldItem &&
                 this.brain.app.bot.heldItem.type == target.type &&
                 this.brain.app.bot.heldItem.metadata == target.metadata
@@ -400,7 +405,40 @@ class OutputNodeBase extends NodeBase{
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
-                    if(!target.displayName == this.brain.app.bot.heldItem.displayName){
+                    /*
+                    0 - held item
+                     1 - shoes
+                     2 - legging
+                     3 - torso
+                     4 - head
+                     */
+                    let testItem = null;
+                    switch(destination){
+                        case('hand'):
+                            testItem = this.brain.app.bot.heldItem;
+                        break;
+                        case('head'):
+                            testItem = this.brain.app.bot.entity.equipment[4];
+                        break;
+                        case('shoes'):
+                        case('feet'):
+                            testItem = this.brain.app.bot.entity.equipment[1];
+                        break;
+                        case('torso'):
+                            testItem = this.brain.app.bot.entity.equipment[3];
+                        break;
+                        case('legs'):
+                        case('legging'):
+                            testItem = this.brain.app.bot.entity.equipment[2];
+                        break;
+                        default:
+                            throw new Error("Invalid Target Equip Destination:" + destination);
+
+                    }
+                    if(
+                        !testItem ||
+                        !target.displayName == testItem.displayName
+                    ){
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
                         return false;
                     }
@@ -532,6 +570,7 @@ class OutputNodeBase extends NodeBase{
                     value:1,
                     target:{
                         type: target.type,
+                        displayName: target.displayName,
                         position:{
                             x: target.position.x,
                             y: target.position.y,
@@ -558,6 +597,7 @@ class OutputNodeBase extends NodeBase{
                         value:1,
                         target: {
                             type: target.type,
+                            displayName: target.displayName,
                             position: {
                                 x: target.position.x,
                                 y: target.position.y,
@@ -602,6 +642,7 @@ class OutputNodeBase extends NodeBase{
                         type:'dig',
                         value:1,
                         target:{
+                            displayName: target.displayName,
                             type: target.type,
                             position:{
                                 x: target.position.x,

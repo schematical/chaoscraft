@@ -650,7 +650,12 @@ class InputNodeBase extends NodeBase{
             //TODO: make this a regex thing
             if(this._target.matchChat({ value: message })){
                 score += 1;
-                targets.push(this.brain.bot.players[username].entity);
+                if(
+                    this.brain.bot.players[username] &&
+                    this.brain.bot.players[username].entity
+                ) {
+                    targets.push(this.brain.bot.players[username].entity);
+                }
             }
         })
         return new NodeEvaluateResult({
