@@ -1,5 +1,11 @@
 # chaoscraft
 
+Support Me on Patreon:
+https://www.patreon.com/schematical
+
+For more information on ChaosCraft check out this playlist: https://www.youtube.com/playlist?list=PLLkpLgU9B5xJ7Qy4kOyBJl5J6zsDIMceH
+
+Discord: https://discord.gg/zUEacFT
 
 ## Install:
 
