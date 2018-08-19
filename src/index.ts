@@ -2,8 +2,6 @@
 import * as _ from 'underscore';
 import * as request from 'request';
 import * as mineflayer from 'mineflayer'
-import * as navigatePlugin from 'mineflayer-navigate'
-import * as blockFinderPlugin from 'mineflayer-blockfinder'
 import * as bloodhoundPlugin from 'mineflayer-bloodhound'
 import * as Vec3 from 'vec3'
 import * as config from 'config';
@@ -32,6 +30,7 @@ class App {
     protected connectionCheckInterval = null;
     protected connectionAttemptStartDate = null;
     protected lastWorldAge:number = 0;
+    protected _lastData:any = null;
     //protected entityPositionMatrix:{};
     constructor () {
         console.log("Starting");
@@ -103,7 +102,11 @@ class App {
             },
             (err, response, brain)=>{
                 if(err){
-                    throw err;
+                    console.error(err.message, new Error().stack);
+                    setTimeout(()=>{
+                        this.setupBot();
+                    }, 60 * 1000)
+                    return;
                 }
                 //Load file and parse JSON
                 //let fileBody = fs.readFileSync(path.resolve(__dirname,'..', 'brain1.json')).toString();
@@ -160,10 +163,29 @@ class App {
                 version: "1.12.2",
                 checkTimeoutInterval: 30*1000
             });
-            navigatePlugin(mineflayer)(this.bot);
-            bloodhoundPlugin(mineflayer)(this.bot);
-            blockFinderPlugin(mineflayer)(this.bot);
+            //bloodhoundPlugin(mineflayer)(this.bot);
 
+// turn on yaw correlation, for better distinguishing of attacks within short radius
+            //this.bot.bloodhound.yaw_correlation_enabled = true;
+            /*this.bot.on('onCorrelateAttack', function (attacker,victim,weapon) {
+                //TODO:!!!MATT!!! REMEMBER YOU INCREASED BLOODHOUND MAX_ATTACK_DELTA_TIME to 1000 from 10. Fork it an override
+                if(attacker.username == this.identity.username){
+                    return this.socket.emit('achievement', {
+                        type:'attack_success',
+                        username: this.identity.username,
+                        victim: victim.username,
+                        //weapon: weapon
+                    });
+                }else if(victim.username == this.identity.username){
+                    return this.socket.emit('achievement', {
+                        type:'attack_received',
+                        username: this.identity.username,
+                        attacker: attacker.username,
+                        //weapon: weapon
+                    });
+                }
+
+            });*/
             this.bot.on('message', (messageData)=>{
                 switch(messageData.json.translate){
                     case('chat.type.text'):
@@ -171,15 +193,29 @@ class App {
                     case('multiplayer.player.left'):
                         return;
                 }
+                console.log("MESSAGE: ", messageData.json.translate)
                 let message = messageData.json.translate + ' ';
                 messageData.json.with.forEach((d)=>{
                     message += d.text + ' | ';
                 })
                 const DEATH_PREFIX = 'death.';
-                console.log(this.identity.username +  " - message:" + message );
+                const ADVANCMENT = 'chat.type.advancement.task';
+                let achievementType = messageData.json.with[1] && messageData.json.with[1].extra[0].translate || null;
+
+                let parts = message.split(' ');
+                if(parts[1] !== this.identity.username){
+                    return;
+                }
+                console.log(this.identity.username +  " - message:" + message + " - " + achievementType);
+                 if(parts[0] == ADVANCMENT){
+                    return this.socket.emit('achievement', {
+                        type:achievementType,
+                        username: this.identity.username,
+                    });
+                }
                 if(message.substr(0, DEATH_PREFIX.length) == DEATH_PREFIX){
-                    let parts = message.split(' ');
-                    if(parts[1] == this.identity.username)
+
+
                     return this.socket.emit('client_death', {
                         username: this.identity.username,
                         death_reason:parts[0],
@@ -273,6 +309,7 @@ class App {
 
             this.setupDebugEventListenter('entitySpawn');
             this.setupDebugEventListenter('entityHurt');
+            this.setupDebugEventListenter('entityDead');
             this.setupDebugEventListenter('entityMoved');
             this.setupDebugEventListenter('entityUpdate');
 
@@ -292,6 +329,11 @@ class App {
                         y:this.bot.entity.position.y,
                         z:this.bot.entity.position.z
                     });
+                    this._lastData = {
+                        health: this.bot.health,
+                        food: this.bot.food,
+                        foodSaturation: this.bot.foodSaturation
+                    }
 
                     console.log(this.identity.username +  " Position:", this.bot.entity.position.x, this.bot.entity.position.y, this.bot.entity.position.z);
                     this.isSpawned = true;
@@ -300,7 +342,11 @@ class App {
                         startPosition: this.startPosition
                     });
                 },10000)
-
+                this._lastData = {
+                    health: this.bot.health,
+                    food: this.bot.food,
+                    foodSaturation: this.bot.foodSaturation
+                }
 
                 if(this.processTickInterval){
                         return;//We already set it dont over clock
@@ -315,6 +361,8 @@ class App {
             this.setupEventListenter('entitySwingArm');
             this.setupEventListenter('entityHurt');
             this.setupEventListenter('entitySpawn');
+            this.setupEventListenter('entityDead');
+
             this.setupEventListenter('entityUpdate');
             this.setupEventListenter('playerCollect');
 
@@ -325,13 +373,9 @@ class App {
             this.setupEventListenter('blockBreakProgressObserved');
             this.setupEventListenter('chestLidMove');
 
-            this.setupEventListenter('move');
+            //this.setupEventListenter('move');
             this.setupEventListenter('forcedMoves');
-            //TODO Move this to a plugin
-            /*this.bot.on('entityMoved', (e)=>{
-                //Update entityPositionMatrix
 
-            })*/
 
             this.bot.visiblePosition =  (a, b) => {
                 let v = b.minus(a)
@@ -375,7 +419,7 @@ class App {
                     return;
                 }
                 return this.brain.app.socket.emit(
-                    'achivment',
+                    'achievement',
                     {
                         username: this.identity.username,
                         type:'attack',
@@ -430,6 +474,7 @@ class App {
 
                     const dest = pos.plus(faceVector)
                     const eventName = `blockUpdate:${dest}`
+                    console.log("Setting up block Listener: " + eventName);
                     let onBlockUpdate = (oldBlock, newBlock)=> {
                         this.bot.removeListener(eventName, onBlockUpdate)
                         if (oldBlock.type === newBlock.type) {
@@ -439,10 +484,13 @@ class App {
                         }
                     }
                     this.bot.on(eventName, onBlockUpdate);
-
+                    let direction = vectorToDirection(faceVector);
+                    if(!direction){
+                        return;
+                    }
                     this.bot._client.write('block_place', {
                         location: pos,
-                        direction: vectorToDirection(faceVector),
+                        direction: ,
                         hand: 0,//Math.round(Math.random()),
                         cursorX: 0.5,//Math.random(),
                         cursorY: 0.5,//Math.random(),
@@ -465,7 +513,8 @@ class App {
                 } else if (v.x > 0) {
                     return 5
                 }
-                throw new Error("Invalid Direction: " + v)
+                console.error("Invalid Direction: " + v);
+                return null;
             }
 
         })
@@ -541,21 +590,100 @@ class App {
 
 
     setupEventListenter(eventType){
-        let _this = this;
-        this.bot.on(eventType, function(e){
-            /*if(eventType == 'chat'){
-                console.log("Chattin");
-            }*/
-            _this._tickEvents.push(new TickEvent({
-                type: eventType,
-                data:Array.from(arguments)
-            }))
+        //let _this = this;
+        this.bot.on(eventType, (e,param2)=>{
+            try {
+                let argData = Array.from(arguments);
+                let time_delta = null;
+                switch (eventType) {
+                    case('entityHurt'):
+                        time_delta = this.bot._lastAttackTime - new Date().getTime();
+                        if (
+                            this.bot._lastAttackEntity &&
+                            this.bot._lastAttackEntity.id == e.id &&
+                            time_delta < 5000
+                        ) {
+                            this.socket.emit('achievement', {
+                                type: 'attack_success',
+                                username: this.identity.username,
+                                victim: e.displayName,
+                                //weapon: weapon
+                            });
+                        }
+
+                        break;
+                    case('entityDead'):
+                        time_delta = this.bot._lastAttackTime - new Date().getTime();
+                        if (
+                            this.bot._lastAttackEntity &&
+                            this.bot._lastAttackEntity.id == e.id &&
+                            time_delta < 5000
+                        ) {
+                            this.socket.emit('achievement', {
+                                type: 'kill',
+                                username: this.identity.username,
+                                victim: e.displayName,
+                                victimTypeId: e.entityType
+                                //weapon: weapon
+                            });
+                        }
+                        break;
+                    case('health'):
+                        if (this._lastData) {
+                            argData = argData || [];
+                            argData[0] = {
+                                last: this._lastData,
+                                delta: {
+                                    health: this._lastData.health - this.bot.health,
+                                    food: this._lastData.food - this.bot.food,
+                                    foodSaturation: this._lastData.foodSaturation - this.bot.foodSaturation,
+                                }
+                            }
+                            this._lastData = {
+                                health: this.bot.health,
+                                food: this.bot.food,
+                                foodSaturation: this.bot.foodSaturation,
+                            }
+
+                            //console.log("HEalth Change:", argData);
+                        }
+                        break;
+                    case('playerCollect'):
+                        if(e.username == this.bot.username) {
+                            let object = param2.metadata && param2.metadata[6] && param2.metadata[6];
+                            if(!object){
+                                console.error("Missing Object for PlayerCollect");
+                            }else{
+                                this.socket.emit('achievement', {
+                                    type: 'player_collect',
+                                    username: this.identity.username,
+                                    itemId: object.itemId,
+                                    blockId: object.blockId
+                                    //weapon: weapon
+                                });
+                            }
+
+
+                        }
+                    break;
+
+                }
+
+                /*if(eventType == 'chat'){
+                 console.log("Chattin");
+                 }*/
+                this._tickEvents.push(new TickEvent({
+                    type: eventType,
+                    data: argData
+                }))
+            }catch(err){
+                console.error(this.identity.username + ' - ' + err.message, err.stack);
+            }
         })
     }
     setupDebugEventListenter(eventType){
 
-        this.bot.on(eventType, (entity)=>{
-
+            this.bot.on(eventType, (entity, param2)=>{
 
             if(!entity || !entity.position || !this.bot.entity){
                 return;
@@ -568,6 +696,9 @@ class App {
                     id:entity.id,
                     name:entity.name,
                     type: entity.type,
+                    entityType: entity.entityType,
+                    healdItem: entity.healdItem,
+                    metadata: entity.metadata,
                     position: {
                         x: entity.position.x,
                         y: entity.position.y,

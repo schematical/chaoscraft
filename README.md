@@ -1,5 +1,11 @@
 # chaoscraft
 
+Support Me on Patreon:
+https://www.patreon.com/schematical
+
+For more information on ChaosCraft check out this playlist: https://www.youtube.com/playlist?list=PLLkpLgU9B5xJ7Qy4kOyBJl5J6zsDIMceH
+
+Discord: https://discord.gg/zUEacFT
 
 ## Install:
 
@@ -30,6 +36,15 @@ Build the code
 ```
 npm build
 ```
+NOTE: Some NPM versions might need
+```
+npm run-script build
+```
+
+NOTE: if the build fails try
+```npm install -g tsc```
+then from the project root directory
+```tsc```
 
 ### Step 6:
 Start it
@@ -39,15 +54,25 @@ npm start
 
 
 
-## Docker Build:
+
+### Common Install Errors:
+
+
+####Windows Users:
+
+`npm start` wont work on windows at the moment.
+Instead try
 ```
-docker build -t chaoscraft-bot .
+ setx NODE_ENV "production"
+ node dist\index.js
 ```
 
-Run it locally:
-```
-docker run -it --net=host chaoscraft-bot
-```
+### `npm build` errors out
+
+Try it manually by running `npm i -g typescript` then just run `tsc` at the root of the repo. That should create a `./dist` folder with a bunch of stuff in it.
+
+
+
 
 ## Random Notes:
 

@@ -161,13 +161,15 @@ class OutputNodeBase extends NodeBase{
         }
         this.brain.bot.chat("I am attacking " + target.type + " - " + target.displayName + " - " + target.username + "!");
         try{
-            this.brain.bot.attack(target);
+            this.brain.bot._lastAttackTime = new Date().getTime();
+            this.brain.bot._lastAttackEntity = target;
+            this.brain.bot.attack(target, true);
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - attack - Error', err.message);
             return false;
         }
         this.brain.app.socket.emit(
-            'achivment',
+            'achievement',
             {
                 username: this.brain.app.identity.username,
                 type:'attack',
@@ -188,44 +190,52 @@ class OutputNodeBase extends NodeBase{
         try{
 
             let recipe = target;
-            let count = null;
+            let count = 1;
             let craftingTable = null;
-            for(let x = this.brain.bot.entity.position.x - 2; x <= this.brain.bot.entity.position.x + 2; x ++){
-                for(let y = this.brain.bot.entity.position.y - 2; y <= this.brain.bot.entity.position.y + 2; y ++){
-                    for(let z = this.brain.bot.entity.position.z - 2; z <= this.brain.bot.entity.position.z + 2; z ++){
-                        let block = this.brain.bot.blockAt(new Vec3(x,y,z));
-                        if(block.type == 58){
-                            craftingTable = block;
+            if(recipe.requiresTable) {
+                let CRAFTING_TABLE_RANGE = 3;
+
+                for (let x = this.brain.bot.entity.position.x - CRAFTING_TABLE_RANGE; x <= this.brain.bot.entity.position.x + CRAFTING_TABLE_RANGE; x++) {
+                    for (let y = this.brain.bot.entity.position.y - CRAFTING_TABLE_RANGE; y <= this.brain.bot.entity.position.y + CRAFTING_TABLE_RANGE; y++) {
+                        for (let z = this.brain.bot.entity.position.z - CRAFTING_TABLE_RANGE; z <= this.brain.bot.entity.position.z + CRAFTING_TABLE_RANGE; z++) {
+                            let block = this.brain.bot.blockAt(new Vec3(x, y, z));
+                            if (block.type == 58) {
+                                craftingTable = block;
+                            }
                         }
                     }
                 }
-            }
-            if(!craftingTable){
-                this.logActivationError(this.brain.app.identity.username + ' - craft - Error: No crafting table near');
-                return false;
+                if (!craftingTable) {
+                    this.logActivationError(this.brain.app.identity.username + ' - craft - Error: No crafting table near');
+                    return false;
+                }
             }
             this.brain.app.socket.emit(
-                'achivment',
+                'achievement',
                 {
                     username: this.brain.app.identity.username,
                     type:'craft_attempt',
-                    value:1
+                    value:1,
+                    recipe:recipe.result.id
                 }
             );
+            //this.brain.bot.chat("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
+            //console.log("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
             this.brain.bot.craft(recipe, count, craftingTable, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - craft - Error 2', err.message);
-                    console.error(err.stack);
+                    //console.error(err.stack);
                     return false;
                 }
                 console.log("CRAFT SUCCESS!!!!", results, recipe);
                 this.brain.bot.chat("I crafted  " + recipe.result.count + " of " + recipe.result.id);
                 return this.brain.app.socket.emit(
-                    'achivment',
+                    'achievement',
                     {
                         username: this.brain.app.identity.username,
                         type:'craft',
-                        value:1
+                        value:1,
+                        recipe:recipe.result.id
                     }
                 );
             });
@@ -331,7 +341,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         this.brain.app.socket.emit(
-            'achivment',
+            'achievement',
             {
                 username: this.brain.app.identity.username,
                 type:'trade',
@@ -366,21 +376,23 @@ class OutputNodeBase extends NodeBase{
         }
         let target = targets[0];
         try {
-            if(
-                this.brain.app.bot.heldItem &&
-                this.brain.app.bot.heldItem.type == target.type &&
-                this.brain.app.bot.heldItem.metadata == target.metadata
-            ){
-                return true;
-            }
             this.brain.app.socket.emit(
-                'achivment',
+                'achievement',
                 {
                     username: this.brain.app.identity.username,
                     type:'equip_attempt',
                     value:1
                 }
             );
+            if(
+                this.rawNode.destination == 'hand' &&
+                this.brain.app.bot.heldItem &&
+                this.brain.app.bot.heldItem.type == target.type &&
+                this.brain.app.bot.heldItem.metadata == target.metadata
+            ){
+                return true;
+            }
+
             let destination = this.rawNode.destination || 'hand';
             this.brain.bot.chat("I am trying to equip: " + target.displayName + ' to my ' + destination);
 
@@ -393,14 +405,47 @@ class OutputNodeBase extends NodeBase{
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because ' + err.message);
                         return false;
                     }
-                    if(!options.results[0].displayName == this.brain.app.bot.heldItem.displayName){
+                    /*
+                    0 - held item
+                     1 - shoes
+                     2 - legging
+                     3 - torso
+                     4 - head
+                     */
+                    let testItem = null;
+                    switch(destination){
+                        case('hand'):
+                            testItem = this.brain.app.bot.heldItem;
+                        break;
+                        case('head'):
+                            testItem = this.brain.app.bot.entity.equipment[4];
+                        break;
+                        case('shoes'):
+                        case('feet'):
+                            testItem = this.brain.app.bot.entity.equipment[1];
+                        break;
+                        case('torso'):
+                            testItem = this.brain.app.bot.entity.equipment[3];
+                        break;
+                        case('legs'):
+                        case('legging'):
+                            testItem = this.brain.app.bot.entity.equipment[2];
+                        break;
+                        default:
+                            throw new Error("Invalid Target Equip Destination:" + destination);
+
+                    }
+                    if(
+                        !testItem ||
+                        !target.displayName == testItem.displayName
+                    ){
                         this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
                         return false;
                     }
                     this.brain.bot.chat("I successfully equipped  " + target.displayName + ' to my ' + destination + '. My held item is ' + this.brain.app.bot.heldItem.displayName + '!!');
 
                     this.brain.app.socket.emit(
-                        'achivment',
+                        'achievement',
                         {
                             username: this.brain.app.identity.username,
                             type:'equip',
@@ -518,13 +563,14 @@ class OutputNodeBase extends NodeBase{
 
 
             this.brain.app.socket.emit(
-                'achivment',
+                'achievement',
                 {
                     username: this.brain.app.identity.username,
                     type:'place_block_attempt',
                     value:1,
                     target:{
                         type: target.type,
+                        displayName: target.displayName,
                         position:{
                             x: target.position.x,
                             y: target.position.y,
@@ -544,13 +590,14 @@ class OutputNodeBase extends NodeBase{
                 this.brain.bot.chat("I placed block: " + this.brain.app.bot.heldItem.displayName + ' next to ' + target.displayName);
                 console.log("Placing Block DOne: ", results);
                 return this.brain.app.socket.emit(
-                    'achivment',
+                    'achievement',
                     {
                         username: this.brain.app.identity.username,
                         type:'place_block',
                         value:1,
                         target: {
                             type: target.type,
+                            displayName: target.displayName,
                             position: {
                                 x: target.position.x,
                                 y: target.position.y,
@@ -589,12 +636,13 @@ class OutputNodeBase extends NodeBase{
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
                 }
                 return this.brain.app.socket.emit(
-                    'achivment',
+                    'achievement',
                     {
                         username: this.brain.app.identity.username,
                         type:'dig',
                         value:1,
                         target:{
+                            displayName: target.displayName,
                             type: target.type,
                             position:{
                                 x: target.position.x,
@@ -766,7 +814,12 @@ class OutputNodeBase extends NodeBase{
         let target = targets[0];
 
         try{
-            this.brain.bot.toss(target);
+            this.brain.bot.toss(target.type, target.metadata, null, (err)=>{
+                if(err){
+                    return this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
+                }
+                console.log(this.brain.app.identity.username + "Toss Successful: " + target.name);
+            });
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - toss - Error', err.message);
             return false;
