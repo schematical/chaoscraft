@@ -381,20 +381,45 @@ class OutputNodeBase extends NodeBase{
                 {
                     username: this.brain.app.identity.username,
                     type:'equip_attempt',
-                    value:1
+                    value:1,
+                    itemId:target.itemId,
+                    blockId: target.blockId
                 }
             );
+            let destination = this.rawNode.destination || 'hand';
+            let testItem = null;
+            switch(destination){
+                case('hand'):
+                    testItem = this.brain.app.bot.heldItem;
+                    break;
+                case('head'):
+                    testItem = this.brain.app.bot.entity.equipment[4];
+                    break;
+                case('shoes'):
+                case('feet'):
+                    testItem = this.brain.app.bot.entity.equipment[1];
+                    break;
+                case('torso'):
+                    testItem = this.brain.app.bot.entity.equipment[3];
+                    break;
+                case('legs'):
+                case('legging'):
+                    testItem = this.brain.app.bot.entity.equipment[2];
+                    break;
+                default:
+                    throw new Error("Invalid Target Equip Destination:" + destination);
+
+            }
             if(
-                this.rawNode.destination == 'hand' &&
-                this.brain.app.bot.heldItem &&
-                this.brain.app.bot.heldItem.type == target.type &&
-                this.brain.app.bot.heldItem.metadata == target.metadata
+                testItem &&
+                testItem.type == target.type &&
+                testItem.metadata == target.metadata
             ){
                 return true;
             }
 
-            let destination = this.rawNode.destination || 'hand';
-            this.brain.bot.chat("I am trying to equip: " + target.displayName + ' to my ' + destination);
+
+            //this.brain.bot.chat("I am trying to equip: " + target.displayName + ' to my ' + destination);
 
             this.brain.bot.equip(
                 target,
@@ -439,7 +464,7 @@ class OutputNodeBase extends NodeBase{
                         !testItem ||
                         !target.displayName == testItem.displayName
                     ){
-                        this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
+                        //this.brain.bot.chat("Equipping  " + target.displayName + ' to my ' + destination + ' failed because on check missmatch');
                         return false;
                     }
                     this.brain.bot.chat("I successfully equipped  " + target.displayName + ' to my ' + destination + '. My held item is ' + this.brain.app.bot.heldItem.displayName + '!!');
@@ -449,7 +474,9 @@ class OutputNodeBase extends NodeBase{
                         {
                             username: this.brain.app.identity.username,
                             type:'equip',
-                            value:1
+                            value:1,
+                            itemId:target.itemId,
+                            blockId: target.blockId
                         }
                     );
                 }
@@ -518,50 +545,68 @@ class OutputNodeBase extends NodeBase{
             }
             let target = null;
             let foundVec = null;
+            let potentialTargets = [];
+            let directions = [
+                new Vec3(1, 0, 0),
+                new Vec3(0, 1, 0),
+                new Vec3(0, 0, 1),
+
+                new Vec3(-1, 0, 0),
+                new Vec3(0, -1, 0),
+                new Vec3(0, 0, -1),
+            ]
             for(let i in targets){
                 target = targets[i];
-                if(!target || !target.digTime){
-                    this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"Place Block Type:: " + target.type);
-                    return false;
-                }
-                for(let xx = -1; xx <= 1; xx ++){
-                    for(let yy = -1; yy <= 1; yy ++){
-                        for(let zz = -1; zz <= 1; zz ++){
-                            let block =  this.brain.bot.blockAt(
-                                target.position.offset(xx, yy, zz)
-                            );
+                if(!foundVec) {
+                    if (!target || !target.digTime) {
+                        this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error', "Place Block Type:: " + target.type);
+                        return false;
+                    }
+                    directions.forEach((directionVec)=>{
+                        let block = this.brain.bot.blockAt(
+                            target.position.offset(directionVec.x, directionVec.y, directionVec.z)
+                        );
+                        if (
+                            _.indexOf([0, 8, 9, 10, 11, 31, '31:1', '31:2', 32], block.type) !== -1
+                        ) {
+                            potentialTargets.push({
+                                target: target,
+                                vec: directionVec
+                            })
 
-                            if(
-                                _.indexOf([0,8,9,10,11, 31, '31:1','31:2',32], block.type) !== -1
-                            ){
-                                foundVec =  new Vec3(xx, yy, zz);;
-                                break;
-                                break;
-                                break;
-                                break;
+                        }
+                    })
+                    /*for (let xx = -1; xx <= 1; xx++) {
+                        for (let yy = -1; yy <= 1; yy++) {
+                            for (let zz = -1; zz <= 1; zz++) {
+                                let block = this.brain.bot.blockAt(
+                                    target.position.offset(xx, yy, zz)
+                                );
+
+                                if (
+                                    _.indexOf([0, 8, 9, 10, 11, 31, '31:1', '31:2', 32], block.type) !== -1
+                                ) {
+                                    foundVec = new Vec3(xx, yy, zz);
+                                    potentialTargets.push({
+                                        target: target,
+                                        vec: foundVec
+                                    })
+
+                                }
                             }
                         }
-                    }
+                    }*/
                 }
             }
 
-            if(!foundVec){
+            if(potentialTargets.length == 0){
                 this.logActivationError(this.brain.app.identity.username + ' - placeBlock - Error',"No valid Vec found (Block was not Air, Water, Lava) ");
                 return false;
             }
-           /* let x = 0;
-            let y = 0;
-            let z = 0;
-            while(x == 0 && y ==0 && z == 0){
-                x = Math.round(Math.random() * 2) -1;
-                y = Math.round(Math.random() * 2) -1;
-                z = Math.round(Math.random() * 2) -1;
-            }
-            let vec = new Vec3(
-                x,y,z
-            );*/
 
-
+            let targetIndex = Math.floor(Math.random() * potentialTargets.length);
+            target = potentialTargets[targetIndex].target;
+            foundVec = potentialTargets[targetIndex].vec;
             this.brain.app.socket.emit(
                 'achievement',
                 {
@@ -569,8 +614,8 @@ class OutputNodeBase extends NodeBase{
                     type:'place_block_attempt',
                     value:1,
                     target:{
-                        type: target.type,
-                        displayName: target.displayName,
+                        type: this.brain.app.bot.heldItem.type,
+                        displayName: this.brain.app.bot.heldItem.displayName,
                         position:{
                             x: target.position.x,
                             y: target.position.y,
@@ -596,8 +641,8 @@ class OutputNodeBase extends NodeBase{
                         type:'place_block',
                         value:1,
                         target: {
-                            type: target.type,
-                            displayName: target.displayName,
+                            type: this.brain.app.bot.heldItem.type,
+                            displayName: this.brain.app.bot.heldItem.displayName,
                             position: {
                                 x: target.position.x,
                                 y: target.position.y,
@@ -621,7 +666,7 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = targets[0];
+        let target = targets[Math.floor(Math.random() * targets.length)];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
 
@@ -836,7 +881,8 @@ class OutputNodeBase extends NodeBase{
         let target = targets[0];
         //TODO: Add some logic to find block at location if need be
         try{
-            this.brain.bot.openChest(target);
+            let chest = this.brain.bot.openChest(target);
+            //console.log("Chest: ", chest);
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - openChest - Error', err.message);
             return false;

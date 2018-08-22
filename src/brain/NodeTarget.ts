@@ -350,7 +350,7 @@ class NodeTarget{
             //throw new Error(this.node.id + '- not valid');
         }
         //TODO: Rewrite
-        let newPosition = this.translatePositionDeltaRange()
+        let newPosition = this.rawTargetData.position;//this.translatePositionDeltaRange()
         if(!newPosition){
             throw new Error(this.node.id + '- no valid `positionDeltaRange`');
         }

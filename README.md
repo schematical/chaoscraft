@@ -42,7 +42,7 @@ npm run-script build
 ```
 
 NOTE: if the build fails try
-```npm install -g tsc```
+```npm install -g typescript@2.9.2```
 then from the project root directory
 ```tsc```
 
@@ -51,6 +51,13 @@ Start it
 ```
 npm start
 ```
+
+NOTE: Windows users use the following:
+```
+setx NODE_ENV "production"
+```
+then
+```node dist\index.js```
 
 
 

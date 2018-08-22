@@ -153,7 +153,7 @@ class App {
             if(username.length >= 14){
                 username = username.substr(3, 15);
             }
-            console.log(username + " - setupBot - " ,ips);
+            console.log(username + " - setupBot - "/* ,ips*/);
             this.bot = mineflayer.createBot({
                 host: ips[Math.floor(Math.random() * ips.length)],//config.get('minecraft.host'),//"127.0.0.1", // optional
                 //port: 3001,       // optional
@@ -490,7 +490,7 @@ class App {
                     }
                     this.bot._client.write('block_place', {
                         location: pos,
-                        direction: ,
+                        direction: direction,
                         hand: 0,//Math.round(Math.random()),
                         cursorX: 0.5,//Math.random(),
                         cursorY: 0.5,//Math.random(),
@@ -747,7 +747,7 @@ class App {
 
         let logData = _.clone(payload);
         delete(logData.nodeInfo);
-        console.log(this.identity.username + " - Sending Pong: ", JSON.stringify(logData));
+        //console.log(this.identity.username + " - Sending Pong: ", JSON.stringify(logData));
         return this.socket.emit('client_pong', payload);
     }
 
