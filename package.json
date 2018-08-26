@@ -12,9 +12,9 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^7.0.5",
-    "@types/socket.io-client": "^1.4.32",
+
     "mineflayer-voxel": "^0.1.0",
-    "typescript": "^2.9.2"
+
   },
   "dependencies": {
     "chaoscraft-shared": "https://github.com/schematical/chaoscraft-shared",
@@ -26,6 +26,10 @@
     "mineflayer-radar": "0.0.2",
     "request": "^2.83.0",
     "socket.io-client": "^2.0.4",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+
+
+    "@types/socket.io-client": "^1.4.32",
+    "typescript": "^2.9.2"
   }
 }

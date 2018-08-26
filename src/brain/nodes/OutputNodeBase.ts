@@ -186,7 +186,7 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to activateEntity");
             return false;
         }
-        let target = targets[0];
+        let target = targets[Math.floor(Math.random() *targets.length)];
         try{
 
             let recipe = target;

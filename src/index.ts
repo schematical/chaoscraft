@@ -657,6 +657,9 @@ class App {
                                 this.socket.emit('achievement', {
                                     type: 'player_collect',
                                     username: this.identity.username,
+                                    target:{
+                                        type:object.itemId || object.blockId
+                                    },
                                     itemId: object.itemId,
                                     blockId: object.blockId
                                     //weapon: weapon
