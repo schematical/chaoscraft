@@ -186,10 +186,20 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to activateEntity");
             return false;
         }
-        let target = targets[Math.floor(Math.random() *targets.length)];
+        let index = Math.floor(Math.random() *targets.length);
+        let target = targets[index];
+        let recipe = target;
+        switch(recipe.result.id){
+            case(24):
+            case(155):
+            case(179):
+            case(351):
+                return false;
+
+        }
         try{
 
-            let recipe = target;
+
             let count = 1;
             let craftingTable = null;
             if(recipe.requiresTable) {
@@ -219,8 +229,8 @@ class OutputNodeBase extends NodeBase{
                     recipe:recipe.result.id
                 }
             );
-            //this.brain.bot.chat("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
-            //console.log("I am attempting to craft  " + recipe.result.count + " of " + recipe.result.id);
+            this.brain.bot.chat("I am attempting to craft  " + recipe.result.id + " ( " + index + " of "  + recipe.result.count +")");
+            console.log("I am attempting to craft  " + recipe.result.id + " ( " + index + " of "  + recipe.result.count +")");
             this.brain.bot.craft(recipe, count, craftingTable, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - craft - Error 2', err.message);
@@ -666,7 +676,8 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - equip - Error', "No results found to attack");
             return false;
         }
-        let target = targets[Math.floor(Math.random() * targets.length)];
+        let index = Math.floor(Math.random() * targets.length);
+        let target = targets[index];
         //TODO: Add currentlyDigging
         //TODO: Add some logic to find block at location if need be
 
@@ -675,7 +686,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
-            this.brain.bot.chat("I am digging: " + target.displayName + '  ' + 0/*index*/ + ' out of ' + options.results.length + ' possable blocks');
+            this.brain.bot.chat("I am digging: " + target.displayName + ' ( ' + index + ' out of ' + targets.length + ' possable blocks)');
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
