@@ -132,18 +132,19 @@ class Brain{
         this.currTick += 1;
         //console.log("ProcessTick:", this.currTick);
         let firingOutputNodes:Array<NodeEvaluateResult> = [];
+        let startDate = new Date().getTime();
         this.eachNodeSync(
             (outputNode)=>{
                 /*if(outputNode.errorThresholdHit){
                     return;
                 }*/
-                let startDate = new Date().getTime();
+                // let startDate = new Date().getTime();
                 try {
                     let evaluateResult = outputNode.evaluate();
                     if (evaluateResult.score >= 1) {
                         firingOutputNodes.push(evaluateResult);
                     }
-                    let duration = (new Date().getTime() - startDate) / 1000;
+                    //let duration = (new Date().getTime() - startDate) / 1000;
                     //console.log(this.app.identity.username + " - OUTPUTNODE EVAL:", outputNode.id, ' - ', duration, ' score: ', evaluateResult.score);
                 }catch(err){
                     console.error(this.app.identity.username + ' - ERROR - Firing OutputNode: ' + outputNode.id , err.message, err.stack);
@@ -151,7 +152,10 @@ class Brain{
             },
             'output'
         )
-
+        let duration = (new Date().getTime() - startDate) / 1000;
+        if(duration > 1){
+            console.error(this.app.identity.username + ' - Brain Tick took: ' + duration + ' seconds');
+        }
         let successfulFiredCount = 0;
         firingOutputNodes.forEach((evaluateResult:NodeEvaluateResult)=>{
             if(successfulFiredCount > config.get('brain.maxOutputsFiredPerTick')){

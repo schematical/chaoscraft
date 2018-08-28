@@ -590,22 +590,22 @@ class App {
 
 
     setupEventListenter(eventType){
-        //let _this = this;
-        this.bot.on(eventType, (e,param2)=>{
+        let _this = this;
+        this.bot.on(eventType, function(e,param2){
             try {
                 let argData = Array.from(arguments);
                 let time_delta = null;
                 switch (eventType) {
                     case('entityHurt'):
-                        time_delta = this.bot._lastAttackTime - new Date().getTime();
+                        time_delta = _this.bot._lastAttackTime - new Date().getTime();
                         if (
-                            this.bot._lastAttackEntity &&
-                            this.bot._lastAttackEntity.id == e.id &&
+                            _this.bot._lastAttackEntity &&
+                            _this.bot._lastAttackEntity.id == e.id &&
                             time_delta < 5000
                         ) {
-                            this.socket.emit('achievement', {
+                            _this.socket.emit('achievement', {
                                 type: 'attack_success',
-                                username: this.identity.username,
+                                username: _this.identity.username,
                                 victim: e.displayName,
                                 //weapon: weapon
                             });
@@ -613,15 +613,15 @@ class App {
 
                         break;
                     case('entityDead'):
-                        time_delta = this.bot._lastAttackTime - new Date().getTime();
+                        time_delta = _this.bot._lastAttackTime - new Date().getTime();
                         if (
-                            this.bot._lastAttackEntity &&
-                            this.bot._lastAttackEntity.id == e.id &&
+                            _this.bot._lastAttackEntity &&
+                            _this.bot._lastAttackEntity.id == e.id &&
                             time_delta < 5000
                         ) {
-                            this.socket.emit('achievement', {
+                            _this.socket.emit('achievement', {
                                 type: 'kill',
-                                username: this.identity.username,
+                                username: _this.identity.username,
                                 victim: e.displayName,
                                 victimTypeId: e.entityType
                                 //weapon: weapon
@@ -629,34 +629,34 @@ class App {
                         }
                         break;
                     case('health'):
-                        if (this._lastData) {
+                        if (_this._lastData) {
                             argData = argData || [];
                             argData[0] = {
-                                last: this._lastData,
+                                last: _this._lastData,
                                 delta: {
-                                    health: this._lastData.health - this.bot.health,
-                                    food: this._lastData.food - this.bot.food,
-                                    foodSaturation: this._lastData.foodSaturation - this.bot.foodSaturation,
+                                    health: _this._lastData.health - _this.bot.health,
+                                    food: _this._lastData.food - _this.bot.food,
+                                    foodSaturation: _this._lastData.foodSaturation - _this.bot.foodSaturation,
                                 }
                             }
-                            this._lastData = {
-                                health: this.bot.health,
-                                food: this.bot.food,
-                                foodSaturation: this.bot.foodSaturation,
+                            _this._lastData = {
+                                health: _this.bot.health,
+                                food: _this.bot.food,
+                                foodSaturation: _this.bot.foodSaturation,
                             }
 
                             //console.log("HEalth Change:", argData);
                         }
                         break;
                     case('playerCollect'):
-                        if(e.username == this.bot.username) {
+                        if(e.username == _this.bot.username) {
                             let object = param2.metadata && param2.metadata[6] && param2.metadata[6];
                             if(!object){
                                 console.error("Missing Object for PlayerCollect");
                             }else{
-                                this.socket.emit('achievement', {
+                                _this.socket.emit('achievement', {
                                     type: 'player_collect',
-                                    username: this.identity.username,
+                                    username: _this.identity.username,
                                     target:{
                                         type:object.itemId || object.blockId
                                     },
@@ -675,7 +675,7 @@ class App {
                 /*if(eventType == 'chat'){
                  console.log("Chattin");
                  }*/
-                this._tickEvents.push(new TickEvent({
+                _this._tickEvents.push(new TickEvent({
                     type: eventType,
                     data: argData
                 }))

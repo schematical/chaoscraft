@@ -138,8 +138,8 @@ class OutputNodeBase extends NodeBase{
                 return this.openVillager(options);
             case(Enum.OutputTypes.trade):
                 return this.trade(options);
-            case(Enum.OutputTypes.openEntity):
-                return this.openEntity(options);
+          /*  case(Enum.OutputTypes.openEntity):
+                return this.openEntity(options);*/
            /* case(Enum.OutputTypes.walkTo):
                 return this.walkTo(options);*/
             default:
@@ -287,7 +287,7 @@ class OutputNodeBase extends NodeBase{
         return true;
     }
 
-    openEntity(options?:any){
+   /* openEntity(options?:any){
         let targets = this._target.findEntity();
         if(targets.length == 0 || !targets[0]){
             //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to attack");
@@ -301,7 +301,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         return true;
-    }
+    }*/
     activateEntity(options?:any){
         let targets = this._target.findEntity();
 
