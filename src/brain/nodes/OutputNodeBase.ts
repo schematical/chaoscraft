@@ -142,6 +142,9 @@ class OutputNodeBase extends NodeBase{
                 return this.openEntity(options);*/
            /* case(Enum.OutputTypes.walkTo):
                 return this.walkTo(options);*/
+           //TODO: Remove hacky shit
+            case('openEntity'):
+                return false;
             default:
                 throw new Error("Invalid `OutputNodeBase.type`: " + this.type)
         }
@@ -186,7 +189,7 @@ class OutputNodeBase extends NodeBase{
             //this.logActivationError(this.brain.app.identity.username + ' - craft - Error', "No results found to activateEntity");
             return false;
         }
-        let index = Math.floor(Math.random() *targets.length);
+        let index = Math.floor(Math.random() * targets.length);
         let target = targets[index];
         let recipe = target;
         switch(recipe.result.id){
