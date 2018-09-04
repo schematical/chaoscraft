@@ -8,6 +8,8 @@ import { NodeTarget } from '../NodeTarget'
 //import { TickEvent } from "../TickEvent";
 import { NodeEvaluateResult } from "../NodeEvaluateResult";
 import * as Vec3 from 'vec3';
+
+import { ChatMessagePayload } from '../ChatMessagePayload';
 interface iTickEvent{
     constructor(options:any);
     type:string;
@@ -647,16 +649,26 @@ class InputNodeBase extends NodeBase{
         results.forEach((result)=> {
             let username = result.data[0];
             let message = result.data[1];
+
+            let chatMessagePayload = new ChatMessagePayload(message);
+            chatMessagePayload.broadcaster = username;
             //TODO: make this a regex thing
-            if(this._target.matchChat({ value: message })){
-                score += 1;
-                if(
-                    this.brain.bot.players[username] &&
-                    this.brain.bot.players[username].entity
-                ) {
-                    targets.push(this.brain.bot.players[username].entity);
-                }
+            switch(chatMessagePayload.action){
+                case('chat'):
+                    if(this._target.matchChat(chatMessagePayload)){
+                        score += 1;
+                        if(
+                            this.brain.bot.players[username] &&
+                            this.brain.bot.players[username].entity
+                        ) {
+                            targets.push(this.brain.bot.players[username].entity);
+                        }
+                    }
+                break;
+                default:
+                    //Do nothing
             }
+
         })
         return new NodeEvaluateResult({
            score: score,
