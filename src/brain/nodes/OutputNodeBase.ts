@@ -727,6 +727,9 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         let target = options.results[0];
+        if(!this.rawNode.target || !this.rawNode.target.word){
+            return false;
+        }
         try{
             let chatMessagePayload = new ChatMessagePayload({
                 action:'chat',
@@ -738,6 +741,7 @@ class OutputNodeBase extends NodeBase{
             );
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - chat - Error', err.message);
+            console.error(err.stack);
             return false;
         }
         return true;
