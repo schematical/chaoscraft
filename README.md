@@ -79,6 +79,12 @@ Instead try
 Try it manually by running `npm i -g typescript` then just run `tsc` at the root of the repo. That should create a `./dist` folder with a bunch of stuff in it.
 
 
+## Special Env Vars:
+You can now prefix your bots by setting the following env vars:
+```
+CC_USERNAME_PREFIX=AA
+```
+I limited it to 2 chars as there are only 3 people running this at the time of this writing.
 
 
 ## Random Notes:

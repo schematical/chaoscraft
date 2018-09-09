@@ -61,6 +61,12 @@ class SocketManager{
         });
         this.socket.on('connect', ()=>{
             console.error("CONNECTED from the socket server!!!!!");
+            if(!this.app.identity){
+                this.socket.emit('client_hello', {
+                    username: process.env.BOT_USERNAME || null,
+                    env: process.env.NODE_ENV
+                });
+            }
         });
         this.socket.on('map_nearby_request', (payload)=>{
             this.onMapNearbyRequest(payload);

@@ -7,7 +7,8 @@ import * as Vec3 from 'vec3'
 import * as _ from 'underscore';
 import * as config from 'config';
 import {NodeEvaluateResult} from "../NodeEvaluateResult";
-import { NodeTarget } from '../NodeTarget'
+import { NodeTarget } from '../NodeTarget';
+import { ChatMessagePayload } from '../ChatMessagePayload';
 class OutputNodeBase extends NodeBase{
     protected _activated:boolean = false;
     protected _activationCount:number = 0;
@@ -689,7 +690,7 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         try{
-            this.brain.bot.chat("I am digging: " + target.displayName + ' ( ' + index + ' out of ' + targets.length + ' possable blocks)');
+            //this.brain.bot.chat("I am digging: " + target.displayName + ' ( ' + index + ' out of ' + targets.length + ' possable blocks)');
             this.brain.bot.smartDig(target, (err, results)=>{
                 if(err){
                     this.logActivationError(this.brain.app.identity.username + ' - dig - Error', err.message);
@@ -726,10 +727,21 @@ class OutputNodeBase extends NodeBase{
             return false;
         }
         let target = options.results[0];
+        if(!this.rawNode.target || !this.rawNode.target.word){
+            return false;
+        }
         try{
-            this.brain.bot.chat("WAZZZUP: " + target.username);
+            let chatMessagePayload = new ChatMessagePayload({
+                action:'chat',
+                target: target.username,
+                words:[this.rawNode.target.word]
+            });
+            this.brain.bot.chat(
+                chatMessagePayload.toString()
+            );
         }catch(err){
             this.logActivationError(this.brain.app.identity.username + ' - chat - Error', err.message);
+            console.error(err.stack);
             return false;
         }
         return true;

@@ -3,6 +3,7 @@ import * as _ from 'underscore'
 import * as vec3 from 'vec3';
 import * as MinecraftData from 'minecraft-data';
 import * as config from 'config'
+import {ChatMessagePayload} from "./ChatMessagePayload";
 class NodeTarget{
     protected rawTargetData:any = null;
     protected _node:NodeBase = null;
@@ -295,8 +296,8 @@ class NodeTarget{
         //TODO: Equipment - https://github.com/PrismarineJS/prismarine-entity#entityequipment5
         return true;
     }
-    matchChat(options:any):boolean{
-        if(options.value && options.value !== this.rawTargetData.value){
+    matchChat(chatMessagePayload:ChatMessagePayload):boolean{
+        if(chatMessagePayload.words[0] !== this.rawTargetData.word){
             return false;
         }
         return true;
