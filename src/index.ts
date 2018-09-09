@@ -146,18 +146,22 @@ class App {
 
             this.connectionAttemptStartDate = new Date();
             this.settingUp = true;
-            let username =  this.identity.username;
+            this.identity._short_username =   this.identity.username;
+            if(process.env.CC_USERNAME_PREFIX){
+                this.identity._short_username = process.env.CC_USERNAME_PREFIX.substr(0,2).toUpperCase() + this.identity._short_username
+            }
             /*switch( this.identity.username){
                 case('adam-0'):
             }*/
-            if(username.length >= 14){
-                username = username.substr(3, 15);
+            if(this.identity._short_username.length >= 14){
+                this.identity._short_username = this.identity._short_username.substr(3, 15);
             }
-            console.log(username + " - setupBot - "/* ,ips*/);
+            console.log(this.identity._short_username + " - setupBot - "/* ,ips*/);
+
             this.bot = mineflayer.createBot({
                 host: ips[Math.floor(Math.random() * ips.length)],//config.get('minecraft.host'),//"127.0.0.1", // optional
                 //port: 3001,       // optional
-                username: username,
+                username: this.identity._short_username,
                 //password: "12345678",          // online-mode=true servers*/
                 verbose: true,
                 version: "1.12.2",
@@ -169,14 +173,14 @@ class App {
             //this.bot.bloodhound.yaw_correlation_enabled = true;
             /*this.bot.on('onCorrelateAttack', function (attacker,victim,weapon) {
                 //TODO:!!!MATT!!! REMEMBER YOU INCREASED BLOODHOUND MAX_ATTACK_DELTA_TIME to 1000 from 10. Fork it an override
-                if(attacker.username == this.identity.username){
+                if(attacker.username == this.identity._short_username){
                     return this.socket.emit('achievement', {
                         type:'attack_success',
                         username: this.identity.username,
                         victim: victim.username,
                         //weapon: weapon
                     });
-                }else if(victim.username == this.identity.username){
+                }else if(victim.username == this.identity._short_username){
                     return this.socket.emit('achievement', {
                         type:'attack_received',
                         username: this.identity.username,
@@ -203,7 +207,7 @@ class App {
                 let achievementType = messageData.json.with[1] && messageData.json.with[1].extra[0].translate || null;
 
                 let parts = message.split(' ');
-                if(parts[1] !== this.identity.username){
+                if(parts[1] !== this.identity._short_username){
                     return;
                 }
                 console.log(this.identity.username +  " - message:" + message + " - " + achievementType);
