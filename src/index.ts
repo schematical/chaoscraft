@@ -147,14 +147,15 @@ class App {
             this.connectionAttemptStartDate = new Date();
             this.settingUp = true;
             this.identity._short_username =   this.identity.username;
-            if(process.env.CC_USERNAME_PREFIX){
-                this.identity._short_username = process.env.CC_USERNAME_PREFIX.substr(0,2).toUpperCase() + this.identity._short_username
-            }
+
             /*switch( this.identity.username){
                 case('adam-0'):
             }*/
             if(this.identity._short_username.length >= 14){
                 this.identity._short_username = this.identity._short_username.substr(3, 15);
+            }
+            if(process.env.CC_USERNAME_PREFIX){
+                this.identity._short_username = process.env.CC_USERNAME_PREFIX.substr(0,2).toUpperCase() + this.identity._short_username.substr(2);
             }
             console.log(this.identity._short_username + " - setupBot - "/* ,ips*/);
 
@@ -197,7 +198,7 @@ class App {
                     case('multiplayer.player.left'):
                         return;
                 }
-                console.log("MESSAGE: ", messageData.json.translate)
+                //console.log("MESSAGE: ", messageData.json.translate)
                 let message = messageData.json.translate + ' ';
                 messageData.json.with.forEach((d)=>{
                     message += d.text + ' | ';
