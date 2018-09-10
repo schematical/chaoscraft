@@ -11,6 +11,7 @@ class SocketManager{
     protected socket:SocketIOClient.Socket = null;
     protected isObserved:boolean = false;//TODO: Change this to false
     protected lastPingTimestamp:number = null;
+    protected lastSeverDisconnectDate:Date = null
 
     constructor(options:any){
 
@@ -58,11 +59,11 @@ class SocketManager{
         });
         this.socket.on('disconnect', ()=>{
             console.error("DISCONNECTED from the socket server!!!!!");
+            this.lastSeverDisconnectDate = new Date();
         });
         this.socket.on('connect', ()=>{
             console.error("CONNECTED from the socket server!!!!!");
-            if(!this.app.identity){
-                this.socket.emit('client_hello', {
+            if(this.lastSeverDisconnectDate && !this.app.identity){ this.socket.emit('client_hello', {
                     username: process.env.BOT_USERNAME || null,
                     env: process.env.NODE_ENV
                 });
