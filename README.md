@@ -1,3 +1,5 @@
+# This project is no longer supported, check out the updated version at https://github.com/schematical/chaoscraft-mod 
+
 # chaoscraft
 
 Support Me on Patreon:
